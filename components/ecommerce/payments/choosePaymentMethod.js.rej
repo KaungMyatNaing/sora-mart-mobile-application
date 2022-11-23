@@ -1,9 +1,0 @@
-diff a/components/ecommerce/payments/choosePaymentMethod.js b/components/ecommerce/payments/choosePaymentMethod.js	(rejected hunks)
-@@ -17,7 +17,6 @@
- 
-     return (
-         // <NativeBaseProvider>
--            <Box {...safeAreaProps} mx={3}>
-             <Box {...safeAreaProps} mx={3} backgroundColor='#FFF'>
-             <VStack alignItems='flex-start' justifyContent="flex-start">
-                 <Radio.Group
