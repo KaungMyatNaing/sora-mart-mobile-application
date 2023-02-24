@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "273668258967",
+    "project_id": "soramyanmar",
+    "storage_bucket": "soramyanmar.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:273668258967:android:de2573c3a58e1e93363dd2",
+        "android_client_info": {
+          "package_name": "soramyanmar.soraapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "273668258967-hhn5q66djknv741olkell8e2nnmer284.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCN1Yq8-wH8Lzh3wbd_Qe5Wxj6lbWn4mmw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "273668258967-hhn5q66djknv741olkell8e2nnmer284.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

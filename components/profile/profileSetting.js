@@ -20,6 +20,7 @@ function ProfileSetting({route, navigation }) {
 
     const userData  = route.params.userData;
 
+    //const [name, setName] = useState(userData.fullname);
     const [name, setName] = useState(userData.fullname);
     const [email, setEmail] = useState(userData.email);
     const [userId, setUserId] = useState(userData.guid);
@@ -33,7 +34,15 @@ function ProfileSetting({route, navigation }) {
         if(global.auth == ''){
             global.forceLoginMsg = config.forceLoginMsg
             navigation.navigate('Sign In');
-          }else{
+        } else {
+            const updateUserData = {
+                "fullname" : name,
+                "dob" : date,
+                "gender" : gender,
+                "ph_no": phno,
+                "photo" : 'kjhdkjhakjhd.png'
+               
+            }
             const myData = {
                 "fullname": name,
                 "email": email,
@@ -47,24 +56,39 @@ function ProfileSetting({route, navigation }) {
             if(image != '' && image != null){
                 myData['profil_pic'] = image;
             }
-            const headers = { 
-                'Accept' : 'application/json',
-                'Authorization' : 'Bearer '+ global.auth,
-            }; 
-
-          axios.post(config.baseUrl+'/api/profile/update/'+userId, myData, { headers })
-          .then(response => {
-            if(response.data.status_code == 200){
-                navigation.navigate('Profile');
-                // alert(response.data.data.desc);
-              }
-            console.log(response.data);      
-          })    
-          .catch((error) => {
-            // alert(error);
-            ToastHelper.toast(error.message, null, 'error');
-            console.log(error);
-          });
+//            const headers = {
+//                'Accept' : 'application/json',
+//                'Authorization' : 'Bearer '+ global.auth,
+//            };
+//
+//          axios.post(config.baseUrl+'/api/profile/update/'+userId, myData, { headers })
+//          .then(response => {
+//            if(response.data.status_code == 200){
+//                navigation.navigate('Profile');
+//                // alert(response.data.data.desc);
+//              }
+//            console.log(response.data);
+//          })
+//          .catch((error) => {
+//            // alert(error);
+//            ToastHelper.toast(error.message, null, 'error');
+//            console.log(error);
+//          });
+            fetch('https://sora-mart.com/api/edit-profile', {
+                method: 
+                    "POST"
+                        ,
+                    headers: {
+        'Accept' : 'application/json',
+        'Authorization' : global.auth,
+                },
+                body: JSON.stringify(updateUserData),
+})
+.then((response) => response.json())
+  .then((data) => {
+      console.log('Profile data is successfully updated !!!',data)
+  }).catch((error) => console.log(error));
+          
         }
     }
 

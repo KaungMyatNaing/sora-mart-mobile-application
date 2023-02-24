@@ -16,38 +16,56 @@ function Profile({ navigation }) {
     const [profileData,setProfileData] = useState('');
     const [orderData,setOrderData] = useState(null);
     const [loading,setLoading] = useState(true);
-    const baseUrl = config.baseUrl + '/api/profile/get';
-    const baseUrl2 = config.baseUrl + '/api/orders';
+    const baseUrl = config.baseUrl + '/profile/get';
+    const baseUrl2 = config.baseUrl + '/orders';
 
     const isFocused = useIsFocused() // for re-render
 
+    //testing fetch profile 
+
+    const getProfile = () => {
+        fetch('https://sora-mart.com/api/me', {
+            headers: {
+                'Accept' : 'application/json',
+                'Authorization' : global.auth,
+              },
+        })
+        .then((response) => response.json())
+          .then((data) => {
+            setProfileData(data.data);
+              console.log('Profile data is successfully fetched !!!')
+              setLoading(false);
+          }).catch((error) => console.log(error));
+    }
+
     useEffect(() => {
 
-        if(global.auth == '' || global.auth == null){
-            global.forceLoginMsg = config.forceLoginMsg;
-            navigation.replace('Sign In');
-        }else{
-            const headers = { 
-                'Accept': 'application/json', 
-                'Authorization' : 'Bearer '+ global.auth,        
-            }
-            function getProdileData(){
-                return axios.get(baseUrl,{ headers });
-            }    
-            function getOrderData(){
-                return axios.get(baseUrl2,{ headers });
-            }
-            axios.all([getProdileData(), getOrderData()])
-            .then(axios.spread(function (profileData, orderData) {     
-                setProfileData(profileData.data.data);
-                setOrderData(orderData.data.data[0]);
-                setLoading(false);
-            }))
-            .catch((error) => {
-                console.log(error);
-                setLoading(false);
-            });
-        }
+        //if(global.auth == '' || global.auth == null){
+        //    global.forceLoginMsg = config.forceLoginMsg;
+        //    navigation.replace('Sign In');
+        //}else{
+        //    const headers = { 
+        //        'Accept': 'application/json', 
+        //        'Authorization' : 'Bearer '+ global.auth,        
+        //    }
+        //    function getProdileData(){
+        //        return axios.get(baseUrl,{ headers });
+        //    }    
+        //    function getOrderData(){
+        //        return axios.get(baseUrl2,{ headers });
+        //    }
+        //    axios.all([getProdileData(), getOrderData()])
+        //    .then(axios.spread(function (profileData, orderData) {     
+        //        setProfileData(profileData.data.data);
+        //        setOrderData(orderData.data.data[0]);
+        //        setLoading(false);
+        //    }))
+        //    .catch((error) => {
+        //        console.log(error);
+        //        setLoading(false);
+        //    });
+        //}
+        getProfile();
         
     }, [isFocused]); // ifFocuesd is for re-render
 

@@ -17,7 +17,7 @@ import Toast from 'react-native-toast-message';
 
 function VerificationCode({route,navigation}) {
     const email = route.params.email;
-    const auth = route.params.authentication;
+    //const auth = route.params.authentication;
     const CELL_COUNT = 5;
     const [value, setValue] = useState('');
 
@@ -31,13 +31,13 @@ function VerificationCode({route,navigation}) {
         const resendUrl = config.baseUrl + '/api/verification/resend';
          
         const headers = { 
-            'Accept' : 'application/json',
-            'Authorization' : 'Bearer '+ auth,
+            'Accept' : 'application/json'
+            //'Authorization' : 'Bearer '+ auth,
         }
         const myData = {};
         axios.post(resendUrl, myData, { headers })
         .then(response => {   
-            if(response.data.status_code === 200){
+            if(response.data.status === 200){
                 console.log('resend verification code is success');
                 // navigation.replace('Sign In');
             }
@@ -50,18 +50,19 @@ function VerificationCode({route,navigation}) {
     }    
     const continueAction = () => {
 
-        const baseUrl = config.baseUrl + '/api/send-verification';
+        const baseUrl = config.baseUrl + '/verify-account';
 
         const myData = {
-            "verify_code": value
+            "email" : email,
+            "verification_code": value
         }
         const headers = { 
             'Accept' : 'application/json',
-            'Authorization' : 'Bearer '+ auth,
+            //'Authorization' : 'Bearer '+ auth,
         }
         axios.post(baseUrl, myData, { headers })
         .then(response => {   
-            if(response.data.status_code === 200){
+            if(response.data.status === 200){
                 navigation.replace('Sign In');
             }
         })    

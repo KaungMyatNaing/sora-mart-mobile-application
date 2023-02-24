@@ -1,5 +1,5 @@
 const config = {
-     baseUrl : 'https://myanmarwebc6.sg-host.com/public',
+     baseUrl : 'https://sora-mart.com/api',
      imageUrl : 'https://demo.myanmarwebc6.sg-host.com/storage',
      forceLoginMsg : 'Please First Login',
 }

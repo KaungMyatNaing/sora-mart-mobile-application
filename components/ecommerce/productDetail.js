@@ -27,7 +27,7 @@ function ProductDetail({route, navigation })  {
 
   const [noOfStock,setNoOfStock] = useState(0);
 
-  const [data,setData] = useState(null);
+  const [pdata,setPdata] = useState();
 
   const baseUrl = config.baseUrl;
 
@@ -46,36 +46,63 @@ function ProductDetail({route, navigation })  {
     }
   };
 
-  function getDetail(id) {
-    const api_url = baseUrl + '/api/products/' + id;
+  function getDetail() {
+    //const api_url = baseUrl + '/api/products/' + id;
 
-    global.product_id = id;
+    //global.product_id = id;
+   let id =  global.product_id;
 
-    console.log(api_url);
-
-    axios.get(api_url)
-        .then(response => {  
-          setData(response.data.data);
-          if(response.data.data.get_stocks){
-            if(response.data.data.get_stocks[0].total_stock != null){
-              setNoOfStock(response.data.data.get_stocks[0].total_stock);
-              setInStock(true);
-            }           
-          }else{
-            setInStock(false);
-          }
-        })    
-        .catch((error) => {
-            console.log(error);
-        });
+    //const { id } = route.params; 
+    console.log(id);
+    console.log(`https://sora-mart.com/api/product/${id}`);
       
-      console.log('get details ------------------');
-      console.log(data);
+    fetch(`https://sora-mart.com/api/product/${id}`)
+    .then((response) => response.json())
+      .then((data) => {
+       
+        //setLoading(false);
+        setPdata(data.data);
+ 
+        //if(Pdata.get_stocks){
+        //  if(Pdata.get_stocks[0].total_stock != null){
+        //    setNoOfStock(Pdata.get_stocks[0].total_stock);
+        //    setInStock(true);
+        //  }           
+        //}else{
+        //  setInStock(false);
+        //}
+        setInStock(true);
+      }) .catch((error) => {
+        console.log(error);
+    });
+  
+ 
+ 
+
+
+    //axios.get(api_url)
+    //    .then(response => {  
+    //      setData(response.data.data);
+    //      if(response.data.data.get_stocks){
+    //        if(response.data.data.get_stocks[0].total_stock != null){
+    //          setNoOfStock(response.data.data.get_stocks[0].total_stock);
+    //          setInStock(true);
+    //        }           
+    //      }else{
+    //        setInStock(false);
+    //      }
+    //    })    
+    //    .catch((error) => {
+    //        console.log(error);
+    //    });
+      //
+      //console.log('get details ------------------');
+      //console.log(data);
   }
 
   useEffect(() => {
-    retrieveData();
-    getDetail(item.id); 
+    //retrieveData();
+    getDetail();
   }, []);
   
   const safeAreaProps = useSafeArea({
@@ -206,34 +233,35 @@ function ProductDetail({route, navigation })  {
       <ScrollView>
         <VStack mb={5}>
             <HStack space={2} alignItems='center' justifyContent='space-evenly'>
-                <Box style={styles.productImgBox} w='20%' justifyContent='center'>                
+              <Box style={styles.productImgBox} w='20%' justifyContent='center'> 
+                <Text>{pdata && pdata.name}</Text>
                     {/* <FlatList
                           data={item.product_pictures}
                           renderItem={renderItem}
                           keyExtractor={item => item.guid}
                       /> */}
-                      {item.product_pictures.map((picture) => 
-                        <TouchableOpacity key={picture.guid}  onPress={() => setBigImg(picture.image_url)}>
-                          <Image alt="product img" source={{ uri: config.imageUrl + '/' + picture.image_url }} style={styles.productImg} resizeMode='contain'/>
+                      {/*{item.product_picture.map((picture) => 
+                        <TouchableOpacity key={picture.guid}  onPress={() => setBigImg(picture.image)}>
+                          <Image alt="product img" source={{ uri: config.imageUrl + '/' + picture.image }} style={styles.productImg} resizeMode='contain'/>
                         </TouchableOpacity>
-                      )}
+                      )}*/}
                 </Box>
-                {item.product_pictures.length !== 0 && (
+                {/*{item.product_picture.length !== 0 && (
                   <Box style={styles.productImgBox} justifyContent='center' alignItems='center'>
                   {
-                    bigImg == '' ? <Image resizeMode='contain' source={{uri : config.imageUrl + '/' + item.product_pictures[0].image_url}} alt="product img" style={styles.productImgMain}/>
+                    bigImg == '' ? <Image resizeMode='contain' source={{uri : config.imageUrl + '/' + item.product_picture[0].image}} alt="product img" style={styles.productImgMain}/>
                     : <Image source={{uri : config.imageUrl + '/' + bigImg}} alt="product.png" style={styles.productImgMain}/>
                   }
                   </Box>
-                )}   
-                
+                )}  */}
+               
             </HStack> 
-            {data == null ? <ActivityIndicator color="red"/> : 
+            {pdata == null ? <ActivityIndicator color="red"/> : 
             <>         
               
             <HStack my={4} justifyContent="space-between" alignItems="center">
                 <VStack>
-                  <Text style={[styles.productTitle, {fontFamily: 'Inter_700Bold'}]}>{data && data.name} </Text>
+                  <Text style={[styles.productTitle, {fontFamily: 'Inter_700Bold'}]}>{pdata && pdata.name} </Text>
                   {instock? <Text style={{color:'#EC1C24',fontFamily:'Inter_700Bold'}}>instock</Text> : <Text style={{color:'#EC1C24',fontFamily:'Inter_700Bold'}}>out of stock</Text>}
                 </VStack>
                 <Box style={styles.productStatus}><Text style={[{fontFamily: 'Inter_600SemiBold'},styles.productStatusText]}>Used</Text></Box>
@@ -252,23 +280,23 @@ function ProductDetail({route, navigation })  {
                   </HStack>
                   </Box>
                   <Box>
-                  {data.price &&
+                  {pdata.price &&
                     <HStack justifyContent='space-evenly' alignItems='center'>
                     {/* <Text style={[styles.priceMMK, {fontFamily: 'Inter_500Medium'}]}>MMK</Text>    
                     <Text style={[styles.price, {fontFamily: 'Inter_700Bold'}]}>{data && data.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>     */}
                     <Text style={[styles.priceMMK, {fontFamily: 'Inter_500Medium'}]}>JPY</Text>    
-                    <Text style={[styles.price, {fontFamily: 'Inter_700Bold'}]}>{data.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text> 
+                    <Text style={[styles.price, {fontFamily: 'Inter_700Bold'}]}>{pdata.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text> 
                     {/* <Text style={[styles.priceDiscount, {fontFamily: 'Inter_500Medium'}]}>{data.product_discounts.amount}</Text>     */}
                   </HStack>
                   }
                   
                   {
-                  data.price_mm &&
+                  pdata.price_mm &&
                     <HStack justifyContent='space-evenly' alignItems='center'>
                       {/* <Text style={[styles.priceMMK, {fontFamily: 'Inter_500Medium'}]}>MMK</Text>    
                       <Text style={[styles.price, {fontFamily: 'Inter_700Bold'}]}>{data && data.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>     */}
                       <Text style={[styles.priceMMK, {fontFamily: 'Inter_500Medium'}]}>MMK</Text>    
-                      <Text style={[styles.price, {fontFamily: 'Inter_700Bold'}]}>{data.price_mm.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
+                      <Text style={[styles.price, {fontFamily: 'Inter_700Bold'}]}>{pdata.price_mm.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
                       {/* <Text style={[styles.priceDiscount, {fontFamily: 'Inter_500Medium'}]}>{data.product_discounts.amount}</Text>     */}
                     </HStack>
                   }
@@ -279,8 +307,8 @@ function ProductDetail({route, navigation })  {
             }
         </VStack>
         <VStack>
-        {data && data.description != undefined ?
-          <HTMLView value={data.description} /> : <Text></Text> 
+        {pdata && pdata.description != undefined ?
+          <HTMLView value={pdata.description} /> : <Text></Text> 
         }
         </VStack>
       

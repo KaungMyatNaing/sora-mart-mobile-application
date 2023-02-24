@@ -26,7 +26,7 @@ function SignUp({ navigation }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const baseUrl = config.baseUrl + '/api/createAccount';
+    const baseUrl = config.baseUrl + '/register';
 
     let [fontsLoaded] = useFonts({
       Inter_100Thin,
@@ -46,7 +46,7 @@ function SignUp({ navigation }) {
     const CreateAction = () => {
      if(validator.isEmail(email)){
           const myData = {
-            "username": userName,
+            "fullname": userName,
             "email": email,
             "password": password
           }
@@ -56,10 +56,11 @@ function SignUp({ navigation }) {
 
           axios.post(baseUrl, myData, { headers })
           .then(response => {          
-              console.log(response.data.status_code);
-              if(response.data.status_code === 200){
-                const token = response.data.data.token;
-                navigation.replace('Verified Code',{email:email,authentication:token});
+              console.log(response.data.status);
+              if(response.data.status === 200){
+                //const token = response.data.data.token;
+                //navigation.replace('Verified Code');
+                navigation.replace('Verified Code',{email:email});
               }
           })    
           .catch((error) => {

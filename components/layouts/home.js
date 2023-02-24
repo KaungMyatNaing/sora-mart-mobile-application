@@ -1,131 +1,3 @@
-// import React,{useEffect, useState} from "react"
-// import { Text, TouchableOpacity, ActivityIndicator} from 'react-native';
-// import { Box, HStack, ScrollView, FlatList,useSafeArea, VStack, Image } from "native-base"
-// import { styles } from '../../assets/css/layouts/homeStyle';
-// import config from "../../config/config";
-// import {useDispatch, useSelector} from 'react-redux';
-// import {apiGetMultipleActionCreator} from '../../backend/ApiActionCreator';
-
-// const Home = ({navigation}) => {
-//   const [userOption,setUserOption] = useState(5);
-//   const dispatch = useDispatch();
-//   const baseUrl = config.baseUrl;
-//   const category_baseUrl = config.baseUrl + '/api/categories/list';
-//   const product_baseUrl = config.baseUrl + '/api/products?category_id='+userOption;
-//   const categories  = useSelector((state) => state.apiReducer.data1);
-//   const products  = useSelector((state) => state.apiReducer.data2);
-//   // const auth  = useSelector((state) => state.apiReducer.data);
-
-//   const loading = useSelector((state) => state.apiReducer.loading);
-
-//   const [image,setImage] = useState('');
-
-//   const safeAreaProps = useSafeArea({
-//     safeAreaTop: true,
-//     pt: 2
-//   });
-
-//   useEffect(()=>{
-//     dispatch(apiGetMultipleActionCreator(category_baseUrl,product_baseUrl,global.auth));
-//   },[userOption])
-
-//   const renderItem = ({item}) => {
-//     return(      
-//       <TouchableOpacity onPress={()=>setUserOption(item.id)}>
-//         <Text style={getCategoryActiveStyle({item})}> {item.name}</Text>
-//     </TouchableOpacity>
-//     )
-//   }
-
-//   const productsRenderItems=({item})=>{
-//     return(
-//       <TouchableOpacity onPress={() => navigation.navigate('Product Details',{item:item})}>
-//         <Box mr={3} my={3}>            
-//           <Box style={styles.ImgContainer} alignItems="center" justifyContent="center">
-
-//           {item.product_pictures ?
-//               item.product_pictures.map((photo) => {
-//                 return(
-//                   <Image alt="product img" source={{ uri: baseUrl +'/'+ photo.image_url }} style={styles.productImg} resizeMode='contain'/>
-//                 )
-//             }): null
-//           }
-//           </Box>
-//           <Box mt="3">
-//           <Text style={[{fontFamily:'Inter_500Medium'},styles.label]}>{item.name}</Text>
-//           <HStack justifyContent='flex-start' alignItems='center'>
-//                 <Text style={[{fontFamily:'Inter_600SemiBold'},styles.priceMMK]}>MMK</Text>    
-//                 <Text style={[{fontFamily:'Inter_600SemiBold'},styles.price]}>{item.price}</Text> 
-//           </HStack>
-//           </Box>
-//         </Box>
-//       </TouchableOpacity>
-//     )
-//   }
-
-//   const renderListEmptyComponent = () => (
-//     <ActivityIndicator/>
-//   )
-
-//   const getCategoryActiveStyle=({item})=>{
-//     if(item.id == userOption){
-//       return styles.productTagActive;
-//     }else{
-//       return styles.productTag;
-//     }
-//   }
-//   return (
-//     <Box px={3} style={{backgroundColor:'#FFF'}} h='100%'>
-//       {loading ? <ActivityIndicator/> :
-//       <Box mb={10}>
-//       <FlatList
-//           data={categories}
-//           horizontal
-//           renderItem={renderItem}
-//           ListEmptyComponent={renderListEmptyComponent}
-//           showsHorizontalScrollIndicator={true}
-//           keyExtractor={item => item.id}
-//           mb='5%' mt='3%'         
-//       />
-//       <ScrollView showsVerticalScrollIndicator={false} mt='5%' mb='10%'>
-//             <VStack>
-//                 <HStack alignItems='center' justifyContent="space-between">
-//                     <Text style={[styles.productTitle,{fontFamily:'Inter_700Bold'}]}>Most Popular Products</Text>
-//                     <Text style={[{fontFamily:'Inter_500Medium'},styles.showMore]}>Show More</Text>
-//                 </HStack>
-
-//                 <FlatList
-//                   data={products}
-//                   horizontal
-//                   renderItem={productsRenderItems}
-//                   ListEmptyComponent={renderListEmptyComponent}
-//                   showsHorizontalScrollIndicator={true}
-//                   keyExtractor={item => item.id}
-//                   mb='5%' mt='3%'         
-//               />
-//               <HStack alignItems='center' justifyContent="space-between">
-//                   <Text style={[styles.productTitle,{fontFamily:'Inter_700Bold'}]}>Accessories You Might Like</Text>
-//                   <Text style={[{fontFamily:'Inter_500Medium'},styles.showMore]}>Show More</Text>
-//               </HStack>
-//               <FlatList
-//                   data={products}
-//                   horizontal
-//                   renderItem={productsRenderItems}
-//                   ListEmptyComponent={renderListEmptyComponent}
-//                   showsHorizontalScrollIndicator={true}
-//                   keyExtractor={item => item.id}
-//                   mb='5%' mt='5%'         
-//               />
-//             </VStack>        
-//       </ScrollView>      
-//     </Box>}
-//     </Box>
-//   )
-// }
-
-// export default Home;
-
-
 import React, { useEffect, useState } from "react"
 import { Text, TouchableOpacity } from 'react-native';
 import { Box, HStack, ScrollView, FlatList, useSafeArea, VStack, Image, View, Modal } from "native-base"
@@ -143,6 +15,7 @@ import { style } from "styled-system";
 import { en } from "../translation/en";
 import { my } from "../translation/my";
 import { setLocalization ,translate } from "react-native-translate";
+import WishList from "../ecommerce/wishList";
 
 const Home = ({ navigation }) => {
   const [userOption, setUserOption] = useState(1);
@@ -158,27 +31,11 @@ const Home = ({ navigation }) => {
   const [cart_product, setCartProduct] = useState('');
   const [isWishList, setIsWishList] = useState(false);
 
-  // const [value, setValue] = React.useState("one");
-  // const [currencyName, setCurrencyName] = React.useState();
-  // const [currencyValue, setCurrencyValue] = React.useState(0);
+  const [products, setProducts] = useState();
+  
+  const [wishlistproducts, setWishlistproducts] = useState();
+  const [wishid, setWishid] = useState([]);
 
-  // const getData = async () => {
-  //   try {
-  //     const res = await AsyncStorage.getItem("currency");
-  //     const result1 = await AsyncStorage.getItem("currency_name");
-  //     const result2 = await AsyncStorage.getItem("currency_value");
-  //     if (res !== null && result1 !== null && result2 !== null) {
-  //       setValue(res);
-  //       setCurrencyName(result1);
-  //       setCurrencyValue(result2);
-  //       // alert(res);
-  //       setExtra(extra + 1);
-  //       return ;
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
 
   const safeAreaProps = useSafeArea({
     safeAreaTop: true,
@@ -191,15 +48,24 @@ const Home = ({ navigation }) => {
   }
 
   const getCategory = () => {
-    const category_baseUrl = config.baseUrl + '/api/categories/list';
-    axios.get(category_baseUrl)
-      .then(response => {
-        setCategories(response.data.data);
-      })
-      .catch((error) => {
-        console.log('cate gory error');
-        console.log(error);
-      });
+    //const category_baseUrl = config.baseUrl + '/categories';
+    //axios.get(category_baseUrl)
+    //  .then(response => {
+    //    setCategories(response.data.categories);
+    //    console.log(categories);
+    //  })
+    //  .catch((error) => {
+    //    console.log('category error');
+    //    console.log(error);
+    //  });
+    //
+    
+      fetch('https://sora-mart.com/api/categories')
+      .then((response) => response.json())
+        .then((data) => { console.log(data); setCategories(data.data.categories);
+          console.log(categories); });
+    
+    
   }
 
   const getProduct = (category_id) => {
@@ -220,7 +86,7 @@ const Home = ({ navigation }) => {
 
         });
     }else{
-      const product_baseUrl = config.baseUrl + '/api/products?page=1&limit=10&category_id=' + category_id;
+      const product_baseUrl = config.baseUrl + '/products?page=1&limit=10&category_id=' + category_id;
       axios.get(product_baseUrl)
         .then(response => {
           setProduct(response.data.data);
@@ -232,8 +98,23 @@ const Home = ({ navigation }) => {
           setLoading(false)
 
         });
-    }
+    }   
+  }
+
+  const getProducts = () => {
+  
+
    
+      fetch('https://sora-mart.com/api/products')
+      .then((response) => response.json())
+        .then((data) => {
+          setLoading(false);
+          setProducts(data.data.products);
+          console.log('Products length is '+products.length)
+        });
+   
+   
+
   }
 
   const getFavouriteProduct = () => {
@@ -251,6 +132,10 @@ const Home = ({ navigation }) => {
           console.log(error);
           setLoadingFav(false)
         });
+      
+      
+
+
     }else{
       const Fav_product_baseUrl = config.baseUrl + '/api/products/get-list/most-popular-products?page=1&limit=10&orderBy=desc';
       axios.get(Fav_product_baseUrl)
@@ -301,20 +186,26 @@ const Home = ({ navigation }) => {
       }
   }
 
-  useEffect(async()=>{
-    // await getData();  
-    // await getCurrency();
-    await getCats();    
-  },[isFocused]);
+  //useEffect(async()=>{
+  //  // await getData();  
+  //  // await getCurrency();
+  //  await getCats();    
+  //},[isFocused]);
 
-  useEffect(()=>{
-    getDefaultLocalization();
-  },[]);
+  //useEffect(()=>{
+  //  //getDefaultLocalization();
+  //  console.log("Test: ",wishid);
+  //},[]);
 
   useEffect(() => {
+    getDefaultLocalization();
     getCategory();
-    getProduct(userOption);
-    getFavouriteProduct();    
+    getProducts();
+    //getWishList();
+    //getProduct(userOption);
+    getFavouriteProduct();   
+    console.log("Test: ", wishid);
+    console.log("Products: ", products)
   }, [isWishList])
 
 //   const getCurrency = ( ) => {
@@ -371,72 +262,146 @@ const Home = ({ navigation }) => {
     // getProduct(id);
   }
 
-  const setWishList = (item) => {
+  const setWishList = (product_id) => {
     if (global.auth == '') {
       global.forceLoginMsg = config.forceLoginMsg
       navigation.navigate('Sign In');
     } else {
-      const myData = {
-        "product_id": item,
-      }
-      const headers = {
-        'Accept': 'application/json',
-        'Authorization': 'Bearer ' + global.auth,
-      };
-      axios.post(baseUrl + '/api/wish-lists', myData, { headers })
-        .then(response => {
-          if (response.data.status_code === 200) {
-            setIsWishList(!isWishList);
-            // dispatch(apiGetMultipleActionCreator(category_baseUrl, product_baseUrl, global.auth));
-          }
-          console.log(response.data);
-
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+    
+      
+          fetch(`https://sora-mart.com/api/add-wishlist/${product_id}`, {
+            method: "POST", // or 'PUT'
+            headers: {
+              "Content-Type": "application/json",
+              'Authorization':  global.auth,
+            }
+          })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.status == 200) {
+                setIsWishList(!isWishList);
+                 console.log("added")
+                }
+                
+            }) .catch((error) => {
+              console.log(error);
+            });
+  
+      
+      
+      
+      
+      
+      //end
     }
   }
 
   const removeWishList = (remove_id) => {
-    const removeUrl = config.baseUrl + '/api/wish-lists/remove/' + remove_id;
-    const headers = { 
-        'Accept': 'application/json', 
-        'Authorization' : 'Bearer '+ global.auth,
-    }
-    axios.get(removeUrl,{ headers })
-      .then(response => {
+   
+    fetch(`https://sora-mart.com/api/remove-wishlist/${remove_id}`, {
+      method: "DELETE", // or 'PUT'
+      headers: {
+        "Content-Type": "application/json",
+        'Authorization':  global.auth,
+      }
+    })
+      .then((response) => response.json())
+      .then((data) => {
+          if (data.status == 200) {
           setIsWishList(!isWishList);
-          console.log(response.data.data.desc);
-      })    
-      .catch((error) => {
-      console.log(error);
+           console.log("removed")
+          }
+          
+      }) .catch((error) => {
+        console.log(error);
       });
+
+
+  }
+  
+  const getWishList = () => {
+   
+    fetch(`https://sora-mart.com/api/wishlists/`, {
+      headers: {
+        "Content-Type": "application/json",
+        'Authorization':  global.auth,
+      }
+    })
+      .then((response) => response.json())
+      .then((data) => {
+     
+          
+        let len = data.data.wishlists.length;
+        let dumbdata = [];
+        for(let i = 0; i < len; i++){
+          dumbdata.push(data.data.wishlists[i].products.id)
+        }
+        setWishid(dumbdata);
+   
+        //const saveData = async () => {
+        //  try {
+        //    await AsyncStorage.setItem("wishlistdata", dumbdata)
+        //    alert('Data successfully saved')
+        //  } catch (e) {
+        //    alert('Failed to save the data to the storage')
+        //  }
+        //}
+        //saveData();
+        //console.log(wishid);
+        console.log("wishlist grab successful.")
+        
+          
+      }) .catch((error) => {
+        console.log(error);
+      });
+
+
 }
 
+  
   const productsRenderItems = ({ item }) => {
+    //const dato =  AsyncStorage.getItem('wishlistdata');
+    //const findItem = null;
+    //const readData = async () => {
+    //  try {
+    //    const value = await  AsyncStorage.getItem('wishlistdata');
+    //
+    //    if (value !== null) {
+    //      console.log("Grab from localstorage"+value);
+    //       findItem = value.find(wi => wi == item.id)
+    //    }
+    //  } catch (e) {
+    //    alert('Failed to fetch the input from storage');
+    //  }
+    //};
+    const findItem = wishid.find(wi => wi == item.id);
+    console.log('current id ---->'+item.id)
+
+   
     return (
-      <TouchableOpacity onPress={() => navigation.navigate('Product Details', { item: item })}>
+      <TouchableOpacity onPress={() => { navigation.navigate('Product Details', { item: item.id }); global.product_id = item.id; }}>
         <Box mr={3} my={3}>
           <Box style={styles.ImgContainer} alignItems="center" justifyContent="center">
-              {item.wishlist.length > 0 ? 
-                <TouchableOpacity onPress={() => removeWishList(item.id)} style={styles.whishListWrap}>
-                  <View>
-                    <Image alt="wishlist" source={require('../../assets/image/Blog/filledheart.png')} resizeMode='contain' w={6} h={6} />
-                  </View>
-                </TouchableOpacity> : 
-                <TouchableOpacity onPress={() => setWishList(item.id)} style={styles.whishListWrap}>
+            {/*{
+               findItem ? <TouchableOpacity onPress={() => removeWishList(item.id)} style={styles.whishListWrap}>
+              <View>
+                <Image alt="wishlist" source={require('../../assets/image/Blog/filledheart.png')} resizeMode='contain' w={6} h={6} />
+              </View>
+            </TouchableOpacity> : <TouchableOpacity onPress={() => setWishList(item.id)} style={styles.whishListWrap}>
                   <View>
                     <Image alt="wishlist" source={require('../../assets/image/Blog/favIcon3x.png')} resizeMode='contain' w={6} h={6} />
                   </View>
                 </TouchableOpacity>
-              }           
+            }
+          */}
+              
+                      
             {/* {item.product_pictures == null ? 
               <Image alt="product img" source={{ uri: ''}} style={styles.productImg} resizeMode='contain'/>
               : <Image alt="product img" source={{ uri: baseUrl +'/'+ item.product_pictures[0].image_url }} style={styles.productImg} resizeMode='contain'/>}
                */}
-            {item.product_pictures[0] == undefined ? null :
-              <Image alt="product img" source={{ uri: config.imageUrl + '/' + item.product_pictures[0].image_url }} style={styles.productImg} />}
+            {item.product_picture[0] == undefined ? null :
+              <Image alt="product img" source={{ uri: config.imageUrl + '/' + item.product_picture[0].image}} style={styles.productImg} />}
           </Box>
           <Box mt="3">
             <Text style={[{ fontFamily: 'Inter_500Medium' }, styles.label]}>{item.name}</Text>
@@ -458,46 +423,6 @@ const Home = ({ navigation }) => {
       </TouchableOpacity>
     )
   }
-
-  // const favouriteProductsRenderItems = ({ item }) => {
-  //   return (
-  //     <TouchableOpacity onPress={() => navigation.navigate('Product Details', { item: item })}>
-  //       <Box mr={3} my={3}>
-  //         <Box style={styles.ImgContainer} alignItems="center" justifyContent="center">
-  //           {item.wishlist.length > 0 ? 
-  //               <TouchableOpacity onPress={() => removeWishList(item.id)} style={styles.whishListWrap}>
-  //                 <View>
-  //                   <Image alt="wishlist" source={require('../../assets/image/Blog/filledheart.png')} resizeMode='contain' w={6} h={6} />
-  //                 </View>
-  //               </TouchableOpacity> : 
-  //               <TouchableOpacity onPress={() => setWishList(item.id)} style={styles.whishListWrap}>
-  //                 <View>
-  //                   <Image alt="wishlist" source={require('../../assets/image/Blog/favIcon3x.png')} resizeMode='contain' w={6} h={6} />
-  //                 </View>
-  //               </TouchableOpacity>
-  //             }
-  //           {/* {item.product_pictures == null ? 
-  //             <Image alt="product img" source={{ uri: ''}} style={styles.productImg} resizeMode='contain'/>
-  //             : <Image alt="product img" source={{ uri: baseUrl +'/'+ item.product_pictures[0].image_url }} style={styles.productImg} resizeMode='contain'/>}
-  //              */}
-  //           {item.product_pictures[0] == undefined ? null :
-  //             <Image alt="product img" source={{ uri: baseUrl + '/' + item.product_pictures[0].image_url }} style={styles.productImg} />}
-  //         </Box>
-  //         <Box mt="3">
-  //           <Text style={[{ fontFamily: 'Inter_500Medium' }, styles.label]}>{item.name}</Text>
-  //           <HStack justifyContent='flex-start' alignItems='center'>
-  //               <Text style={[{fontFamily:'Inter_600SemiBold'},styles.priceMMK]}>JPY</Text>    
-  //               <Text style={[{fontFamily:'Inter_600SemiBold'},styles.price]}>{item.price}</Text>
-  //           </HStack>
-  //           <HStack justifyContent='flex-start' alignItems='center'>
-  //               <Text style={[{fontFamily:'Inter_600SemiBold'},styles.priceMMK]}>MMK</Text>    
-  //               <Text style={[{fontFamily:'Inter_600SemiBold'},styles.price]}>{item.price_mm}</Text>
-  //           </HStack>
-  //         </Box>
-  //       </Box>
-  //     </TouchableOpacity>
-  //   )
-  // }
 
   const renderListEmptyComponent = () => (
     <Text w='100%' style={[{ fontFamily: 'Inter_500Medium' }, styles.no_items]}>{translate('noItem')}</Text>
@@ -545,7 +470,7 @@ const Home = ({ navigation }) => {
             </HStack>
             {loadingFav ? <ActivityIndicator color="red" alignItems='center' style={{ padding: 5 }} /> :
               <FlatList
-                data={favouriteProduct}
+                data={products}
                 horizontal
                 extraData={extra}
                 renderItem={productsRenderItems}
@@ -562,7 +487,7 @@ const Home = ({ navigation }) => {
             </HStack>
             {loading ? <ActivityIndicator color="red" alignItems='center' style={{ padding: 5 }} /> :
               <FlatList
-                data={product}
+                data={products}
                 horizontal
                 extraData={extra}
                 renderItem={productsRenderItems}
@@ -572,6 +497,9 @@ const Home = ({ navigation }) => {
                 mb='5%' mt='5%'
               />
             }
+
+          
+            
           </VStack>
         </ScrollView>
       </View>
@@ -580,6 +508,12 @@ const Home = ({ navigation }) => {
       </View>
       {alert()}
       <Toast />
+      <Text>{products && products.length}</Text>
+        {
+               products && products.map((item, key) =>  (
+                 <Text key={key}>{item.id}{item.name}{item.category.name}</Text>
+              ))
+            }
     </View>
   )
 }
