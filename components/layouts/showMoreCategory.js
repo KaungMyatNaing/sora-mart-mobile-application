@@ -35,12 +35,15 @@ const ShowMoreCategory = ({route, navigation}) => {
   // getProductByCategory();
 
   const getProducts = () => {
+    let category_name = global.category_name;
+    console.log(category_name)
     fetch('https://sora-mart.com/api/products')
     .then((response) => response.json())
       .then((data) => {
         setLoading(false);
-        setProducts(data.data.products);
-        console.log('Products length is '+products.length)
+
+        setProducts(data.data.products.filter(i => i.category.name == category_name));
+        console.log(products);
       });
 }
 

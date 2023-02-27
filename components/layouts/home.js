@@ -16,6 +16,7 @@ import { en } from "../translation/en";
 import { my } from "../translation/my";
 import { setLocalization ,translate } from "react-native-translate";
 import WishList from "../ecommerce/wishList";
+import { AntDesign } from '@expo/vector-icons';
 
 const Home = ({ navigation }) => {
   const [userOption, setUserOption] = useState(1);
@@ -35,7 +36,10 @@ const Home = ({ navigation }) => {
   
   const [wishlistproducts, setWishlistproducts] = useState();
   const [wishid, setWishid] = useState([]);
-
+  
+  //global.back = 0;
+  //const [watchpd,setWatchpd] = useState(global.back)
+  console.log(global.auth)
 
   const safeAreaProps = useSafeArea({
     safeAreaTop: true,
@@ -62,8 +66,8 @@ const Home = ({ navigation }) => {
     
       fetch('https://sora-mart.com/api/categories')
       .then((response) => response.json())
-        .then((data) => { console.log(data); setCategories(data.data.categories);
-          console.log(categories); });
+        .then((data) => { setCategories(data.data.categories);
+         });
     
     
   }
@@ -110,7 +114,7 @@ const Home = ({ navigation }) => {
         .then((data) => {
           setLoading(false);
           setProducts(data.data.products);
-          console.log('Products length is '+products.length)
+          //console.log('Products length is '+products.length)
         });
    
    
@@ -196,17 +200,16 @@ const Home = ({ navigation }) => {
   //  //getDefaultLocalization();
   //  console.log("Test: ",wishid);
   //},[]);
-
-  useEffect(() => {
+  React.useEffect(() => {
     getDefaultLocalization();
+    getAction();
     getCategory();
-    getProducts();
-    //getWishList();
-    //getProduct(userOption);
-    getFavouriteProduct();   
-    console.log("Test: ", wishid);
-    console.log("Products: ", products)
-  }, [isWishList])
+    getProducts();}
+    , [])
+  React.useEffect(() => {
+    // getAction();
+  }, [wishid]);
+
 
 //   const getCurrency = ( ) => {
 //     const myData = {
@@ -250,7 +253,7 @@ const Home = ({ navigation }) => {
         //   alert();
         // }
         // }>
-        onPress={() => userAction(item)}>
+        onPress={() => goCategory(item)}>
         <Text style={getCategoryTextStyle({item})}>{item.name}</Text>
       </TouchableOpacity>
     )
@@ -260,6 +263,11 @@ const Home = ({ navigation }) => {
     navigation.navigate('Products', { item: item })
     setUserOption(item.id);
     // getProduct(id);
+  }
+
+  const goCategory = (item) => {
+    global.category_name = item.name;
+    navigation.navigate('Products')
   }
 
   const setWishList = (product_id) => {
@@ -318,43 +326,74 @@ const Home = ({ navigation }) => {
 
 
   }
-  
-  const getWishList = () => {
-   
-    fetch(`https://sora-mart.com/api/wishlists/`, {
+
+  const unlikeAction = (id) => {
+    fetch(`https://sora-mart.com/api/remove-wishlist/${id}`, {
+      method: 'DELETE', // or 'PUT'
       headers: {
-        "Content-Type": "application/json",
-        'Authorization':  global.auth,
-      }
+        'Content-Type': 'application/json',
+        Authorization: global.auth,
+      },
     })
       .then((response) => response.json())
       .then((data) => {
-     
-          
-        let len = data.data.wishlists.length;
-        let dumbdata = [];
-        for(let i = 0; i < len; i++){
-          dumbdata.push(data.data.wishlists[i].products.id)
+        if (data.status == 200) {
+          getAction();
+          console.log('removed');
         }
-        setWishid(dumbdata);
-   
-        //const saveData = async () => {
-        //  try {
-        //    await AsyncStorage.setItem("wishlistdata", dumbdata)
-        //    alert('Data successfully saved')
-        //  } catch (e) {
-        //    alert('Failed to save the data to the storage')
-        //  }
-        //}
-        //saveData();
-        //console.log(wishid);
-        console.log("wishlist grab successful.")
-        
-          
-      }) .catch((error) => {
+      })
+      .catch((error) => {
         console.log(error);
       });
+    const fdata = wishid.filter(i => i !== id);
+    setWishid(fdata);
+   
+  };
 
+  const likeAction = (id) => {
+
+   fetch(`https://sora-mart.com/api/add-wishlist/${id}`, {
+     method: 'POST', // or 'PUT'
+     headers: {
+       'Content-Type': 'application/json',
+       Authorization: global.auth,
+     },
+   })
+     .then((response) => response.json())
+     .then((data) => {
+       if (data.status == 200) {
+         getAction();
+         console.log('added');
+       }
+     })
+     .catch((error) => {
+       console.log(error);
+     });
+   setWishid(prev=>[...prev,id]);
+   console.log(wishid);
+ };
+  
+  const getAction = () => {
+    if (global.pd) {
+      fetch(`https://sora-mart.com/api/wishlists/`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: global.auth,
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          let len = data.data.wishlists.length;
+          console.log(len);
+          let dumbdata = [];
+          for (let i = 0; i < len; i++) {
+            dumbdata.push(data.data.wishlists[i].products.id);
+          }
+          setWishid(dumbdata);
+          console.log('wishlist grab successful.');
+        })
+        .catch((error) => console.log(error));
+    }
 
 }
 
@@ -374,34 +413,31 @@ const Home = ({ navigation }) => {
     //    alert('Failed to fetch the input from storage');
     //  }
     //};
-    const findItem = wishid.find(wi => wi == item.id);
-    console.log('current id ---->'+item.id)
+    const checkId = wishid && wishid.filter((i) => i == item.id);
+  
 
    
     return (
       <TouchableOpacity onPress={() => { navigation.navigate('Product Details', { item: item.id }); global.product_id = item.id; }}>
         <Box mr={3} my={3}>
           <Box style={styles.ImgContainer} alignItems="center" justifyContent="center">
-            {/*{
-               findItem ? <TouchableOpacity onPress={() => removeWishList(item.id)} style={styles.whishListWrap}>
+             <TouchableOpacity onPress={() => {
+          checkId.length > 0 ? unlikeAction(item.id) : likeAction(item.id);
+        }} style={styles.whishListWrap}>
               <View>
-                <Image alt="wishlist" source={require('../../assets/image/Blog/filledheart.png')} resizeMode='contain' w={6} h={6} />
+                {checkId.length > 0 ? <AntDesign name="heart" size={24} color="red" /> : <AntDesign name="hearto" size={24} color="black" />}
               </View>
-            </TouchableOpacity> : <TouchableOpacity onPress={() => setWishList(item.id)} style={styles.whishListWrap}>
-                  <View>
-                    <Image alt="wishlist" source={require('../../assets/image/Blog/favIcon3x.png')} resizeMode='contain' w={6} h={6} />
-                  </View>
-                </TouchableOpacity>
-            }
-          */}
-              
+            </TouchableOpacity>
+            
+        
+            <Image alt="product img" source={{ uri: 'https://sora-mart.com/storage/product_picture/6374b5719d119_photo.png'}} style={styles.productImg} resizeMode='contain'/> 
                       
-            {/* {item.product_pictures == null ? 
+            {/*{item.product_pictures == null ? 
               <Image alt="product img" source={{ uri: ''}} style={styles.productImg} resizeMode='contain'/>
-              : <Image alt="product img" source={{ uri: baseUrl +'/'+ item.product_pictures[0].image_url }} style={styles.productImg} resizeMode='contain'/>}
-               */}
+              : <Image alt="product img" source={{ uri: 'https://sora-mart.com/storage/product_picture/6374b5719d119_photo.png'}} style={styles.productImg} resizeMode='contain'/>}
+              
             {item.product_picture[0] == undefined ? null :
-              <Image alt="product img" source={{ uri: config.imageUrl + '/' + item.product_picture[0].image}} style={styles.productImg} />}
+              <Image alt="product img" source={{ uri: config.imageUrl + '/' + item.product_picture[0].image}} style={styles.productImg} />}*/}
           </Box>
           <Box mt="3">
             <Text style={[{ fontFamily: 'Inter_500Medium' }, styles.label]}>{item.name}</Text>

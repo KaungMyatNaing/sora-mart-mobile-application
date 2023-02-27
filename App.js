@@ -293,7 +293,10 @@ export default function App() {
           options={{headerRight: () => (<SearchInput />)}} />
           <Stack.Screen name="Product Details" component={ProductDetail}
             options={{headerRight: () => (<ShareAndFav />)}}
-          />
+              />
+              {/*<Stack.Screen name="Product Details" component={ProductDetail}
+           
+          />*/}
           <Stack.Screen name="Cart" component={ShoppingCart}/>
           <Stack.Screen name="Shipping and Payments" component={ShippingAndPayment}/>
           <Stack.Screen name="Add New Address" component={AddAddress}/>

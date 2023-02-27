@@ -16,6 +16,7 @@ import HTMLView from 'react-native-htmlview';
 import { AsyncStorage } from 'react-native';
 import { translate } from 'react-native-translate';
 import { ActivityIndicator } from 'react-native-paper';
+import ShareAndFav from '../layouts/ShareAndFav';
 
 function ProductDetail({route, navigation })  {
   const {item} = route.params; 
@@ -229,6 +230,7 @@ function ProductDetail({route, navigation })  {
   
   return (
     <Box {...safeAreaProps} style={styles.containerPush}>
+    
     <Box m={3}>
       <ScrollView>
         <VStack mb={5}>
