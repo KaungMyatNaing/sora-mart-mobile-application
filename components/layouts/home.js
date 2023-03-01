@@ -17,6 +17,7 @@ import { my } from "../translation/my";
 import { setLocalization ,translate } from "react-native-translate";
 import WishList from "../ecommerce/wishList";
 import { AntDesign } from '@expo/vector-icons';
+import { wishlistStore } from "../store/wishlistStore";
 
 const Home = ({ navigation }) => {
   const [userOption, setUserOption] = useState(1);
@@ -36,6 +37,9 @@ const Home = ({ navigation }) => {
   
   const [wishlistproducts, setWishlistproducts] = useState();
   const [wishid, setWishid] = useState([]);
+  const wishlist = wishlistStore(state => state.wishlist);
+  const replaceWishlist = wishlistStore(state => state.replaceWishlist);
+  const updateWishlist = wishlistStore(state => state.updateWishlist);
   
   //global.back = 0;
   //const [watchpd,setWatchpd] = useState(global.back)
@@ -208,7 +212,7 @@ const Home = ({ navigation }) => {
     , [])
   React.useEffect(() => {
     // getAction();
-  }, [wishid]);
+  }, [wishlist]);
 
 
 //   const getCurrency = ( ) => {
@@ -253,7 +257,7 @@ const Home = ({ navigation }) => {
         //   alert();
         // }
         // }>
-        onPress={() => goCategory(item)}>
+        onPress={() => { goCategory(item); global.category_name = item.name }}>
         <Text style={getCategoryTextStyle({item})}>{item.name}</Text>
       </TouchableOpacity>
     )
@@ -345,8 +349,9 @@ const Home = ({ navigation }) => {
       .catch((error) => {
         console.log(error);
       });
-    const fdata = wishid.filter(i => i !== id);
-    setWishid(fdata);
+    const fdata = wishlist.filter(i => i !== id);
+    replaceWishlist(fdata);
+    console.log(wishlist);
    
   };
 
@@ -369,8 +374,10 @@ const Home = ({ navigation }) => {
      .catch((error) => {
        console.log(error);
      });
-   setWishid(prev=>[...prev,id]);
-   console.log(wishid);
+    updateWishlist(id);
+    console.log(wishlist);
+    
+    
  };
   
   const getAction = () => {
@@ -399,24 +406,7 @@ const Home = ({ navigation }) => {
 
   
   const productsRenderItems = ({ item }) => {
-    //const dato =  AsyncStorage.getItem('wishlistdata');
-    //const findItem = null;
-    //const readData = async () => {
-    //  try {
-    //    const value = await  AsyncStorage.getItem('wishlistdata');
-    //
-    //    if (value !== null) {
-    //      console.log("Grab from localstorage"+value);
-    //       findItem = value.find(wi => wi == item.id)
-    //    }
-    //  } catch (e) {
-    //    alert('Failed to fetch the input from storage');
-    //  }
-    //};
-    const checkId = wishid && wishid.filter((i) => i == item.id);
-  
-
-   
+    const checkId = wishlist && wishlist.filter((i) => i == item.id);
     return (
       <TouchableOpacity onPress={() => { navigation.navigate('Product Details', { item: item.id }); global.product_id = item.id; }}>
         <Box mr={3} my={3}>
@@ -517,9 +507,11 @@ const Home = ({ navigation }) => {
               />}
             <HStack alignItems='center' justifyContent="space-between">
               <Text style={[styles.productTitle, { fontFamily: 'Inter_700Bold' }]}>{translate('accessoriesUML')}</Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Accessories You May Like', { item: userOption })}>
+              <TouchableOpacity onPress={() =>  navigation.navigate('Most Popular Products')}>
+              {/*<TouchableOpacity onPress={() => navigation.navigate('Accessories You May Like', { item: userOption })}>*/}
                 <Text style={[{ fontFamily: 'Inter_500Medium' }, styles.showMore]}>{translate('showMore')}</Text>
               </TouchableOpacity>
+             
             </HStack>
             {loading ? <ActivityIndicator color="red" alignItems='center' style={{ padding: 5 }} /> :
               <FlatList

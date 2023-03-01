@@ -13,7 +13,7 @@ import { Prefectureddl } from '../../Blog/HomeWifi/homeWifiFormItems';
 
 function AddAddress({ navigation }) {
   
-  const baseUrl = config.baseUrl + '/api/address';
+  const baseUrl = config.baseUrl + '/add-address';
   const [township,setTownship] = useState('');
   const [full_name,setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -32,31 +32,31 @@ function AddAddress({ navigation }) {
 
   const town_baseUrl = config.baseUrl + '/api/town';
   const prefecture_baseUrl = config.baseUrl + '/api/prefecture';
+//
+//  const getTown = () => {
+//    axios.get(town_baseUrl)
+//      .then(response => {  
+//          setTownData(response.data.data);
+//      })    
+//      .catch((error) => {
+//          console.log(error);
+//      });
+//  }
+//
+//  const getPrefecture = () => {
+//    axios.get(prefecture_baseUrl)
+//        .then(response => {   
+//            setPrefectureData(response.data.data);
+//        })    
+//        .catch((error) => {
+//            console.log(error);
+//        });
+//  }
 
-  const getTown = () => {
-    axios.get(town_baseUrl)
-      .then(response => {  
-          setTownData(response.data.data);
-      })    
-      .catch((error) => {
-          console.log(error);
-      });
-  }
-
-  const getPrefecture = () => {
-    axios.get(prefecture_baseUrl)
-        .then(response => {   
-            setPrefectureData(response.data.data);
-        })    
-        .catch((error) => {
-            console.log(error);
-        });
-  }
-
-  useEffect(()=>{
-    getTown();
-    getPrefecture();
-  },[])
+  //useEffect(()=>{
+  //  getTown();
+  //  getPrefecture();
+  //},[])
 
   const saveAction = () => {
     
@@ -65,38 +65,71 @@ function AddAddress({ navigation }) {
       navigation.replace('Sign In');
     }else{
 
-      const myData = {
-        "prefecture_id": prefecture,
-        "city": city,
-        "town": township,
-        "ward": chome,
-        "building": building,
-        "room_no": unit,
-        "region": region,
-        "phone": phone,
-        "full_name": full_name,
-        "is_default": isDefault,
-        "address_type": "office",
-        "is_active": 0
-    }   
-    console.log('=============== add address data');
-    console.log(myData); 
-      const headers = { 
-        'Accept': 'application/json', 
-        'Authorization' : 'Bearer '+ global.auth,
-      }
+    //  const myData = {
+    //    "prefecture_id": prefecture,
+    //    "city": city,
+    //    "town": township,
+    //    "ward": chome,
+    //    "building": building,
+    //    "room_no": unit,
+    //    "region": region,
+    //    "phone": phone,
+    //    "full_name": full_name,
+    //    "is_default": isDefault,
+    //    "address_type": "office",
+    //    "is_active": 0
+    //}   
+    const myData = {
+      "city": city,
+      "township": 'Bagan',
+      "building_room_no": unit,
+      "region": region,
+      "phone": phone,
+      "full_name": full_name,
+      "is_default": isDefault,
+      "address_type": "office",
+  }   
+//    console.log('=============== add address data');
+//    console.log(myData); 
+//      const headers = { 
+//        'Accept': 'application/json', 
+//        'Authorization' : 'Bearer '+ global.auth,
+//      }
+//
+//      axios.post(baseUrl, myData, { headers })
+//      .then(response => {
+//        if(response.data.status_code === 200){
+//            navigation.replace('Choose Address');
+//          }
+//        console.log(response.data);
+//      })    
+//      .catch((error) => {
+//        console.log(error);
+//        alert(error);
+//      }); 
 
-      axios.post(baseUrl, myData, { headers })
-      .then(response => {
-        if(response.data.status_code === 200){
-            navigation.replace('Choose Address');
-          }
-        console.log(response.data);
-      })    
-      .catch((error) => {
-        console.log(error);
-        alert(error);
-      });   
+      console.log(myData);
+
+      fetch(`https://sora-mart.com/api/add-address/`, {
+        method: "POST", 
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization':  global.auth,
+        },
+        body: JSON.stringify(myData),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.status == 200) {
+              //navigation.replace('Choose Address');
+              navigation.goBack();
+              //refresh state lote ya. state manager htae yan
+            }
+            
+        }) .catch((error) => {
+          console.log(error);
+          alert(error);
+        });
     }
   }    
     return (

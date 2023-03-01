@@ -8,24 +8,25 @@ import ToastHelper from '../Helper/toast';
 import Toast from 'react-native-toast-message';
 import React from 'react';
 import { AntDesign } from '@expo/vector-icons';
+import { wishlistStore } from '../store/wishlistStore';
 //lote yan
 
 function ShareAndFav() {
   
-
-
-
+  const wishlist = wishlistStore(state => state.wishlist);
+  const replaceWishlist = wishlistStore(state => state.replaceWishlist);
+  const updateWishlist = wishlistStore(state => state.updateWishlist);
+  
 
 
   const [wishid, setWishid] = React.useState([]);
-
-
+ 
   React.useEffect(() => {
     getAction();
   }, [])
   React.useEffect(() => {
 
-  }, [wishid]);
+  }, [wishlist]);
 
   const unlikeAction = (id) => {
     fetch(`https://sora-mart.com/api/remove-wishlist/${id}`, {
@@ -45,8 +46,8 @@ function ShareAndFav() {
       .catch((error) => {
         console.log(error);
       });
-    const fdata = wishid.filter(i => i !== id);
-    setWishid(fdata);
+    const fdata = wishlist.filter(i => i !== id);
+    replaceWishlist(fdata);
    
   };
 
@@ -69,8 +70,9 @@ function ShareAndFav() {
      .catch((error) => {
        console.log(error);
      });
-   setWishid(prev=>[...prev,id]);
-   console.log(wishid);
+  // setWishid(prev=>[...prev,id]);
+  // console.log(wishid);
+    updateWishlist(id);
  };
   
   const getAction = () => {
@@ -116,7 +118,7 @@ function ShareAndFav() {
           // alert(error.message);
         }
   };
-  const checkId = wishid && wishid.filter((i) => i == global.product_id);
+  const checkId = wishlist && wishlist.filter((i) => i == global.product_id);
     return(
         <HStack>
             <TouchableOpacity p={3} onPress={() => shareAction()}> 

@@ -334,6 +334,8 @@ import { AsyncStorage } from 'react-native';
 import { translate, Translate } from 'react-native-translate';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Linking } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import ChooseAddress from '../ecommerce/address/chooseAddress'
 
 const Drawer = createDrawerNavigator();
 const MyOrderNav = createNativeStackNavigator();
@@ -518,11 +520,11 @@ function MyDrawer({navigation}) {
             ),
           }}
         />
-        <Drawer.Screen
+
+<Drawer.Screen
           name="My Addresses"
-          component={MyAddress}
-          options={{ 
-            drawerLabel: ({ focused }) => {
+          component={ChooseAddress} options={{ 
+            drawerLabel: ({focused}) => {
               return (
                 <Box>
                   <HStack justifyContent="space-between" alignItems="center">
@@ -537,6 +539,8 @@ function MyDrawer({navigation}) {
             ),
           }}
         />
+      
+       
         <Drawer.Screen
           name="My Payment Methods"
           component={MyPayment}
@@ -674,14 +678,14 @@ function MyDrawer({navigation}) {
     );
   }
 
-   function MyAddressStack() {
-    return (
-      <MyAddressNav.Navigator>
-        <MyAddressNav.Screen name="Profile" component={Profile} />             
-        {/* <MyAddressNav.Screen name="Profile Setting" component={ProfileSetting} />  */}
-      </MyAddressNav.Navigator>
-     );
-   }
+  // function MyAddressStack() {
+  //  return (
+  //    <MyAddressNav.Navigator>
+  //      <MyAddressNav.Screen name="Profile" component={Profile} />             
+  //      {/* <MyAddressNav.Screen name="Profile Setting" component={ProfileSetting} />  */}
+  //    </MyAddressNav.Navigator>
+  //   );
+  // }
 
 
   export default MyDrawer;

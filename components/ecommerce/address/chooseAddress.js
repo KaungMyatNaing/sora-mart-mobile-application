@@ -14,12 +14,18 @@ function MyAddress({route, navigation }) {
     // const dispatch = useDispatch();
     // const addresses  = useSelector((state) => state.apiReducer.data);
     const [addresses,setAddresses] = useState([]);
-    const [loading,setLoading] = useState(false); 
+    const [loading, setLoading] = useState(false); 
+    const [plsreload, setPlsreload] = useState(false); 
     
     const [chooseAddress, setChooseAddress] = useState(null);
 
-    const isFocused = useIsFocused() // for re-render
+    const isFocused = useIsFocused()
+     // for re-render
     
+    const [radiopress, setRadiopress] = useState(true);
+    const [isdelete, setIsdelete] = useState(true);
+   
+    useEffect(()=>{getAddress()},[plsreload])
     useEffect(() => {
         if(route.params != null){
             setOrderId(route.params);
@@ -28,22 +34,40 @@ function MyAddress({route, navigation }) {
             global.forceLoginMsg = config.forceLoginMsg;
             navigation.replace('Sign In');
         }else{
-            const baseUrl = config.baseUrl + '/api/address';
-            const headers = { 
-                'Accept': 'application/json', 
-                'Authorization' : 'Bearer '+ global.auth,  
-            }
-            axios.get(baseUrl,{headers})
-                .then(response => {   
-                    setAddresses(response.data.data);
-                    setLoading(false);
-                })    
-                .catch((error) => {
-                    console.log(error);
-                    setLoading(false);
-                });
+       
+        //    fetch('https://sora-mart.com/api/address', {headers: {
+        //        "Content-Type": "application/json",
+        //        'Authorization':  global.auth,
+        //      }})
+        // .then((response) => response.json())
+        //        .then((data) => {
+        //            console.log(data);
+        //            setAddresses(data.data);
+        //            setLoading(false);
+        //        })   
+        //        .catch((error) => {
+        //            console.log(error);
+        //            setLoading(false);
+        //        });
+            getAddress();
         }
-    }, [isFocused]);
+    }, [radiopress]);
+    const getAddress = () => {
+        fetch('https://sora-mart.com/api/address', {headers: {
+            "Content-Type": "application/json",
+            'Authorization':  global.auth,
+          }})
+     .then((response) => response.json())
+            .then((data) => {
+                console.log(data);
+                setAddresses(data.data);
+                setLoading(false);
+            })   
+            .catch((error) => {
+                console.log(error);
+                setLoading(false);
+            });
+    }
 
     const [choosedValue, setChoosedValue] = useState(null);
     const safeAreaProps = useSafeArea({
@@ -52,14 +76,31 @@ function MyAddress({route, navigation }) {
       });
 
     const getChooseStyle = ({item}) => {
-        
-        if(choosedValue == item.guid ){
+      
+       
             global.chooseAddress = item;
             // setChooseAddress(item);
+            fetch(`https://sora-mart.com/api/set-default-address/${item.guid}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    'Authorization': global.auth,
+                }
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.status == 200) {
+                        getAddress();
+                        console.log(item.guid + " default address is set")
+                    }
+                    
+                }).catch((error) => {
+                    console.log(error);
+                });
+      
+
             return styles.radioSelectStyle;
-        }else{
-            return styles.radioSelectSecStyle;
-        }
+      
     }
     const renderListEmptyComponent = () => (
         <View style={styles.noNotification}>
@@ -76,16 +117,44 @@ function MyAddress({route, navigation }) {
             navigation.replace('Shipping and Payments');
         }
     }
+
+    const deleteAddress = (id) => {
+        fetch(`https://sora-mart.com/api/delete-address/${id}`, {
+            method: "DELETE", 
+            headers: {
+              "Content-Type": "application/json",
+              'Authorization':  global.auth,
+            }
+          })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.status == 200) {
+                    getAddress();
+                    console.log(id + " address is deleted !")
+                    
+                }
+                
+            }) .catch((error) => {
+              console.log(error);
+            });
+    }
     
     const renderItem = ({item}) => {
         return (
-            <Radio value={item.guid} my={1} mt={2} mb={5} colorScheme="red">
-                <Box ml={3} p={4} width={'88%'} style={getChooseStyle({item})}>
+            //<Radio value={item.guid} my={1} mt={2} mb={5} colorScheme="red" onChange={()=>setRadiopress(!radiopress)}>
+            <TouchableOpacity onPress={()=>getChooseStyle({item})}>
+                <Box ml={3} p={4} style={{width: 350}} mb={3} backgroundColor={'white'} borderRadius={15}>
                     <HStack justifyContent='space-between' alignItems='center' p={2}>
                         <Text style={{fontFamily: 'Inter_700Bold'}}>{item.full_name}</Text>
-                        <TouchableOpacity onPress={() => navigation.navigate('Update Address',{detailData:item})}>
-                            <Text style={[styles.editText,{fontFamily: 'Inter_500Medium'}]}>Edit</Text>
+                        <TouchableOpacity onPress={() => deleteAddress(item.guid)}>
+                            <Text style={[styles.editText,{fontFamily: 'Inter_500Medium'}]}>Delete</Text>
                         </TouchableOpacity>
+
+                        {/*<TouchableOpacity onPress={() => navigation.navigate('Update Address',{detailData:item})}>
+                            <Text style={[styles.editText,{fontFamily: 'Inter_500Medium'}]}>Delete</Text>
+                        </TouchableOpacity>*/}
+
+                        
                     </HStack>
                     <Text p={1} style={{fontFamily: 'Inter_400Regular'}}>{item.phone}</Text>
                     <Text p={1} style={{fontFamily: 'Inter_400Regular'}}>{item.ward}</Text>
@@ -93,43 +162,39 @@ function MyAddress({route, navigation }) {
                     <Text p={1} style={{fontFamily: 'Inter_400Regular'}}>{item.city}</Text>
                     <Text p={1} style={{fontFamily: 'Inter_400Regular'}}>{item.region}</Text>
                     {item.is_default ?
-                    <Text p={3} pl={1} style={[styles.defaultText,{fontFamily: 'Inter_500Medium'}]}>Default Address</Text>
+                        <Text p={3} pl={1} style={[styles.defaultText, { fontFamily: 'Inter_500Medium' }]}>{item.is_default = 1 ? 'Your default address' : 'Not your default address'}</Text>
                     : null}
                 </Box>
-            </Radio>
+                </TouchableOpacity>
+            //{/*</Radio>*/}
         )
     }
 
     return (         
-        <Box {...safeAreaProps} style={styles.container}>
+        <Box {...safeAreaProps} style={{width:'100%'}}>
             <Center>
             {loading ? (
                 <ActivityIndicator color="red" justifyContent='center' alignItems='center'/>
             ):
-            (<VStack alignItems='center' justifyContent='center'>
-            <Box  style={styles.containerPush}>
+            (<VStack>
+            <Box  style={{width:'100%'}}>
             <Center>
-                <Radio.Group
-                name="myRadioGroup"
-                accessibilityLabel="favorite number"
-                value={choosedValue}
-                onChange={(nextValue) => {
-                setChoosedValue(nextValue)
-                }}
-                 >
+             
                     <FlatList
                         data={addresses}
                         renderItem={renderItem}
                         ListEmptyComponent={renderListEmptyComponent}
-                        keyExtractor={item => item.guid}
+                                    keyExtractor={item => item.guid}
+                                    style={{ width: "100%" }} 
                     />                  
-                </Radio.Group>
+                    
+              
                 </Center>               
                 </Box>
                     {orderId == null ? 
                     <HStack alignItems='center' justifyContent="space-around">
                         <TouchableOpacity>
-                            <Text style = {styles.addNewAddress} onPress={() => navigation.navigate('Add New Address')}>{translate('addNewAddress')}</Text>
+                                    <Text style={styles.addNewAddress} onPress={() => { navigation.navigate('Add New Address'); setPlsreload(!plsreload); }}>{translate('addNewAddress')}</Text>
                         </TouchableOpacity>                        
                     </HStack> :
                     <HStack alignItems='center' justifyContent="space-around" ml={5}>

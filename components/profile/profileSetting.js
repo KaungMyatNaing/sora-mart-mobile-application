@@ -31,31 +31,40 @@ function ProfileSetting({route, navigation }) {
     const [date, setDate] = useState(userData.dob);   
 
     const updateProfile = () => {
+        console.log("I click update btn")
         if(global.auth == ''){
             global.forceLoginMsg = config.forceLoginMsg
             navigation.navigate('Sign In');
         } else {
+            console.log("Am I working?")
+            //const updateUserData = {
+            //    "fullname" : name,
+            //    "dob" : '1/1/1',
+            //    "gender" : gender,
+            //    "ph_no": phno,
+            //    "photo" : 'kjhdkjhakjhd.png'
+            //   
+            //}
+            
             const updateUserData = {
-                "fullname" : name,
-                "dob" : date,
-                "gender" : gender,
-                "ph_no": phno,
+                "fullname" : 'Prince of Darkness',
+                "dob" : '1/1/1',
+                "gender" : 'sigma male',
+                "ph_no": '12345678',
                 "photo" : 'kjhdkjhakjhd.png'
                
-            }
+   }
             const myData = {
                 "fullname": name,
-                "email": email,
                 "ph_no": phno,
                 "dob":date,
                 "gender": gender,
                 "username": email,                
-                "is_reset": "0",
-                "status": "1"
+               
             } 
-            if(image != '' && image != null){
-                myData['profil_pic'] = image;
-            }
+            //if(image != '' && image != null){
+            //    myData['profil_pic'] = image;
+            //}
 //            const headers = {
 //                'Accept' : 'application/json',
 //                'Authorization' : 'Bearer '+ global.auth,
@@ -74,6 +83,7 @@ function ProfileSetting({route, navigation }) {
 //            ToastHelper.toast(error.message, null, 'error');
 //            console.log(error);
 //          });
+            console.log(updateUserData);
             fetch('https://sora-mart.com/api/edit-profile', {
                 method: 
                     "POST"
