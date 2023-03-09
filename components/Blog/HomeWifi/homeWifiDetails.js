@@ -45,10 +45,10 @@ function HomeWifiDetails({route,navigation}){
             'Authorization': 'Bearer ' + global.auth,
         }
         if(global.auth != '' && global.auth != null){
-            const wifiUrl = config.baseUrl + '/api/auth/service/detail/' + id;
+            const wifiUrl = config.baseUrl + '/blog/services/' + id;
             axios.get(wifiUrl,{headers})
             .then(response => {
-                if(response.data.status_code === 200){
+                if(response.data.status === 200){
                     console.log('response services ');
                     // console.log(response);
                     setWData(response.data.data);
@@ -68,10 +68,10 @@ function HomeWifiDetails({route,navigation}){
                 // alert(error);
             });
         }else{
-            const wifiUrl = config.baseUrl + '/api/service/detail/' + id;
+            const wifiUrl = config.baseUrl + '/blog/services/' + id;
             axios.get(wifiUrl)
             .then(response => {
-                if(response.data.status_code === 200){
+                if(response.data.status === 200){
                     setWData(response.data.data);
                     setWifiFavData(response.data.data[0].favourite_service);
                     setWifiJobSavedData(response.data.data[0].save_job);

@@ -25,47 +25,73 @@ function HouseRentDetails({route,navigation}){
        getHouseRentDetail(id);
     }, [isDoRentFav,isDoRentSaveJob,isFocused]);
 
+    //const getHouseRentDetail = (id) => {
+    //  if(global.auth != '' && global.auth != null){
+    //    const headers = {
+    //      'Accept': 'application/json',
+    //      'Authorization': 'Bearer ' + global.auth,
+    //    }
+    //    const baseUrl = config.baseUrl + '/api/auth/service/detail/' + id;
+    //      axios.get(baseUrl,{headers})
+    //      .then(response => {
+    //        if(response.data.status_code === 200){
+    //          setRentData(response.data.data[0]);
+    //          setRentFavData(response.data.data[0].favourite_service);
+    //          setRentJobSavedData(response.data.data[0].save_job);              
+    //          setRentCompanyData(response.data.data[0].company);
+    //          setLoading(false);
+    //        }
+    //        setLoading(false);
+    //  
+    //      })    
+    //      .catch((error) => {
+    //          setLoading(false);
+    //          console.log(error);
+    //      });
+    //  }else{
+    //    const baseUrl = config.baseUrl + '/api/service/detail/' + id;
+    //      axios.get(baseUrl)
+    //      .then(response => {
+    //        if(response.data.status_code === 200){
+    //          setRentData(response.data.data[0]);
+    //          setRentFavData(respone.data.data[0].favourite_service);
+    //          setRentJobSavedData(response.data.data[0].save_job);
+    //          setRentCompanyData(response.data.data[0].company);
+    //          setLoading(false);
+    //          }
+    //          setLoading(false);
+    //  
+    //      })    
+    //      .catch((error) => {
+    //          setLoading(false);
+    //          console.log(error);
+    //      });
+    //    }
+    //  
+    //  }
+    
     const getHouseRentDetail = (id) => {
-      if(global.auth != '' && global.auth != null){
-        const headers = {
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ' + global.auth,
+      if (global.auth != '' && global.auth != null) {
+        fetch(`https://sora-mart.com/api/blog/services?type=${type}`, {
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': global.auth,
         }
-        const baseUrl = config.baseUrl + '/api/auth/service/detail/' + id;
-          axios.get(baseUrl,{headers})
-          .then(response => {
-            if(response.data.status_code === 200){
-              setRentData(response.data.data[0]);
-              setRentFavData(response.data.data[0].favourite_service);
-              setRentJobSavedData(response.data.data[0].save_job);              
-              setRentCompanyData(response.data.data[0].company);
-              setLoading(false);
-            }
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status == 200) {
+            setRentData(data.data[0]);
+            setRentCompanyData(data.data[0].company);
             setLoading(false);
-      
-          })    
-          .catch((error) => {
-              setLoading(false);
+          }
+
+        }).catch((error) => {
+          setLoading(false);
               console.log(error);
-          });
-      }else{
-        const baseUrl = config.baseUrl + '/api/service/detail/' + id;
-          axios.get(baseUrl)
-          .then(response => {
-            if(response.data.status_code === 200){
-              setRentData(response.data.data[0]);
-              setRentFavData(respone.data.data[0].favourite_service);
-              setRentJobSavedData(response.data.data[0].save_job);
-              setRentCompanyData(response.data.data[0].company);
-              setLoading(false);
-              }
-              setLoading(false);
-      
-          })    
-          .catch((error) => {
-              setLoading(false);
-              console.log(error);
-          });
+        });
+
+       
         }
       
       }
@@ -166,7 +192,7 @@ function HouseRentDetails({route,navigation}){
 
                 <HStack justifyContent='flex-end'>
                     <HStack justifyContent='space-evenly' alignItems='flex-start' w={20} style={styles.favAndSaveBtn}>          
-                        {rentFavData.length > 0 ?                            
+                        {/*{rentFavData.length > 0 ?                            
                             <TouchableOpacity onPress={() => removeFav()} >
                                 <HStack justifyContent='center'>
                                     <Image alt='fav icon' source={require('../../../assets/image/Blog/FillheartIcon3x.png')} style={{width:25, height:25}}/>
@@ -180,9 +206,9 @@ function HouseRentDetails({route,navigation}){
                                     <Text style={{fontFamily:'Inter_400Regular',fontSize:10,color:'#A1A1A1',textAlign:'center'}}>200</Text> 
                                 </HStack>             
                             </TouchableOpacity>
-                        }                        
+                        }                        */}
 
-                        {rentJobSavedData.length > 0 ?                            
+                        {/*{rentJobSavedData.length > 0 ?                            
                             <TouchableOpacity onPress={() => removeJob(rentdata.guid)}>
                                 <Image alt='save icon' source={require('../../../assets/image/Blog/filledSaveIcon.png')} style={{width:25, height:25}}/>
                             </TouchableOpacity>
@@ -190,7 +216,7 @@ function HouseRentDetails({route,navigation}){
                             <TouchableOpacity onPress={() => saveJob(rentdata.guid,rentdata.company_id)} >
                                 <Image alt='save icon' source={require('../../../assets/image/Blog/saveIcon3x.png')} style={{width:25, height:25}}/>            
                             </TouchableOpacity>
-                        }
+                        }*/}
                     </HStack>
                 </HStack>
                 <KeyValuePart twidth='80%' tkey='Rental Price' value={rentdata && rentdata.price}/>

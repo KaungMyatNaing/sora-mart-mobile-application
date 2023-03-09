@@ -174,6 +174,9 @@ function MyPayment({route, navigation }) {
                     console.log(error);
                     setLoading(false);
                 });
+            
+            
+           
         }
     }, [isFocused]);
 

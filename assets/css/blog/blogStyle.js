@@ -37,7 +37,8 @@ const styles = StyleSheet.create({
     },
     imgStyle:{
         width:'100%',
-        height:150,
+        height: 150,
+        resizeMode: 'contain'
     }
 
 });

@@ -32,7 +32,8 @@ function ProductDetail({route, navigation })  {
 
   const baseUrl = config.baseUrl;
 
-  const [show,setShow] = useState(false);
+  const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(true);
 
 
   const [itemData, setItemData] = useState();
@@ -40,7 +41,10 @@ function ProductDetail({route, navigation })  {
     try {
       const value = await AsyncStorage.getItem('item');
       if (value !== null) {
-       setItemData(JSON.parse(value))
+        setItemData(JSON.parse(value));
+        console.log(itemData);
+        
+        
       }
     } catch (error) {
       // Error retrieving data
@@ -51,59 +55,45 @@ function ProductDetail({route, navigation })  {
     //const api_url = baseUrl + '/api/products/' + id;
 
     //global.product_id = id;
-   let id =  global.product_id;
+    setLoading(true);
+    let id = global.product_id;
 
     //const { id } = route.params; 
     console.log(id);
     console.log(`https://sora-mart.com/api/product/${id}`);
       
     fetch(`https://sora-mart.com/api/product/${id}`)
-    .then((response) => response.json())
+      .then((response) => response.json())
       .then((data) => {
-       
-        //setLoading(false);
-        setPdata(data.data);
- 
-        //if(Pdata.get_stocks){
-        //  if(Pdata.get_stocks[0].total_stock != null){
-        //    setNoOfStock(Pdata.get_stocks[0].total_stock);
-        //    setInStock(true);
-        //  }           
-        //}else{
-        //  setInStock(false);
-        //}
-        setInStock(true);
-      }) .catch((error) => {
+        if (data.status == 200) {
+          setLoading(false);
+        
+          if (data.data !== undefined) {
+            if (data.data.stock !== null || undefined) {
+             
+              setNoOfStock(data.data.stock);
+              setInStock(true);
+             
+            }
+            else {
+              setInStock(false);
+            }
+          
+          }
+
+          setPdata(data.data);
+        }
+      })
+      .catch((error) => {
         console.log(error);
-    });
-  
- 
- 
-
-
-    //axios.get(api_url)
-    //    .then(response => {  
-    //      setData(response.data.data);
-    //      if(response.data.data.get_stocks){
-    //        if(response.data.data.get_stocks[0].total_stock != null){
-    //          setNoOfStock(response.data.data.get_stocks[0].total_stock);
-    //          setInStock(true);
-    //        }           
-    //      }else{
-    //        setInStock(false);
-    //      }
-    //    })    
-    //    .catch((error) => {
-    //        console.log(error);
-    //    });
-      //
-      //console.log('get details ------------------');
-      //console.log(data);
+      });
+        
   }
 
   useEffect(() => {
     //retrieveData();
     getDetail();
+
   }, []);
   
   const safeAreaProps = useSafeArea({
@@ -111,31 +101,55 @@ function ProductDetail({route, navigation })  {
     pt: 2
   });
 
-  const AddToCartAction = () => {
-    if(global.user && global.user !== '' && global.user !== null){
+  const AddToCartAction = async () => {
+   
+   
+    //if(global.user && global.user !== '' && global.user !== null){
       const myData = {
-        "product_id": data.id,
+        "product_id": pdata.id,
+        "name": pdata.name,
         "quantity": quantity,
-      }
-      const cart_url = baseUrl + '/api/carts';
-      const headers = { 
-        'Accept': 'application/json', 
-        'Authorization' : 'Bearer '+ global.auth,
-      }
-      axios.post(cart_url, myData, { headers })
-        .then(response => {
-          // alert(response.data.data.desc); 
-          // console.log(response.data.data.desc);
-          showAlert();
-        })    
-        .catch((error) => {
-          console.log(error);
-        }); 
-        getDetail(item.id);
-    }else{
-        StoreData(item, quantity);
+        "price": pdata.price,
+        "max": pdata.stock,
+        "m_point" : pdata.point
     }
     
+     
+    const value = await AsyncStorage.getItem('item');
+
+    if (value !== null) {
+      const jj = JSON.parse(value);
+      const checkProductExist = jj.filter((jo) => jo.product_id == myData.product_id);
+      if (checkProductExist.length > 0) {
+      
+        const prevProductCopy = jj.filter((jo) => jo.product_id != myData.product_id);
+        jj.map(i => i.product_id == myData.product_id ? i.quantity += myData.quantity : null)
+        await AsyncStorage.setItem(
+          'item',
+          JSON.stringify(jj));
+          console.log('condition 1')
+        showAlert();
+      }
+      if (checkProductExist.length == 0) {
+        const buggy = [...jj, myData]
+     
+        await AsyncStorage.setItem(
+          'item',
+          JSON.stringify(buggy));
+        console.log('condition 2');
+        showAlert();
+      } 
+
+    }
+    else {
+      const gg = [myData];
+      await AsyncStorage.setItem(
+        'item',
+        JSON.stringify(gg))
+      console.log('condition 3')
+      showAlert();
+    }
+
   }
 
   const StoreData = async (data, quantity) => {
@@ -156,6 +170,7 @@ function ProductDetail({route, navigation })  {
         JSON.stringify(updatedItem)
       );
       // AsyncStorage.clear();
+      retrieveData();
       showAlert();
     } catch (error) {
     }
