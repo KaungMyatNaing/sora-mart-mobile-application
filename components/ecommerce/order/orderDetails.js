@@ -49,18 +49,43 @@ function OrderDetails({route,navigation}){
 
     const isFocused = useIsFocused(); // for re-render
 
-    useEffect(() => {      
-        axios.get(baseUrl, { headers })
-        .then(response => {        
-            setCartProducts(response.data.data.order_cart.cart_products); 
-            setData(response.data.data);
-            setLoading(false);
-        })    
-        .catch((error) => {
-            ToastHelper.toast(error, null, 'error');
-            // alert(error);
-        });
+    useEffect(() => {
+        const {order_id} = route.params;
+        if (order_id) {
+            fetch(`https://sora-mart.com/api/order-detail/${order_id}`, {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: global.auth,
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+
+                setData(data.data);
+                //console.log(data.data);
+                setLoading(false); 
+                data.data.cart.cart_items.map((i,index) => console.log(i.product.name))
+               
+              
+            })
+            .catch((error) => console.log(error));
+        }
+        
     }, [isFocused]);
+
+
+    //useEffect(() => {      
+    //    axios.get(baseUrl, { headers })
+    //    .then(response => {        
+    //        setCartProducts(response.data.data.order_cart.cart_products); 
+    //        setData(response.data.data);
+    //        setLoading(false);
+    //    })    
+    //    .catch((error) => {
+    //        ToastHelper.toast(error, null, 'error');
+    //        // alert(error);
+    //    });
+    //}, [isFocused]);
     
     useEffect(()=>{
         ProfileDate();
@@ -139,16 +164,16 @@ function OrderDetails({route,navigation}){
     
     return (   
               
-            <ScrollView backgroundColor='#fff' style={{padding:5}}>
+        <ScrollView backgroundColor='#fff' style={{ padding: 5 }}>
                 <Box>
                 {loading ? <ActivityIndicator/> :
                  <Box>
                      <HStack alignItems='flex-start' justifyContent='space-evenly' mb={5}>
                         <VStack>
                         <Text>{data && data.created_when}</Text> 
-                        <Text>{translate('orderId')}: #{data && data.order_number}</Text>
+                        <Text>{translate('orderId')}: #{data && data.guid}</Text>
                         </VStack>  
-                        {orderProfile && 
+                        {/*{orderProfile && 
                         <>
                             <TouchableOpacity style={{backgroundColor:'#EC1C24',padding:5,borderRadius:50}} onPress={()=>Linking.openURL('https://demo.myanmarwebc6.sg-host.com/live_chat?user_id='+orderProfile.guid+'&last_login=' + orderProfile.last_login)}>
                                 <Image alt="sms icon" w={5} h={5} resizeMode='contain' source={require('../../../assets/image/png_icons/smsIcon.png')}/>
@@ -157,7 +182,7 @@ function OrderDetails({route,navigation}){
                                 <Text style={styles.orderCancelledLbl}>{translate('cancelled')}</Text>
                             </TouchableOpacity> 
                         </>
-                        }    
+                        }    */}
                     </HStack>
                     {data.status == 'pending' && (
                         <>
@@ -235,18 +260,18 @@ function OrderDetails({route,navigation}){
                                 <Image alt="item icon" mr='3' w={6} h={6} source={require('../../../assets/image/png_icons/itemIcon.png')}></Image>
                                 <Text>{translate('items')}</Text>
                             </HStack>
-                            {cartProducts.map((item)=>(
+                            {data && data.cart.cart_items.map((item)=>(
                                 <HStack key={item.guid} justifyContent='space-around' alignItems='center' mb='2' mt='2'>
-                                    <Text style={styles.orderDetailsItems}>{item.cart_product.name}</Text>
+                                    <Text style={styles.orderDetailsItems}>{item.product.name}</Text>
                                     <Text>{item.quantity}</Text>
-                                    <Text>{currency == 'two' ? 'MMK' : 'JPY'} <Text>{item.cart_product.price}</Text></Text>
+                                    <Text>{currency == 'two' ? 'MMK' : 'JPY'} <Text>{item.product.price}</Text></Text>
                                 </HStack>
                             ))}
                         </VStack>
                     <Divider my={2}/>
                     <HStack justifyContent='space-between'>
                         <Text>{translate('total')}</Text>
-                        <Text>{currency == 'two' ? 'MMK' : 'JPY'} {data.total_price}</Text>
+                        <Text>{currency == 'two' ? 'MMK' : 'JPY'} {data.net_price}</Text>
                     </HStack>
                     <Divider my={2}/>
                     <VStack style={[styles.card, styles.shadowProp, {marginBottom:"2%"}]} >                        

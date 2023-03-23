@@ -1,6 +1,7 @@
 export const en = {
     "home": "Home",
-    "myOrder" : "My Order",
+  "myOrder": "My Order",
+    "mySimCard" : "My Sim Card",
     "myAddress" : "My Address",
     "myPaymentMethod" : "My Payment Methods",
     "mySubscription" : "My Subscriptions",

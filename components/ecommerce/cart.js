@@ -408,7 +408,7 @@ function ShoppingCart({navigation}) {
                             {item.name}
                         </Text>
                         <Text color="coolGray.600" _dark={{color: "warmGray.200"}}>
-                            {item.product_id}
+                            {item.product_id} {item.p_attribute}
                         </Text>                                                
                         <HStack style={styles.getPoints} justifyContent='center'>
                             <Text style={[{fontFamily:'Inter_600SemiBold'},styles.getPointText]} px="2"  _dark={{ color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">

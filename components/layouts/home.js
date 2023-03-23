@@ -40,6 +40,7 @@ const Home = ({ navigation }) => {
   const wishlist = wishlistStore(state => state.wishlist);
   const replaceWishlist = wishlistStore(state => state.replaceWishlist);
   const updateWishlist = wishlistStore(state => state.updateWishlist);
+  const getWishlist = wishlistStore(state => state.getWishlist);
   
   //global.back = 0;
   //const [watchpd,setWatchpd] = useState(global.back)
@@ -207,11 +208,12 @@ const Home = ({ navigation }) => {
   React.useEffect(() => {
     getDefaultLocalization();
     getAction();
+    getWishlist();
     getCategory();
     getProducts();}
     , [])
   React.useEffect(() => {
-    // getAction();
+     getAction();
   }, [wishlist]);
 
 
@@ -381,7 +383,7 @@ const Home = ({ navigation }) => {
  };
   
   const getAction = () => {
-    if (global.pd) {
+    
       fetch(`https://sora-mart.com/api/wishlists/`, {
         headers: {
           'Content-Type': 'application/json',
@@ -400,14 +402,16 @@ const Home = ({ navigation }) => {
           console.log('wishlist grab successful.');
         })
         .catch((error) => console.log(error));
-    }
+    
 
 }
 
   
   const productsRenderItems = ({ item }) => {
-    const checkId = wishlist && wishlist.filter((i) => i == item.id);
+   
+    const checkId = wishlist.filter((i) => i == item.id);
     return (
+      
       <TouchableOpacity onPress={() => { navigation.navigate('Product Details', { item: item.id }); global.product_id = item.id; }}>
         <Box mr={3} my={3}>
           <Box style={styles.ImgContainer} alignItems="center" justifyContent="center">
@@ -446,7 +450,8 @@ const Home = ({ navigation }) => {
             
           </Box>
         </Box>
-      </TouchableOpacity>
+      </TouchableOpacity >
+          
     )
   }
 
@@ -513,7 +518,7 @@ const Home = ({ navigation }) => {
               </TouchableOpacity>
              
             </HStack>
-            {loading ? <ActivityIndicator color="red" alignItems='center' style={{ padding: 5 }} /> :
+            {loading ?  <ActivityIndicator color="red" alignItems='center' style={{ padding: 5 }} /> :
               <FlatList
                 data={products}
                 horizontal

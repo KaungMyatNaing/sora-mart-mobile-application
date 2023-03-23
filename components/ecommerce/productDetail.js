@@ -34,6 +34,9 @@ function ProductDetail({route, navigation })  {
 
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [atr, setAtr] = useState();
+  const [atr2, setAtr2] = useState();
+  const [atrclick, setAtrClick] = useState();
 
 
   const [itemData, setItemData] = useState();
@@ -106,15 +109,16 @@ function ProductDetail({route, navigation })  {
    
     //if(global.user && global.user !== '' && global.user !== null){
       const myData = {
-        "product_id": pdata.id,
+        "product_id": atr ? atr : pdata.id,
         "name": pdata.name,
         "quantity": quantity,
         "price": pdata.price,
         "max": pdata.stock,
-        "m_point" : pdata.point
+        "m_point": pdata.point,
+        "p_attribute" : atrclick ? atrclick : 'Standard'
     }
     
-     
+    console.log(myData);
     const value = await AsyncStorage.getItem('item');
 
     if (value !== null) {
@@ -242,6 +246,17 @@ function ProductDetail({route, navigation })  {
     )
   }
 
+//  const whiteButton = ({item}) => {
+//    const [click, setClick] = useState(false);
+//    return (
+//      <TouchableOpacity onPress={()=> setClick(!click)}>
+//      <View style={{ backgroundColor: item.value, width: 35, height: 35, borderRadius: 35, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+//        {click ?  <View style={{backgroundColor: 'white',width: 20, height: 20,borderRadius: 20,}}></View>  : null}
+//  </View>
+//</TouchableOpacity>
+//    )
+//  }
+
   
   return (
     <Box {...safeAreaProps} style={styles.containerPush}>
@@ -268,7 +283,7 @@ function ProductDetail({route, navigation })  {
                   {
                     bigImg == '' ? <Image resizeMode='contain' source={{uri : config.imageUrl + '/' + item.product_picture[0].image}} alt="product img" style={styles.productImgMain}/>
                     : <Image source={{uri : config.imageUrl + '/' + bigImg}} alt="product.png" style={styles.productImgMain}/>
-                  }
+                  } 
                   </Box>
                 )}  */}
                
@@ -279,7 +294,29 @@ function ProductDetail({route, navigation })  {
             <HStack my={4} justifyContent="space-between" alignItems="center">
                 <VStack>
                   <Text style={[styles.productTitle, {fontFamily: 'Inter_700Bold'}]}>{pdata && pdata.name} </Text>
-                  {instock? <Text style={{color:'#EC1C24',fontFamily:'Inter_700Bold'}}>instock</Text> : <Text style={{color:'#EC1C24',fontFamily:'Inter_700Bold'}}>out of stock</Text>}
+                    {instock ? <Text style={{ color: '#EC1C24', fontFamily: 'Inter_700Bold' }}>instock</Text> : <Text style={{ color: '#EC1C24', fontFamily: 'Inter_700Bold' }}>out of stock</Text>}
+                    <HStack space={2} my={3}>
+                      {pdata.product_attribute.length > 0 ?  
+                        pdata.product_attribute.map((item, index) => (
+                          item.name == 'color' ?
+                        
+                            <TouchableOpacity onPress={() => { setAtrClick(item.value);  setAtr(item.product_attrbute_value_id);} }>
+                              <View style={{ backgroundColor: item.value, width: 35, height: 35, borderRadius: 35, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                {atrclick == item.value ?  <View style={{backgroundColor: 'white',width: 20, height: 20,borderRadius: 20,}}></View>  : null}
+                          </View>
+                        </TouchableOpacity>
+                      :
+                        <TouchableOpacity onPress={() => { setAtrClick(item.value);  setAtr(item.product_attrbute_value_id);} }>
+                          <Text style={{padding: 10,borderWidth: atrclick == item.value ? 4 : 2}}>{item.value}</Text>
+                        </TouchableOpacity>
+                      
+                    
+                        ))
+                        :
+                        null
+                       
+                      }
+                    </HStack>
                 </VStack>
                 <Box style={styles.productStatus}><Text style={[{fontFamily: 'Inter_600SemiBold'},styles.productStatusText]}>Used</Text></Box>
             </HStack>            
@@ -333,7 +370,7 @@ function ProductDetail({route, navigation })  {
         {instock ? 
           <TouchableOpacity
               style={styles.button}
-              onPress={() => AddToCartAction()}
+                onPress={() => { pdata.product_attribute.length > 0 && atr == undefined ? console.log('You')  : AddToCartAction() }}
               ><Text style={[styles.buttonText, {fontFamily: 'Inter_700Bold'}]}>{translate('addtocart')}</Text>
           </TouchableOpacity > : 
           <TouchableOpacity

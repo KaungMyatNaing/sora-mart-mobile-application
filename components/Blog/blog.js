@@ -9,6 +9,7 @@ import {ActivityIndicator} from 'react-native-paper'
 import { useIsFocused } from '@react-navigation/native' // for re-render
 import Toast from 'react-native-toast-message';
 import HTMLView from 'react-native-htmlview';
+import { savedStore } from "../store/savedStore"
 
 const renderListEmptyComponent = () =>{
   return(
@@ -28,6 +29,11 @@ function Blog({ navigation }) {
   const [isDoSaveJob,setIsDoSaveJob] = useState(false);
   const [isDoSaveFav,setIsDoSaveFav] = useState(false);
   const [favCount, setFavCount] = useState(200);
+  const getSaved = savedStore(state => state.getSaved);
+  const savedlist = savedStore(state => state.savedlist);
+  const updateSaved = savedStore(state => state.updateSaved);
+  const deleteSaved = savedStore(state => state.deleteSaved);
+
 
   if(global.service_type == '' || global.service_type == null){
     var service_type = 'All';
@@ -50,17 +56,22 @@ function Blog({ navigation }) {
 
   const baseUrlCart = config.baseUrl + '/api/carts';
 
-  const [cart_product,setCartProduct] = useState('');
+  const [cart_product, setCartProduct] = useState('');
+  const [saveaction, setSaveAction] = useState(false);
+  const [unsaveaction, setUnSaveAction] = useState(false);
 
   const isFocused = useIsFocused() // for re-render
 
   useEffect(() => {
     getCats();
-}, [type,isFocused]);
+  }, [type, isFocused]);
+  useEffect(() => {
+    getSaved();
+  },[])
 
 useEffect(()=>{
   getBlogs();
-},[isDoSaveFav,isDoSaveJob,type,isFocused]);
+},[type,saveaction,unsaveaction]);
 
   const headers = {
     'Accept': 'application/json',
@@ -73,7 +84,7 @@ useEffect(()=>{
     }else if(item.type == 'House'){
       return navigation.navigate('House Rent Details',{id:item.guid});
     }else if(item.type == 'Wifi'){
-      return navigation.navigate('Home Wifi Details',{id:item.guid});
+      return navigation.navigate('Home Wifi Details',{id:item.guid, company_id:item.company.guid});
     }else if(item.type == 'Travel'){
       return navigation.navigate('Travel Details',{id:item.guid});
     }
@@ -164,95 +175,65 @@ const getBlogs = () => {
   }
 
 
-  const removeFav = () => {
-    alert('remove fav');
-    // const addServiceUrl = config.baseUrl + '/api/favourite-service/remove/' + props.id + '/' + props.type;
-    //   const headers = {
-    //       'Accept': 'application/json',
-    //       'Authorization' : 'Bearer '+ global.auth,
-    //   }
-    //   axios.get(addServiceUrl,{ headers })
-    //       .then(response => {
-    //           setIsDoSaveFav(!isDoSaveFav);
-    //           console.log(response.data.data.desc);
-    //       })
-    //       .catch((error) => {
-    //         console.log(error);
-    //       });
+
+
+  const saveJob = (service_id) => {
+    if(global.auth == '' || global.auth == null){
+      global.forceLoginMsg = config.forceLoginMsg;
+      navigation.replace('Sign In');
+    }else{
+      fetch(`https://sora-mart.com/api/blog/save-service/${service_id}`, {
+        method: "POST", 
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: global.auth,
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+        if (data.status == 200) {
+          updateSaved(service_id);
+          setSaveAction(!saveaction);
+          console.log('Service has been added to your saved list.');
+         }
+        
+       
+        })
+        .catch((error) => console.log(''+error));
+    }
   }
 
   const removeJob = (service_id) => {
-    const removeUrl = config.baseUrl + '/api/save-job/remove/' + service_id;
-    const headers = {
-        'Accept': 'application/json',
-        'Authorization' : 'Bearer '+ global.auth,
-    }
-    axios.get(removeUrl,{ headers })
-        .then(response => {
-          setIsDoSaveJob(!isDoSaveJob);
-          console.log(response.data.data.desc);
+    if(global.auth == '' || global.auth == null){
+      global.forceLoginMsg = config.forceLoginMsg;
+      navigation.replace('Sign In');
+    }else{
+      fetch(`https://sora-mart.com/api/blog/remove-service/${service_id}`, {
+        method: "DELETE", 
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: global.auth,
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+        if (data.status == 200) {
+          
+          deleteSaved(service_id);
+          setUnSaveAction(!unsaveaction);
+          console.log('Service has been removed from your saved list.');
+         }
+        
+       
         })
-        .catch((error) => {
-            console.log(error);
-        });
-  }
-
-  const saveJob = (service_id,company_id) => {
-    alert('save job');
-    if(global.auth == '' || global.auth == null){
-      global.forceLoginMsg = config.forceLoginMsg;
-      navigation.replace('Sign In');
-    }else{
-      const saveUrl = config.baseUrl + '/api/save-job/add';
-
-      const myData = {
-        service_id : service_id,
-        company_id : company_id
-      };
-
-      const headers = {
-          'Accept': 'application/json',
-          'Authorization' : 'Bearer '+ global.auth,
-      };
-
-      axios.post(saveUrl,myData,{ headers })
-          .then(response => {
-            setIsDoSaveJob(!isDoSaveJob);
-            console.log('save jog');
-            console.log(response.data.data.desc);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-    }
-
-  }
-
-  const addFav = (service_id,type) => {
-    alert('add fav');
-    if(global.auth == '' || global.auth == null){
-      global.forceLoginMsg = config.forceLoginMsg;
-      navigation.replace('Sign In');
-    }else{
-      const addServiceUrl = config.baseUrl + '/api/favourite-service/add/' + service_id + '/' + type;
-      const headers = {
-          'Accept': 'application/json',
-          'Authorization' : 'Bearer '+ global.auth,
-      }
-      axios.get(addServiceUrl,{ headers })
-          .then(response => {
-              setIsDoSaveFav(!isDoSaveFav)
-              console.log(response.data.data.desc);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+        .catch((error) => console.log(''+error));
     }
   }
-
 
   function RenderItem ({services_data}) {
-
+    const checkId = savedlist.filter((i) => i == services_data.guid);
     return(
       <Box mb='5%'>
       <VStack ml={5} mr={5} mb={3}>
@@ -291,6 +272,15 @@ const getBlogs = () => {
                   <Image alt='save icon' source={require('../../assets/image/Blog/saveIcon3x.png')} w={6} h={6}/>
                 </TouchableOpacity>}*/}
               {/*kana htar omm*/}
+
+               {checkId.length > 0 ?
+                <TouchableOpacity onPress={() => removeJob(services_data.guid)}>
+                  <Image alt='save icon' source={require('../../assets/image/Blog/filledSaveIcon.png')} w={6} h={6}/>
+                </TouchableOpacity>
+              :
+                <TouchableOpacity onPress={() => saveJob(services_data.guid)}>
+                  <Image alt='save icon' source={require('../../assets/image/Blog/saveIcon3x.png')} w={6} h={6}/>
+                </TouchableOpacity>}
           </HStack>
         </HStack>
         {services_data.salary && <Text pt={3} style={{fontFamily:'Inter_400Regular',fontSize:12,color:'#A1A1A1'}}>Salary-{services_data.salary}</Text>}

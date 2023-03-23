@@ -40,7 +40,8 @@ function MyOrder({navigation}) {
     const [order,setOrder] = useState(null);   
     const [data,setData] = useState(null); 
     const [loading,setLoading] = useState(true);
-    const [userOption,setUserOption] = useState('all');
+    const [userOption, setUserOption] = useState('all');
+    
     const baseUrl = config.baseUrl + '/api/orders';
 
     const isFocused = useIsFocused() // for re-render
@@ -55,15 +56,23 @@ function MyOrder({navigation}) {
         }else{
             const headers = { 
                 'Accept': 'application/json', 
-                'Authorization' : 'Bearer '+ global.auth,        
+                'Authorization' : global.auth,        
             }
-            axios.get(baseUrl, { headers })
-            .then(response => {        
-                const tempData = response.data.data;
-                setData(tempData);
-                setOrder( tempData);
-                setLoading(false);
-            })    
+            fetch(`https://sora-mart.com/api/order-lists`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: global.auth,
+        },
+      })
+        .then((response) => response.json())
+      .then((data) => {
+          const tempData = data.data;
+          console.log( typeof tempData);
+        setData(tempData);
+        setOrder(tempData);
+          setLoading(false);
+          
+        })  
             .catch((error) => {
                 setLoading(false);
                 console.log(response); 
@@ -106,7 +115,10 @@ function MyOrder({navigation}) {
               break;
             case 'deliver':
                 setOrder( data.filter(data => data.status == 'deliver'));              
-              break;
+                break;
+                case 'packaging':
+                    setOrder( data.filter(data => data.status == 'packaging'));              
+                  break;
             default:
                 setOrder(data);
           }
@@ -116,12 +128,13 @@ function MyOrder({navigation}) {
         <>
         <VStack mx='3' mt='3'>
             <HStack justifyContent='space-between'>
-                <Text style={{fontFamily: 'Inter_700Bold',fontSize:14}}>{translate('orderId')} : <Text style={{fontFamily: 'Inter_700Bold',fontSize:14}}>#{item.guid}</Text>
+                      {/*<Text style={{ fontFamily: 'Inter_700Bold', fontSize: 14 }}>{translate('orderId')} : <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 14 }}>#{item.guid}</Text>*/}
+                      <Text style={{fontFamily: 'Inter_700Bold',fontSize:14}}>{translate('orderId')} : <Text style={{fontFamily: 'Inter_700Bold',fontSize:14}}>#{item.guid}</Text>
                 </Text>
                 <Spacer size='1'/>
-                <Text alignItems='flex-end' style={[styles.orderViewDetails, {fontFamily: 'Inter_500Medium'}]} onPress={() => navigation.navigate('Order Details',{orderId:item.guid})}>{translate('viewDetail')}</Text>
+                <Text alignItems='flex-end' style={[styles.orderViewDetails, {fontFamily: 'Inter_500Medium'}]} onPress={() => navigation.navigate('Order Details',{order_id:item.guid})}>{translate('viewDetail')}</Text>
             </HStack>
-            <Text style={[styles.orderDeliveryMethod, {fontFamily: 'Inter_400Regular',fontSize:12}]}>{item.delivery_id}</Text>
+            <Text style={[styles.orderDeliveryMethod, {fontFamily: 'Inter_400Regular',fontSize:12}]}>{item.delivery}</Text>
             <Spacer size='1'/>                        
             <HStack>
                 <Text style={[{fontFamily: 'Inter_400Regular'},styles.myOrderTitle]}>{translate('placeOn')} : </Text>
@@ -136,7 +149,7 @@ function MyOrder({navigation}) {
             <HStack>
                 <Text  style={[{fontFamily: 'Inter_400Regular'},styles.myOrderTitle]}>{translate('quantity')} : </Text>
                 <Spacer size='1'/>
-                <Text  style={{fontFamily: 'Inter_400Regular',fontSize:14}}>{item.order_cart.cart_products.length}</Text>
+                <Text  style={{fontFamily: 'Inter_400Regular',fontSize:14}}>{item.cart.cart_items.length}</Text>
             </HStack>
             <HStack>
                 <Text  style={[{fontFamily: 'Inter_400Regular'},styles.myOrderTitle]}>{translate('total')} : </Text>
@@ -174,18 +187,19 @@ function MyOrder({navigation}) {
         )
       }
     
-    const status_array = [{id:'all',value:'All'},{id:'finish',value:'Processing'},{id:'complete',value:'Completed'},{id:'deliver',value:'Delivered'},{id:'cancel',value:'Cancelled'}]
+    const status_array = [{id:'all',value:'All'},{id:'finish',value:'Processing'},{id:'complete',value:'Completed'},{id:'deliver',value:'Delivered'},{id:'cancel',value:'Cancelled'},{id:'packaging',value:'packaging'}]
 
     return (
         <>
             <View justifyContent='space-evenly' alignItems='center' pt='3' pb={5} backgroundColor='#fff'>
+                
                 <FlatList
                     data={status_array}
                     horizontal
                     renderItem={statusRenderItem}
                     ListEmptyComponent={renderListEmptyComponent}
                     showsHorizontalScrollIndicator={false}
-                    keyExtractor={item => item.id}       
+                    keyExtractor={item => item.guid}       
                 />
             </View>
             {loading ? <ActivityIndicator color='red' backgroundColor='#fff' height='100%'/> : 

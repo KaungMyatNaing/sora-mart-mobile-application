@@ -57,7 +57,7 @@ function WifiRequestFormOne({route,navigation}){
                 <MyInputItem lbl={translate('nameEng')} value={engName} setValue={setEngName}/>
                 <MyInputItem lbl={translate('nameJpn')} value={jpnName} setValue={setJpnName}/>
                 <MyDatePicker lbl={translate('birthday')} date={dob} setDate={setDob}/>
-                <ResidenceImg fImg={frontResidence} bImg={backResidence} setFImg={setFrontResidence} setBImg={setBackResidence}/>                                              
+                <dd fImg={frontResidence} bImg={backResidence} setFImg={setFrontResidence} setBImg={setBackResidence}/>                                              
             </Box>
             <PassportImg image={passport} setImage={setPassport}/>
             <BankImage image={bankBook} setImage={setBankBook}/>
@@ -80,7 +80,6 @@ function WifiRequestFormTwo({route,navigation}){
     const [prefectureData,setPrefectureData] = useState(['Prefecture']);
     const [townData,setTownData] = useState(['City/Town']);
 
-    const town_baseUrl = config.baseUrl + '/api/town';
     const prefecture_baseUrl = config.baseUrl + '/api/prefecture';
 
     myData['phone'] = mobile;
@@ -95,13 +94,19 @@ function WifiRequestFormTwo({route,navigation}){
 
 
     const getTown = () => {
-        axios.get(town_baseUrl)
-            .then(response => {  
-                setTownData(response.data.data);
-            })    
-            .catch((error) => {
-                console.log(error);
-            });
+            fetch(`https://sora-mart.com/api/blog/town-lists`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.status == 200) {
+                        console.log(data.data);
+                        setTownData(data.data);
+                    }
+                })
+                .catch((error) => console.log('' + error));
     }
 
     const getPrefecture = () => {

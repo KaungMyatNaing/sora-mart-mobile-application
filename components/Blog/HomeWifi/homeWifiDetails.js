@@ -9,83 +9,70 @@ import { ActivityIndicator } from 'react-native-paper'
 import { useIsFocused } from '@react-navigation/native' // for re-render
 import ToastHelper from '../../Helper/toast'
 import { translate } from 'react-native-translate'
+import { savedStore } from '../../store/savedStore'
+
 
 function HomeWifiDetails({route,navigation}){
 
-    const pdata = {
-        'companyName' : 'Xfinity',
-        'favCount' : '100k',
-    }
-    
-    const {id} = route.params;
+    const { id,company_id } = route.params;
+    const [savedata, setSaveData] = useState();
+    const [loading, setLoading] = useState(false);
+    const [saveaction, setSaveAction] = useState(false);
+    const [unsaveaction, setUnSaveAction] = useState(false);
+    const getSaved = savedStore(state => state.getSaved);
+    const savedlist = savedStore(state => state.savedlist);
+    const updateSaved = savedStore(state => state.updateSaved);
+    const deleteSaved = savedStore(state => state.deleteSaved);
+    const isFocused = useIsFocused() // for re-render
+    const [wifipackages, setWifiPackages] = useState();
 
-    const [wData,setWData] = useState([]);
-
-    const [wiFiFavData, setWifiFavData] = useState([]);
-
-    const [wifiJobSavedData, setWifiJobSavedData] = useState([]);
-
-    const [wifiCompanyData, setWifiCompanyData] = useState([]);
-
-    const [loading, setLoading] = useState(true);
- 
-    const [isDoFav,setIsDoFav] = useState(false);
-
-    const [isDojob,setIsDoJob] = useState(false);
-
-    const isFocused = useIsFocused();
-     // for re-render
-    useEffect(() => {
-        getWifiDetails(id);
-    }, [isDoFav,isDojob,isFocused]);
+     useEffect(() => {
+         getWifiDetails(id);
+         getWifiPackages();
+}, [isFocused,saveaction,unsaveaction]);
+useEffect(() => {
+    getSaved();
+  },[saveaction,unsaveaction])
 
     const getWifiDetails = (id) => {
-        const headers = {
-            'Accept': 'application/json',
-            'Authorization': 'Bearer ' + global.auth,
+        if (global.auth !== '' && global.auth != null) {
+            setLoading(true);
+            fetch(`https://sora-mart.com/api/blog/services/${id}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: global.auth,
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    setSaveData(data.data)
+                    console.log(data.data)
+                    setLoading(false);
+                })
+                .catch((error) => console.log(error));
         }
-        if(global.auth != '' && global.auth != null){
-            const wifiUrl = config.baseUrl + '/blog/services/' + id;
-            axios.get(wifiUrl,{headers})
-            .then(response => {
-                if(response.data.status === 200){
-                    console.log('response services ');
-                    // console.log(response);
-                    setWData(response.data.data);
-                    setWifiFavData(response.data.data[0].favourite_service);
-                    console.log('wifi fav data is ');
-                    console.log(response.data.data[0].favourite_service);
-                    setWifiJobSavedData(response.data.data[0].save_job);
-                    setWifiCompanyData(response.data.data[0].company);
-                }
-                console.log(wData);
-                setLoading(false);            
-            })    
-            .catch((error) => {
-                setLoading(false);
-                console.log(error);
-                ToastHelper.toast(error, null, 'error');
-                // alert(error);
-            });
-        }else{
-            const wifiUrl = config.baseUrl + '/blog/services/' + id;
-            axios.get(wifiUrl)
-            .then(response => {
-                if(response.data.status === 200){
-                    setWData(response.data.data);
-                    setWifiFavData(response.data.data[0].favourite_service);
-                    setWifiJobSavedData(response.data.data[0].save_job);
-                    setWifiCompanyData(response.data.data[0].company);
-                }
-                console.log(wData);
-                setLoading(false);            
-            })    
-            .catch((error) => {
-                setLoading(false);
-                console.log(error);
-                ToastHelper.toast(error, null, 'error');
-                // alert(error);
-            });
+        
+    }
+
+    const getWifiPackages = async() => {
+        if (global.auth !== '' && global.auth != null) {
+           await fetch(`https://sora-mart.com/api/blog/services?type=Wifi`, {
+        headers: {
+          "Content-Type": "application/json",
+         
+        }
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status == 200) {
+            
+           
+              setWifiPackages(data.data.services.filter((i, index) => i.company.guid = company_id));
+          }
+  
+        }).catch((error) => {
+          console.log(error);
+        });
         }
         
     }
@@ -94,89 +81,62 @@ function HomeWifiDetails({route,navigation}){
         return navigation.navigate('Home Wifi Request Form',{item:item});
     }
 
-    const removeFav = () => {
-        alert('remove fav');
-        // const addServiceUrl = config.baseUrl + '/api/favourite-service/remove/' + props.id + '/' + props.type;
-        //   const headers = { 
-        //       'Accept': 'application/json', 
-        //       'Authorization' : 'Bearer '+ global.auth,
-        //   }
-        //   axios.get(addServiceUrl,{ headers })
-        //       .then(response => {
-        //           setIsDoFav(!isDoFav);
-        //           console.log(response.data.data.desc);
-        //       })    
-        //       .catch((error) => {
-        //         console.log(error);
-        //       });      
-      }
-    
-      const removeJob = (service_id) => {        
-        const removeUrl = config.baseUrl + '/api/save-job/remove/' + service_id;
-        const headers = { 
-            'Accept': 'application/json', 
-            'Authorization' : 'Bearer '+ global.auth,
-        }
-        axios.get(removeUrl,{ headers })
-            .then(response => {
-                setIsDoJob(!isDojob);
-                console.log(response.data.data.desc);
-            })    
-            .catch((error) => {
-                console.log(error);
-            }); 
-      } 
-    
-      const saveJob = (service_id,company_id) => {
-                
-        if(global.auth == '' || global.auth == null){
-          global.forceLoginMsg = config.forceLoginMsg;
-          navigation.replace('Sign In');
-        }else{
-          const saveUrl = config.baseUrl + '/api/save-job/add';
-    
-          const myData = {
-            service_id : service_id,
-            company_id : company_id
-          };
-    
-          const headers = { 
-              'Accept': 'application/json', 
-              'Authorization' : 'Bearer '+ global.auth,
-          };
-    
-          axios.post(saveUrl,myData,{ headers })
-              .then(response => {
-                setIsDoJob(!isDojob);
-                console.log(response.data.data.desc);
-              })    
-              .catch((error) => {
-                console.log(error);
-              });
-        } 
+    const saveJob = (service_id) => {
+        if (global.auth == '' || global.auth == null) {
+            global.forceLoginMsg = config.forceLoginMsg;
+            navigation.replace('Sign In');
+        } else {
+            fetch(`https://sora-mart.com/api/blog/save-service/${service_id}`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: global.auth,
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data);
+                    if (data.status == 200) {
+                        updateSaved(service_id);
+                        setSaveAction(!saveaction);
+                        console.log('Service has been added to your saved list.');
+                    }
         
+       
+                })
+                .catch((error) => console.log('' + error));
+        }
       }
-    
-      const addFav = (service_id,type) => {
-        if(global.auth == '' || global.auth == null){
-          global.forceLoginMsg = config.forceLoginMsg;
-          navigation.replace('Sign In');
-        }else{
-          const addServiceUrl = config.baseUrl + '/api/favourite-service/add/' + service_id + '/' + type;
-          const headers = { 
-              'Accept': 'application/json', 
-              'Authorization' : 'Bearer '+ global.auth,
-          }
-          axios.get(addServiceUrl,{ headers })
-              .then(response => {
-                  setIsDoFav(!isDoFav);
-                  console.log(response.data.data.desc);
-              })    
-              .catch((error) => {
-                console.log(error);
-              });      
-        }   
+      
+      const removeJob = (service_id) => {
+        if (global.auth == '' || global.auth == null) {
+            global.forceLoginMsg = config.forceLoginMsg;
+            navigation.replace('Sign In');
+        } else {
+            fetch(`https://sora-mart.com/api/blog/remove-service/${service_id}`, {
+                method: "DELETE",
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: global.auth,
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data);
+                    if (data.status == 200) {
+          
+                        deleteSaved(service_id);
+                        setUnSaveAction(!unsaveaction);
+                        console.log('Service has been removed from your saved list.');
+                    }
+        
+       
+                })
+                .catch((error) => console.log('' + error));
+        }
+      
       }
+      const checkId =  savedlist.filter((i) => i == id); 
     
     const renderItem = ({item}) => {
         return (
@@ -207,48 +167,33 @@ function HomeWifiDetails({route,navigation}){
 
     return(
         <VStack p={5} backgroundColor='#fff' height='100%'>
-            {wData == null? 
+            {savedata == null? 
                 <ActivityIndicator color='red' height='100%'/> 
             :
             <>
             <VStack>
                 <HStack justifyContent='space-between' alignItems='center' mt={1}>
                     <HStack>
-                        <Image source={{uri : config.imageUrl + wifiCompanyData.logo_url}} w={6} h={6} resizeMode='contain' alt='logo'/>
-                        <Text style={styles.companyName}>{wifiCompanyData && wifiCompanyData.companyName}</Text>
+                                {/*<Image source={{ uri: config.imageUrl + wifiCompanyData.logo_url }} w={6} h={6} resizeMode='contain' alt='logo' />*/}
+                                <Image style={styles.mainImg} source={{uri:'https://1.bp.blogspot.com/-hG85Di3-8Co/WCqdqTdvxuI/AAAAAAAA_lE/HFKBj1184Gc2c50Yc35KkNItdaprTWcaACLcB/s180-c/businesscard.png'}}   resizeMode="contain" alt='logo'/>
+                                <Text style={styles.companyName}>{savedata.company.name && savedata.company.name}</Text>
                     </HStack>
                     {/* <SaveAndFav favCount={pdata.favCount}/> */}
                     <HStack justifyContent='space-between' alignItems='flex-start' w={20}>          
-                        {wiFiFavData.length > 0 ?                           
-                            <TouchableOpacity onPress={() => removeFav()}>
-                                <HStack justifyContent='center'>
-                                    <Image alt='fav icon' source={require('../../../assets/image/Blog/FillheartIcon3x.png')} style={{width:25,height:25}}/>
-                                    <Text style={{fontFamily:'Inter_400Regular',fontSize:10,color:'#A1A1A1',textAlign:'center'}}>200</Text>
-                                </HStack>
-                            </TouchableOpacity>                                    
-                            :
-                            <TouchableOpacity onPress={() => addFav(wData[0].guid,wData[0].type)}>
-                                 <HStack>
-                                    <Image alt='fav icon' source={require('../../../assets/image/Blog/favIcon3x.png')} style={{width:25,height:25}}/>
-                                    <Text style={{fontFamily:'Inter_400Regular',fontSize:10,color:'#A1A1A1',textAlign:'center'}}>200</Text> 
-                                </HStack> 
-                            </TouchableOpacity>
-                        }
-
-                        {wifiJobSavedData.length > 0 ?
-                            <TouchableOpacity onPress={() => removeJob(wData[0].guid)}>
-                                <Image alt='save icon' source={require('../../../assets/image/Blog/filledSaveIcon.png')} style={{width:25,height:25}}/>
-                            </TouchableOpacity>
-                            :
-                            <TouchableOpacity onPress={() => saveJob(wData[0].guid,wData[0].company_id)}>
-                                <Image alt='save icon' source={require('../../../assets/image/Blog/saveIcon3x.png')} style={{width:25,height:25}}/>
-                            </TouchableOpacity>
-                        }
+                    {checkId.length > 0 ?
+<TouchableOpacity onPress={() => removeJob(id)}>
+                      <Image alt='save icon' source={require('../../../assets/image/Blog/filledSaveIcon.png')} w={25} h={25} />
+                     
+</TouchableOpacity>
+:
+<TouchableOpacity onPress={() => saveJob(id)}>
+<Image alt='save icon' source={require('../../../assets/image/Blog/saveIcon3x.png')} w={25} h={25}/> 
+</TouchableOpacity>}
                     </HStack>
                 </HStack>
             </VStack>
             <FlatList
-                data={wData}
+                data={wifipackages}
                 renderItem={renderItem}
                 ListEmptyComponent={renderListEmptyComponent}
                 keyExtractor={item => item.guid}        

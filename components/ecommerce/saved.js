@@ -39,6 +39,8 @@ import {
     Inter_900Black, } from '@expo-google-fonts/inter';
 import { ActivityIndicator } from 'react-native-paper';
 import { translate } from 'react-native-translate';
+import { savedStore } from "../store/savedStore"
+
 
   // const items = []; 
   
@@ -48,10 +50,49 @@ function Saved({navigation}) {
     const [saveData,setSaveData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isDoRemove, setIsDoRemove] = useState(false);
+    
+  const getSaved = savedStore(state => state.getSaved);
 
-    useEffect(() => {
-        getSavedList();
-    },[isDoRemove]);
+    React.useEffect(() => {
+        fetch(`https://sora-mart.com/api/blog/save-service-list`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: global.auth,
+        },
+      })
+        .then((response) => response.json())
+      .then((data) => {
+          setSaveData(data.data)
+       
+          setLoading(false);
+        })
+        .catch((error) => console.log(error));
+    }, [isDoRemove])
+    
+    const removeItem = (id) => {
+  
+          fetch(`https://sora-mart.com/api/blog/remove-service/${id}`, {
+            method: "DELETE", 
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: global.auth,
+            },
+          })
+            .then((response) => response.json())
+          .then((data) => {
+            if (data.status == 200) {
+              
+            console.log(id)
+              setIsDoRemove(!isDoRemove);
+              console.log('removed');
+             }
+            
+           
+            })
+            .catch((error) => console.log(error));
+       
+       
+      };
 
     const renderListEmptyComponent = () => (
         <View style={styles.noNotification}>
@@ -61,62 +102,28 @@ function Saved({navigation}) {
         </View>
     ); 
 
-    const getSavedList = () => {
-
-        if(global.auth == '' || global.auth == null){
-            global.forceLoginMsg = config.forceLoginMsg;
-            navigation.replace('Sign In');
-        }else{
-            const baseUrl = config.baseUrl + '/api/save-job/list';
-            const headers = { 
-                'Accept': 'application/json', 
-                'Authorization' : 'Bearer '+ global.auth,  
-            }
-            axios.get(baseUrl,{headers})
-                .then(response => {   
-                    setSaveData(response.data.data);
-                    setLoading(false);
-                })    
-                .catch((error) => {
-                    console.log(error);
-                    setLoading(false);
-                });
-        }
-
-        
-    }
-
-    const removeItem = (item) => {        
-        // alert(item.wish_list_product.id);
-        const removeUrl = config.baseUrl + '/api/save-job/remove/' + item.service_id;
-        const headers = { 
-            'Accept': 'application/json', 
-            'Authorization' : 'Bearer '+ global.auth,
-        }
-        axios.get(removeUrl,{ headers })
-            .then(response => {
-                setIsDoRemove(!isDoRemove);
-                console.log(response.data.data.desc);
-            })    
-            .catch((error) => {
-                console.log(error);
-            }); 
-    }
 
     const renderItem = ({ item }) => (
         <Box px={5}>
             <VStack>
                 <HStack justifyContent='space-between' alignItems="center" mb="2">
                     <Box style={{fontFamily:'Inter_500Medium', width:'60%'}}>
-                        <Text style={{fontFamily:'Inter_700Bold', fontSize:16}}>{item.name}{item.service_id}</Text>
-                        <Text style={{fontFamily:'Inter_500Medium', color:'#a3a3a3'}} mb="2">{item.company.name}</Text>
-                        <HTMLView style={{fontFamily:'Inter_500Medium'}} value={item.company.description} />
+                        <Text style={{fontFamily:'Inter_700Bold', fontSize:16}}>{item.service.name}{item.service.guid}</Text>
+              <Text style={{ fontFamily: 'Inter_500Medium', color: '#a3a3a3' }} mb="2">{item.service.company.name}</Text>
+              {
+                item.service.description && item.service.description.length > 50 ? 
+                  <HTMLView style={{ fontFamily: 'Inter_500Medium' }} value={item.service.description.slice(0, 50) + '...'} />
+                  :
+                  <HTMLView style={{fontFamily:'Inter_500Medium'}} value={item.service.description} />
+              }
+                       
                     </Box>
-                    <Image alt="company logo" source={{uri:config.imageUrl + '/' + item.company.logo_url}}  style={styles.logo} width="100" height="100"/>
+            {/*<Image alt="company logo" source={{uri:config.imageUrl + '/' + item.company.logo_url}}  style={styles.logo} width="100" height="100"/>*/}
+             <Image alt="company logo" source={{uri:'https://1.bp.blogspot.com/-hG85Di3-8Co/WCqdqTdvxuI/AAAAAAAA_lE/HFKBj1184Gc2c50Yc35KkNItdaprTWcaACLcB/s180-c/businesscard.png'}}  style={styles.logo} width="100" height="100"/>
                 </HStack>
                 <HStack justifyContent='space-between' alignItems="center" mt="3">
                     <Box color='grey' style={{fontFamily:'Inter_500Medium'}}></Box>
-                    <TouchableOpacity onPress={()=>removeItem(item)}>
+                    <TouchableOpacity onPress={()=>removeItem(item.service.guid)}>
                         <Image alt='delete icon' source={require('../../assets/image/png_icons/deleteIcon3x.png')}  style={styles.logo} w={6} h={6}/>
                     </TouchableOpacity>
                 </HStack>
@@ -150,8 +157,11 @@ function Saved({navigation}) {
                         data={saveData}
                         renderItem={renderItem}
                         ListEmptyComponent={renderListEmptyComponent}
+                        showsHorizontalScrollIndicator={false}
                         keyExtractor={item => item.guid}
-                    />
+            />
+            
+          
                 )
             }
         </SafeAreaView>      

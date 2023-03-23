@@ -1,6 +1,6 @@
 import React, { useState,useEffect } from 'react';
 
-import { Box, useSafeArea, VStack, HStack,Button, Radio,Text, Center} from 'native-base';
+import { Box, useSafeArea, VStack, HStack,Button, Radio,Text, Center,Modal} from 'native-base';
 import { View, FlatList, TouchableOpacity } from 'react-native';
 import { styles } from '../../../assets/css/ecommerce/addressStyle';
 import config from '../../../config/config';
@@ -9,7 +9,7 @@ import { useIsFocused } from '@react-navigation/native' // for re-render
 import { translate } from 'react-native-translate';
 import axios from 'axios';
 
-function MyAddress({route, navigation }) {
+function AddressPop({route, navigation },props) {
     const [orderId, setOrderId] = useState(null);    
     // const dispatch = useDispatch();
     // const addresses  = useSelector((state) => state.apiReducer.data);
@@ -23,7 +23,8 @@ function MyAddress({route, navigation }) {
      // for re-render
     
     const [radiopress, setRadiopress] = useState(true);
-    const [isdelete, setIsdelete] = useState(true);
+  const [isdelete, setIsdelete] = useState(true);
+  const [open, setOpen] = useState(false);
    
     useEffect(()=>{getAddress()},[plsreload])
     useEffect(() => {
@@ -34,6 +35,21 @@ function MyAddress({route, navigation }) {
             global.forceLoginMsg = config.forceLoginMsg;
             navigation.replace('Sign In');
         }else{
+       
+        //    fetch('https://sora-mart.com/api/address', {headers: {
+        //        "Content-Type": "application/json",
+        //        'Authorization':  global.auth,
+        //      }})
+        // .then((response) => response.json())
+        //        .then((data) => {
+        //            console.log(data);
+        //            setAddresses(data.data);
+        //            setLoading(false);
+        //        })   
+        //        .catch((error) => {
+        //            console.log(error);
+        //            setLoading(false);
+        //        });
             getAddress();
         }
     }, [radiopress]);
@@ -128,7 +144,7 @@ function MyAddress({route, navigation }) {
         return (
             //<Radio value={item.guid} my={1} mt={2} mb={5} colorScheme="red" onChange={()=>setRadiopress(!radiopress)}>
             <TouchableOpacity onPress={()=>getChooseStyle({item})}>
-                <Box p={4} style={{width: 350}} mb={3} backgroundColor={'white'} borderRadius={15} mt={3}>
+                <Box ml={3} p={4} style={{width: 350}} mb={3} backgroundColor={'white'} borderRadius={15}>
                     <HStack justifyContent='space-between' alignItems='center' p={2}>
                         <Text style={{fontFamily: 'Inter_700Bold'}}>{item.full_name}</Text>
                         <TouchableOpacity onPress={() => deleteAddress(item.guid)}>
@@ -155,14 +171,20 @@ function MyAddress({route, navigation }) {
         )
     }
 
-    return (         
-        <Box {...safeAreaProps} style={{width:'100%'}}>
-            <Center>
+    
+  
+  return (
+    <Modal isOpen={props.isOpen} onClose={() => props.onClose} safeAreaTop={true}>
+    <Modal.Content maxWidth="350">
+      <Modal.CloseButton />
+      <Modal.Header>Addresses</Modal.Header>
+      <Modal.Body>
+      <Center>
             {loading ? (
                 <ActivityIndicator color="red" justifyContent='center' alignItems='center'/>
             ):
             (<VStack>
-            <Box  style={{display:'flex', justifyContent:'center', alignItems:'center'}}>
+            <Box  style={{width:'100%'}}>
             <Center>
              
                     <FlatList
@@ -192,8 +214,13 @@ function MyAddress({route, navigation }) {
                     </HStack>}
             </VStack>)}
             </Center>
-        </Box>
-    );
+      </Modal.Body>
+      <Modal.Footer>
+
+      </Modal.Footer>
+    </Modal.Content>
+  </Modal>
+  )
   }
 
-  export default MyAddress;
+  export default AddressPop;

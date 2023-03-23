@@ -59,6 +59,7 @@ import * as Notifications from 'expo-notifications';
 import JobForm from './components/Blog/Job/jobForm';
 import DrawerBackBtn from './components/layouts/drawerBackBtn';
 import ChooseAddress from './components/ecommerce/address/chooseAddress'
+import SimCard from './components/simcard/simcard';
 
 const Stack = createNativeStackNavigator();
 
@@ -138,7 +139,7 @@ export default function App() {
        <NativeBaseProvider>
     {/* <ShowMoreFav/> */}
         <NavigationContainer>
-        <Stack.Navigator initialRouteName="Welcome">
+        <Stack.Navigator initialRouteName="Welcome">    
           <Stack.Screen name="Welcome" options={{ headerShown: false }} component={Welcome}/>
           <Stack.Screen name="Sign In" options={{ title: ' ' }} component={SignIn} />
           <Stack.Screen name="Sign Up" options={{ title: ' ' }} component={SignUp} />
@@ -197,7 +198,7 @@ export default function App() {
           <Stack.Screen name="Update PaymentInfo" component={UpdatePaymentInfo} options={{title:'Edit Payment Information'}}/>
           <Stack.Screen name="Notification" component={Notification}/>
           <Stack.Screen name="Order Details" component={OrderDetails}/>
-       
+          <Stack.Screen name='Sim Card' component={SimCard}/>
           <Stack.Screen name='Point History' component={PointHistory}/>
           <Stack.Screen name='Travel Details' component={TravelDetails} options={{title:"Travel"}}/>
           <Stack.Screen name='Job Form' component={JobForm}/>

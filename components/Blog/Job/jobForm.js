@@ -12,16 +12,19 @@ import { useIsFocused } from '@react-navigation/native' // for re-render
 import {MyCheckBoxItem} from '../HouseRent/TourFormComponents'
 import ToastHelper from '../../Helper/toast';
 import { translate } from 'react-native-translate';
+import qs from 'qs'
 
 function JobForm ({navigation,route}){
     const serviceId = route.params.service_id;
     const [eng_name,setEngName] = useState('');
     const [jpn_name,setJpnName] = useState('');
     const [dob, setDob] = useState(new Date());
-    const [certificateImg, setCertificateImg] = useState('');
+    //const [certificateImg, setCertificateImg] = useState('');
+    const [certificateImg, setCertificateImg] = useState([]);
     const [roomNo,setRoomNo] = useState('');
     const [building,setBuilding] = useState('');
-    const [city,setCity] = useState('');
+    const [city, setCity] = useState('');
+    const [town,setTown] = useState('');
     const [prefecture,setPrefecture] = useState(''); 
     const [postal,setPostal] = useState('');
     const [chome,setChome] = useState('');
@@ -84,23 +87,35 @@ function JobForm ({navigation,route}){
    
 
     const getTown = () => {
-        axios.get(town_baseUrl)
-            .then(response => {  
-                setTownData(response.data.data);
-            })    
-            .catch((error) => {
-                console.log(error);
-            });
+        fetch(`https://sora-mart.com/api/blog/town-lists`, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.status == 200) {
+                  
+                    setTownData(data.data);
+                }
+            })
+            .catch((error) => console.log('' + error));
     }
     
     const getPrefecture = () => {
-        axios.get(prefecture_baseUrl)
-            .then(response => {   
-                setPrefectureData(response.data.data);
-            })    
-            .catch((error) => {
-                console.log(error);
-            });
+            fetch(`https://sora-mart.com/api/blog/prefecture-lists`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.status == 200) {
+                        
+                        setPrefectureData(data.data);
+                    }
+                })
+                .catch((error) => console.log('' + error));
     }
 
     function formatToString(date) {
@@ -206,123 +221,249 @@ function JobForm ({navigation,route}){
 
     let day = [];    
 
-    const baseUrl = config.baseUrl+'/api/job-apply/add';      
+   
 
     const ApplyAction = () => {
+       
+        console.log('Image Length ->' + certificateImg.length)
+        console.log(certificateImg);
+        console.log(expCompanyArr);
+        //setIsApplyClick(true);
 
-        setIsApplyClick(true);
+        //const postData = {
+        //    "eng_name" : eng_name,
+        //    "jp_name" : jpn_name,
+        //    "dob" : formatToString(dob),
+        //    "phone_home" : homePhone,
+        //    "phone_mobile" : mobilePhone,
+        //    "gender" : gender,
+        //    "postal_code" : postal,
+        //    "prefecture" : prefecture ,
+        //    "service_id" : serviceId,
+        //    "city" : city,
+        //    "town" : city,
+        //    "ward" : chome,
+        //    "building" : building,
+        //    "room_no" : roomNo,
+        //    "edu_year_primary" : primaryYear,
+        //    "edu_month_primary" : primaryMonth,
+        //    "edu_university_primary" : primaryUni,
+        //    "edu_year_secondary" : secondaryYear ,
+        //    "edu_month_secondary" : secondaryMonth,
+        //    "edu_university_secondary" : secondaryUni,
+        //    "edu_year_tertiary" : tertiaryYear ,
+        //    "edu_month_tertiary" : tertiaryMonth,
+        //    "edu_university_tertiary" : tertiaryUni,
+        //    "purpose" : purpose,
+        //    "advantages" : advantage,
+        //    "photo" : photo,
+        //    "exp_company":expCompanyArr,
+        //    "exp_year" : expYearArr,
+        //    "exp_month" : expMonthArr,
+        //}
 
         const postData = {
-            "eng_name" : eng_name,
-            "jp_name" : jpn_name,
-            "dob" : formatToString(dob),
-            "phone_home" : homePhone,
-            "phone_mobile" : mobilePhone,
-            "gender" : gender,
-            "postal_code" : postal,
-            "prefecture" : prefecture ,
-            "service_id" : serviceId,
-            "city" : city,
-            "town" : city,
-            "ward" : chome,
-            "building" : building,
-            "room_no" : roomNo,
-            "edu_year_primary" : primaryYear,
-            "edu_month_primary" : primaryMonth,
-            "edu_university_primary" : primaryUni,
-            "edu_year_secondary" : secondaryYear ,
-            "edu_month_secondary" : secondaryMonth,
-            "edu_university_secondary" : secondaryUni,
-            "edu_year_tertiary" : tertiaryYear ,
-            "edu_month_tertiary" : tertiaryMonth,
-            "edu_university_tertiary" : tertiaryUni,
-            "purpose" : purpose,
-            "advantages" : advantage,
-            "photo" : photo,
-            "exp_company":expCompanyArr,
-            "exp_year" : expYearArr,
-            "exp_month" : expMonthArr,
+            "eng_name": "Hanzo",
+            "jp_name": "Hanzo",
+            "dob": "1989-03-03",
+            "phone_home": "09798978674",
+            "phone_mobile": "09798978674",
+            "gender": "male",
+            "postal_code": "11211",
+            "prefecture_id": "30881489505274",
+            "service_id": "939008",
+            "city": "Yangon",
+            "town": "Hlaing",
+            "ward": "IDK ",
+            "building": "IDK",
+            "room_no": "11",
+            "purpose": "IDK",
+             "advantages": "IDK",
+            "exp_company[]": ["Hello", "Yabai"],
+            "exp_year[]": ["2000", "1999"],
+            "exp_month[]": ["01", "02"]
         }
+        const formData = new FormData();
+        //formData.append("eng_name",eng_name);
+        //formData.append("jp_name",jpn_name);
+        //formData.append("dob",formatToString(dob));
+        // formData.append("phone_home",homePhone);
+        //formData.append("phone_mobile" ,mobilePhone);
+        //formData.append("gender",gender);
+        //formData.append("postal_code",postal);
+        //formData.append("prefecture_id",prefecture);
+        //formData.append("service_id",serviceId);
+        //formData.append("city",town);
+        //formData.append("town",town);
+        //formData.append("ward",chome);
+        //formData.append("building",building);
+        //formData.append("room_no",roomNo);
+        //formData.append("purpose" , purpose);
+        //formData.append("advantages",advantage);
+        //formData.append("photo[]",certificateImg);
+        //formData.append("exp_company[]",expCompanyArr);
+        //formData.append("exp_year[]",expYearArr);
+        //formData.append("exp_month[]", expMonthArr);
+
+        formData.append("eng_name", "Nigga");
+        formData.append("jp_name", "Yusuke");
+        formData.append("dob", "1989-03-03");
+        formData.append("phone_home", "09798978674");
+        formData.append("phone_mobile", "09798978674");
+        formData.append("gender", "male");
+        formData.append("postal_code", "11211");
+        formData.append("prefecture_id", "30881489505274");
+        formData.append("service_id", "939008");
+        formData.append("city", "Yangon");
+        formData.append("town", "Hlaing");
+        formData.append("ward", "No (6) Ward");
+        formData.append("building", "B-4");
+        formData.append("room_no", "AB-12");
+        formData.append("purpose", "Just Apply");
+        formData.append("advantages", "Just Apply");
+        //formData.append("photo[]",certificateImg);
+        formData.append("exp_company[]", ["Hello", "Yabai"]);
+        formData.append("exp_year[]", ["2000", "1999"]);
+        formData.append("exp_month[]", ["01", "02"]);
+        
+
+        let jsonObject = {};
+
+        for (const part of formData.getParts()) {
+            jsonObject[part.fieldName] = part.string;
+        }
+        console.log(jsonObject)
     
-        if(certificateImg !== null && certificateImg != ""){
-            photo.push(certificateImg);
-        }
+        //if(certificateImg !== null && certificateImg != ""){
+        //    photo.push(certificateImg);
+        //}
 
-        if(monday){
-            postData['m_start'] = formatAMPM(monStart);
-            postData['m_end'] = formatAMPM(monEnd);
-            day.push("monday");
-        }
-        
-        if(tuesday){
-            postData['tue_start'] = formatAMPM(tueStart);
-            postData['tue_end'] = formatAMPM(tueEnd);
-            day.push("tuesday");
-        }
-        
-        if(wedday){
-            postData['wed_tart'] = formatAMPM(wedStart);
-            postData['wed_end'] = formatAMPM(wedEnd);
-            day.push("wedday");
-        }
-        
-        if(thursday){
-            postData['thur_start'] = formatAMPM(thurStart);
-            postData['thur_end'] = formatAMPM(thurEnd);
-            day.push("thursday");
-        }
-        
-        if(friday){
-            postData['fri_start'] = formatAMPM(friStart);
-            postData['fri_end'] = formatAMPM(friEnd);
-            day.push("friday");
-        }
-        
-        if(satday){
-            postData['sat_start'] = formatAMPM(satStart);
-            postData['sat_end'] = formatAMPM(satEnd);
-            day.push("satday");
-        }
-        
-        if(sunday){
-            postData['sun_start'] = formatAMPM(sunStart);
-            postData['sun_end'] = formatAMPM(sunEnd);
-            day.push("sunday");
-        }
+        //        if(monday){
+        //            postData['m_start'] = formatAMPM(monStart);
+        //            postData['m_end'] = formatAMPM(monEnd);
+        //            day.push("monday");
+        //        }
+        //        
+        //        if(tuesday){
+        //            postData['tue_start'] = formatAMPM(tueStart);
+        //            postData['tue_end'] = formatAMPM(tueEnd);
+        //            day.push("tuesday");
+        //        }
+        //        
+        //        if(wedday){
+        //            postData['wed_tart'] = formatAMPM(wedStart);
+        //            postData['wed_end'] = formatAMPM(wedEnd);
+        //            day.push("wedday");
+        //        }
+        //        
+        //        if(thursday){
+        //            postData['thur_start'] = formatAMPM(thurStart);
+        //            postData['thur_end'] = formatAMPM(thurEnd);
+        //            day.push("thursday");
+        //        }
+        //        
+        //        if(friday){
+        //            postData['fri_start'] = formatAMPM(friStart);
+        //            postData['fri_end'] = formatAMPM(friEnd);
+        //            day.push("friday");
+        //        }
+        //        
+        //        if(satday){
+        //            postData['sat_start'] = formatAMPM(satStart);
+        //            postData['sat_end'] = formatAMPM(satEnd);
+        //            day.push("satday");
+        //        }
+        //        
+        //        if(sunday){
+        //            postData['sun_start'] = formatAMPM(sunStart);
+        //            postData['sun_end'] = formatAMPM(sunEnd);
+        //            day.push("sunday");
+        //        }
+        //
+        //        postData['day'] = day;
+        //
+        //        if(global.auth == '' || global.auth == null){
+        //
+        //            global.forceLoginMsg = config.forceLoginMsg;
+        //
+        //            navigation.replace('Sign In');
+        //            
+        //        }else{
+        //            console.log('auth');
+        //            
+        //            const headers = { 
+        //                'Accept' : 'application/json',
+        //                'Authorization' : 'Bearer '+ global.auth,
+        //            }; 
+        //            axios.post(baseUrl, postData, { headers })
+        //            .then(response => {
+        //            if(response.data.status_code == 200){
+        //                console.log(response.data.status_code);
+        //                console.log("success");
+        //
+        //                navigation.replace('Blog Complete Status');            
+        //
+        //                ToastHelper.toast(response.data.status, null, 'success');
+        //                // alert(response.data.status);
+        //                }    
+        //            })    
+        //            .catch((error) => {
+        //                alert(error);
+        //                console.log(error);
+        //                navigation.replace('Blog Failed Status');
+        //            });
 
-        postData['day'] = day;
-
-        if(global.auth == '' || global.auth == null){
-
-            global.forceLoginMsg = config.forceLoginMsg;
-
-            navigation.replace('Sign In');
+        //fetch("https://sora-mart.com/api/blog/job-apply", {
+        //    method: "POST", // or 'PUT'
+        //    headers: {
+        //        "Content-Type": "application/json",
+        //        Authorization: global.auth,
+        //    },
+        //    body: JSON.stringify(postData),
+        //  })
+        //    .then((response) => response.json())
+        //    .then((data) => {
+        //        console.log(data);
+        //        if (data.status == 200) {
+        //            console.log("Success")
+        //        }
+        //      
+        //    })
+        //      .catch((error) => {
+        //        //  ToastHelper.toast('Something wrong.');
+        //        //  navigation.replace('Blog Failed Status');
+        //          console.log(" "+error)
+        //     
+        //    });
+        const cuck = {
+            'eng_name': formData.eng_name,
+           
+            'jp_name': formData.jp_name,
             
-        }else{
-            console.log('auth');
             
-            const headers = { 
-                'Accept' : 'application/json',
-                'Authorization' : 'Bearer '+ global.auth,
-            }; 
-            axios.post(baseUrl, postData, { headers })
-            .then(response => {
-            if(response.data.status_code == 200){
-                console.log(response.data.status_code);
-                console.log("success");
-
-                navigation.replace('Blog Complete Status');            
-
-                ToastHelper.toast(response.data.status, null, 'success');
-                // alert(response.data.status);
-                }    
-            })    
-            .catch((error) => {
-                alert(error);
-                console.log(error);
-                navigation.replace('Blog Failed Status');
-            });
-        }  
+    }
+      
+            fetch("https://sora-mart.com/api/blog/job-apply", {
+                method: "POST", // or 'PUT'
+                headers: {
+                  
+                   
+                   Authorization: global.auth,
+                },
+                body:  formData,
+              })
+                .then((response) => response.json())
+                .then((data) => {
+  console.log(data)
+                 
+                 
+                })
+                  .catch((error) => {
+                      console.log(" "+error)
+                
+                });
+           
+        //}  
     }
 
     return (
@@ -364,7 +505,7 @@ function JobForm ({navigation,route}){
                     <HStack justifyContent='space-between'>
                         {townData &&                    
                             <VStack w='45%'>
-                                <Myddl lbl={translate('city')} town={townData} value = {city} setSelectedValue={setCity}/>
+                                <Myddl lbl={translate('city')} town={townData} value = {town} setSelectedValue={setTown}/>
                             </VStack>
                         }
                         {prefectureData &&

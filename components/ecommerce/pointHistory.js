@@ -59,7 +59,7 @@ const points = [
 
 const getColor = ({item}) => {
     let color;
-        if (item.point > 0) {
+        if (item.point_amount > 0) {
             color = 'green';
         }else{
             color = 'orange';
@@ -72,12 +72,12 @@ const renderItem = ({ item }) => (
     <HStack m='5' justifyContent='space-between'>
         <VStack>
         {/* <Text style={{ fontFamily: 'Inter_700Bold',fontSize:14}}>{item.title}</Text> */}
-        <Text pb="3" style={{ fontFamily: 'Inter_400Regular',fontSize:14}}>Order ID: {item.order_id}</Text>
-        <Text style={{ fontFamily: 'Inter_600SemiBold',fontSize:12}}>MMK 150,000</Text>
+        <Text pb="3" style={{ fontFamily: 'Inter_400Regular',fontSize:14}}>Order ID: {item.order.order_number}</Text>
+                <Text style={{ fontFamily: 'Inter_600SemiBold', fontSize: 12 }}>MMK {item.order.total_price}</Text>
         </VStack>
         <VStack justifyContent='space-between'>
             <Text style={{fontFamily: 'Inter_400Regular',fontSize:10,color:'#A1A1A1'}}>{Moment(item.created_at).format('LL')}</Text>
-            <Text style={{fontFamily:'Inter_800ExtraBold',color:getColor({item}), fontSize:16}}>{item.point}<Text style={{fontFamily:'Inter_400Regular',fontSize:12,color:'#A1A1A1'}}> Points</Text></Text>
+            <Text style={{fontFamily:'Inter_800ExtraBold',color:getColor({item}), fontSize:16}}>{item.point_amount}<Text style={{fontFamily:'Inter_400Regular',fontSize:12,color:'#A1A1A1'}}> Points</Text></Text>
         </VStack>
     </HStack> 
     <Divider my='2'/>
@@ -95,9 +95,6 @@ const renderListEmptyComponent = () => (
 function PointHistory(){ 
 
     const [data, setData] = React.useState();
-    const baseUrl = config.baseUrl + '/api/point-usages/764394/user';
-    const myData = {'cart_id' : 724622}; 
-
     if(global.auth == '' || global.auth == null){
         global.forceLoginMsg = config.forceLoginMsg;
         navigation.replace('Sign In');
@@ -109,17 +106,24 @@ function PointHistory(){
         const isFocused = useIsFocused() // for re-render
     
         useEffect(() => {      
-            axios.get(baseUrl, { headers })
-            .then(response => {        
-                console.log(response); 
-                setData(response.data.data);
-                // setLoading(false);
-            })    
-            .catch((error) => {
-                console.log(response); 
-                ToastHelper.toast(error, null, 'error');
-                // alert(error);
-            });
+
+            fetch(`https://sora-mart.com/api/point-histories`, {
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: global.auth,
+                },
+              })
+                .then((response) => response.json())
+              .then((data) => {
+                
+                setData(data.data);
+                  
+                })  
+                    .catch((error) => {
+                      
+                        ToastHelper.toast(error, null, 'error');
+                        // alert(error);
+                    });
         }, [isFocused]);
     }  
     
@@ -146,7 +150,7 @@ function PointHistory(){
                 data={data}
                 renderItem={renderItem}
                 ListEmptyComponent={renderListEmptyComponent}
-                keyExtractor={item => item.id}
+                keyExtractor={item => item.guid}
             />
              {/* <Toast /> */}
         </SafeAreaView>  

@@ -11,7 +11,8 @@ import {
     View,
     Text,
     Switch,
-    ScrollView
+    ScrollView,
+    Modal
 } from 'native-base';
 import { styles } from '../../assets/css/ecommerce/checkoutStyle';
 import {ActivityIndicator, TouchableOpacity,Alert} from 'react-native';
@@ -26,6 +27,9 @@ import { AsyncStorage } from 'react-native';
 import { translate } from 'react-native-translate';
 import { SuccessToast } from 'react-native-toast-message';
 import Toast from 'react-native-toast-message';
+
+import ModalExample from './address/modalExample';
+import PaymentModal from './payments/paymentModal';
 
 function ShippingAndPayment({route,navigation}) {
 
@@ -60,15 +64,46 @@ function ShippingAndPayment({route,navigation}) {
     const [delis,setDelis] = useState(null);
     const [cartProduct,setCartProduct] = useState();
     const [subTotal, setSubTotalAmount] = useState(0);
-    //const [finalTotal, setFinalTotal] = useState(global.total - delis.fee - global.m_discount);
-    //const { name, guid } = global.choosePayment;
-    //console.log(global.choosePayment);
+    const [addressshow, setAddressShow] = useState(false);
+    const [paymentshow, setPaymentShow] = useState(false);
    
     const headers = { 
         'Accept': 'application/json', 
         'Authorization' : 'Bearer '+ global.auth,
     }
 
+    function checkDefault() {
+        //const default_address = '';
+        //const default_payment = '';
+        fetch("https://sora-mart.com/api/address", {
+            headers: {
+                "Content-Type": "application/json",
+                'Authorization' : global.auth,  
+            },
+           
+          })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.status == 200) {
+                    console.log(data);
+                    const findAddress = data.data.filter(d => d.is_default == 1);
+                    if (findAddress.length > 0) {
+                        global.chooseAddress = findAddress[0];
+                    } else {
+                        console.log(`Since nothing is here. I don't need to do anything.`)
+                    }
+                  }
+                }
+                
+            )
+              .catch((error) => {
+                  console.log(error)
+              });
+        
+
+        //global.choosePayment = {name : "Cash On Delivery"}
+
+    }
     function getCats() {
         axios.get(cart_baseUrl, { headers })
         .then(response => { 
@@ -157,6 +192,7 @@ function ShippingAndPayment({route,navigation}) {
         //global.final_cart.map((i, index) => final_cart.push(global.final_cart[index]))
         //setCartProduct(final_cart);
         //console.log(cartProduct)
+        checkDefault();
         getData();
     },[]);
 
@@ -268,10 +304,10 @@ function ShippingAndPayment({route,navigation}) {
               Alert.alert("Success", "Your order has been successfully placed !", [{
                   text: 'Return to Home', onPress: async() => {
                       navigation.navigate("Home");
-                      const gg = [];
+                  
                       await AsyncStorage.setItem(
                         'item',
-                          JSON.stringify(gg))
+                          null)
                       console.log('Cart cleared !')
             }}])
           }
@@ -282,6 +318,15 @@ function ShippingAndPayment({route,navigation}) {
        
       });
         }
+
+        const final_order = {
+            cart_item: final_cart,
+            payment_method: final_payment,
+            used_point: final_point,
+            broker_code: final_code,
+    
+        }
+        console.log(final_order);
        
     }
  
@@ -350,8 +395,7 @@ function ShippingAndPayment({route,navigation}) {
         setDeliAmount(0);
         setIsEnabled(!isEnabled);
     }
-    let final_cart = [];
-    global.final_cart.map((i, index) => final_cart.push(global.final_cart[index]))
+   
     return (         
             <Box w={{base: "100%", md: "25%"}} h={{base: "100%"}} backgroundColor='#fff'>  
                 <ScrollView>             
@@ -361,7 +405,7 @@ function ShippingAndPayment({route,navigation}) {
                             <Divider w={39}/>
                             <Image width={28} height={28} resizeMode="cover" source={require('../../assets/image/ShippingAndPayment/ActivePayment3x.png')} alt='checkout'/>
                         </HStack>                        
-                        {loading  ? <ActivityIndicator/> : 
+                        {/*{loading  ? <ActivityIndicator/> : 
                             <HStack>                       
                             <FlatList
                                 data={final_cart}
@@ -371,9 +415,12 @@ function ShippingAndPayment({route,navigation}) {
                                 horizontal={true}
                             />
                             </HStack>
-                        }
+                        }*/}
                         <Divider my='2'/>
-                        {global.chooseAddress == null ?
+                    <TouchableOpacity onPress={() => setAddressShow(true)}>
+                                <Text style={{fontFamily: 'Inter_700Bold',color:'#00A5E2',fontSize:14}}>Choose Address</Text>
+                            </TouchableOpacity>
+                       {global.chooseAddress == null ?
                         <>
                         <HStack alignItems='center'>
                             <Image width={6} height={6} mr={3} resizeMode="contain" source={require('../../assets/image/ShippingAndPayment/AddressIcon.png')} alt='cart'/>
@@ -389,7 +436,10 @@ function ShippingAndPayment({route,navigation}) {
                                         <Text style={{fontFamily: 'Inter_700Bold',fontSize:14}}>{translate('address')}</Text>
                                     </HStack>
                                     <TouchableOpacity onPress={() => navigation.replace('Choose Address',{orderId:cartProduct})}>
-                                        <Text style={{fontFamily: 'Inter_700Bold',color:'#00A5E2',fontSize:14}}>{translate('change')}</Text>
+                                    <Text style={{ fontFamily: 'Inter_700Bold', color: '#00A5E2', fontSize: 14 }}>
+                                        {/*{translate('change')}*/}
+                                        Edit Address
+                                    </Text>
                                     </TouchableOpacity>                            
                                 </HStack>
                             {/*<MyListWithoutPadding lbl={chooseAddress.user_id}/>*/}
@@ -401,8 +451,12 @@ function ShippingAndPayment({route,navigation}) {
                                
                             </>
                         }
+
                                       
-                        <Divider my='2'/>
+                    <Divider my='2' />
+                    <TouchableOpacity onPress={() => setPaymentShow(true)}>
+                                <Text style={{fontFamily: 'Inter_700Bold',color:'#00A5E2',fontSize:14}}>Choose Payment</Text>
+                            </TouchableOpacity>
                         {global.choosePayment == null ? 
                         <HStack alignItems="center">
                             <Image width={6} height={6} mr={3} resizeMode="contain" source={require('../../assets/image/ShippingAndPayment/PaymentMethodIcon3x.png')} alt='cart'/>
@@ -514,7 +568,9 @@ function ShippingAndPayment({route,navigation}) {
                         </Center>
                     </VStack>                
                 </ScrollView>    
-                 {/* <Toast />           */}
+            {/* <Toast />           */}
+            <ModalExample isOpen={addressshow} onClose={() => setAddressShow(false)} />
+            <PaymentModal isOpen={paymentshow} onClose={()=> setPaymentShow(false)} />
             </Box> 
     )
 }
