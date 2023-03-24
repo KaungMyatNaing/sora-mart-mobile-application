@@ -137,7 +137,7 @@ function DefaultPassportImgs({image,setImage}){
         )
 }
 
-function DefaultCertificateImgs({image,setImage}){
+function DefaultCertificateImgs ({image,setImage,imageuri,setImageUri}){
     
   const pickImage = async () => {
       // No permissions request is necessary for launching the image library
@@ -150,20 +150,43 @@ function DefaultCertificateImgs({image,setImage}){
   
       if (!result.cancelled) {
         const fetchResponse = await fetch(result.uri);
-        console.log('fetchResponse', fetchResponse);
         const blob = await fetchResponse.blob();
-        const imageData = new File([blob], `.png`);
-        setImage(prev => [...prev, imageData]);
-        console.log(image.length);
-      }
-    };
+        const imageData = await new File([blob],`.png`);
+        setImageUri(prev => [...prev, result.uri]);
+        //setImage(prev => [...prev, imageData]);
+        setImage(imageData);
+        //await setImage(result.uri);
+        //console.log(typeof imageData)
+        //console.log(typeof image)
+        //setImage(result.uri);
+        
+    }
+    
+  };
+  
+  const deleteCertificate= (uri) => {
+    if (imageuri.length > 0) {
+      const filtered = imageuri.filter(i => i !== uri);
+      setImageUri(filtered);
+    }
+  }
   
   return(
-      <>
-      <TouchableOpacity onPress={pickImage}>
-          {image ? <Image resizeMode='contain' style={{width:'100%',height:160}} alt="certificate img" />
-          :<MyDefaultImg lbl='Upload Certificate'/>
-          }            
+    <>
+      <VStack>
+        {
+          imageuri && imageuri.map(i => (
+            <>
+              <Text style={{ padding: 2, backgroundColor: 'black', color: 'white' }}>{i.slice(105)}...</Text>
+              <TouchableOpacity onPress={() => deleteCertificate(i)}><Text>X</Text></TouchableOpacity>
+            </>
+          ))
+        }
+        </VStack>
+        
+        
+      <TouchableOpacity onPress={pickImage}>   
+      <MyDefaultImg lbl='Upload Certificate'/>
       </TouchableOpacity>
       </>
       )
@@ -190,11 +213,11 @@ function PassportImg({image,setImage}){
     )
 }
 
-function CertificateImg({image,setImage}){
+function CertificateImg({image,setImage,imageuri,setImageUri}){
   return(
       <VStack mt={5} ml={0}>
           <Text style={styles.certificateTitle} pb={5}>{translate('certification')}</Text>
-          <DefaultCertificateImgs image={image} setImage={setImage}/>                    
+          <DefaultCertificateImgs image={image} setImage={setImage} setImageUri={setImageUri} imageuri={imageuri}/>                    
       </VStack>
   )
 }

@@ -89,7 +89,7 @@ function Profile({ navigation }) {
                     (<VStack space="2" m='5' mt={0} style={styles.bg}>
                     <HStack alignItems='center' justifyContent="space-between"> 
                         <HStack alignItems='flex-start'  space="3"  justifyContent="center">                            
-                            {profileData.profil_pic ? <Image resizeMode='cover' source={{ uri: config.imageUrl +'/'+ profileData.profil_pic }} alt="profile img" style={styles.logo}/>
+                            {profileData.profil_pic ? <Image resizeMode='cover' source={{ uri: 'https://sora-mart.com'+profileData.profil_pic }} alt="profile img" style={styles.logo}/>
                             :<Image alt="profile" source={require('../../assets/image/profile/Profile_imgage.png')}  style={styles.logo}/>
                             }
                             <Box m='2'>

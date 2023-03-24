@@ -72,7 +72,7 @@ function ShoppingCart({navigation}) {
       }
     };
 
-    const [itemData, setItemData] = useState();
+    const [itemData, setItemData] = useState([]);
     //const retrieveData = async () => {
     //  try {
     //    const value = await AsyncStorage.getItem('item');
