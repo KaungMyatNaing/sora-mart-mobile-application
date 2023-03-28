@@ -90,33 +90,49 @@ function RentFormTwo({route,navigation}){
 
 
     const getTown = () => {
-        axios.get(town_baseUrl)
-            .then(response => {  
-                setTownData(response.data.data);
-            })    
-            .catch((error) => {
-                console.log(error);
-            });
-    }
-    
-    const getPrefecture = () => {
-        axios.get(prefecture_baseUrl)
-            .then(response => {   
-                setPrefectureData(response.data.data);
-            })    
-            .catch((error) => {
-                console.log(error);
-            });
-    }
+        fetch(`https://sora-mart.com/api/blog/town-lists`, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.status == 200) {
+                    console.log(data.data);
+                    setTownData(data.data);
+                }
+            })
+            .catch((error) => console.log('' + error));
+}
+
+const getPrefecture = () => {
+    fetch(`https://sora-mart.com/api/blog/prefecture-lists`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status == 200) {
+          setPrefectureData(data.data);
+        }
+      })
+      .catch((error) => console.log("" + error));
+  };
 
     const getVisaType = () => {
-        axios.get(visa_baseUrl)
-            .then(response => { 
-                setVisaData(response.data.data);
-            })    
-            .catch((error) => {
-                console.log(error);
-            });
+        fetch(`https://sora-mart.com/api/blog/visa-lists`, {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.status == 200) {
+                setVisaData(data.data);
+              }
+            })
+            .catch((error) => console.log("" + error));
     }
 
     useEffect(()=>{
@@ -173,26 +189,26 @@ function RentFormTwo({route,navigation}){
     )
 }
 
-function RentFormThree({route,navigation}){
+function RentFormThree({ route, navigation }) {
     const postData = route.params.myData;
 
-    const [conjp_eng_name,setConJpEngName] = useState('');
-    const [conjp_eng_ph,setConJpEngPh] = useState('');
-    const [conjp_eng_dob,setConJpEngDob] = useState(new Date());
-    const [postal,setPostal] = useState('');
-    const [chome,setChome] = useState('');     
-    const [roomNo,setRoomNo] = useState('');
-    const [building,setBuilding] = useState('');
-    const [city,setCity] = useState('');
-    const [prefecture,setPrefecture] = useState('');
+    const [conjp_eng_name, setConJpEngName] = useState('');
+    const [conjp_eng_ph, setConJpEngPh] = useState('');
+    const [conjp_eng_dob, setConJpEngDob] = useState(new Date());
+    const [postal, setPostal] = useState('');
+    const [chome, setChome] = useState('');
+    const [roomNo, setRoomNo] = useState('');
+    const [building, setBuilding] = useState('');
+    const [city, setCity] = useState('');
+    const [prefecture, setPrefecture] = useState('');
     // const [conjp_eng_address,setConJpEngAddress] = useState('');
-    const [conmy_eng_name,setConMyEngName] = useState('');
-    const [conmy_eng_ph,setConMyEngPh] = useState('');
-    const [conmy_eng_dob,setConMyEngDob] = useState(new Date());
-    const [conmy_eng_address,setConMyEngAddress] = useState('');
+    const [conmy_eng_name, setConMyEngName] = useState('');
+    const [conmy_eng_ph, setConMyEngPh] = useState('');
+    const [conmy_eng_dob, setConMyEngDob] = useState(new Date());
+    const [conmy_eng_address, setConMyEngAddress] = useState('');
     
-    const [townData,setTownData] = useState(['Cit/Town']);
-    const [prefectureData,setPrefectureData] = useState(['Prefecture']);
+    const [townData, setTownData] = useState(['Cit/Town']);
+    const [prefectureData, setPrefectureData] = useState(['Prefecture']);
 
     const town_baseUrl = config.baseUrl + '/api/town';
     const prefecture_baseUrl = config.baseUrl + '/api/prefecture';
@@ -200,7 +216,7 @@ function RentFormThree({route,navigation}){
     postData["con_jp_name"] = conjp_eng_name;
     postData["con_jp_phone"] = conjp_eng_ph;
     postData["con_jp_dob"] = formatToString(conjp_eng_dob);
-    postData["con_jp_address"] = "remove address"; 
+    postData["con_jp_address"] = "remove address";
     postData["con_jp_postal"] = postal;
     postData["con_jp_chome"] = chome;
     postData["con_jp_room_number"] = roomNo;
@@ -211,27 +227,104 @@ function RentFormThree({route,navigation}){
     postData["con_mm_name"] = conmy_eng_name;
     postData["con_mm_phone"] = conmy_eng_ph;
     postData["con_mm_dob"] = formatToString(conmy_eng_dob);
-    postData["con_mm_address"] = conmy_eng_address; 
-
+    postData["con_mm_address"] = conmy_eng_address;
     const getTown = () => {
-        axios.get(town_baseUrl)
-            .then(response => {  
-                setTownData(response.data.data);
-            })    
-            .catch((error) => {
-                console.log(error);
-            });
+        fetch(`https://sora-mart.com/api/blog/town-lists`, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.status == 200) {
+                    console.log(data.data);
+                    setTownData(data.data);
+                }
+            })
+            .catch((error) => console.log('' + error));
     }
-    
+
     const getPrefecture = () => {
-        axios.get(prefecture_baseUrl)
-            .then(response => {   
-                setPrefectureData(response.data.data);
-            })    
+        fetch(`https://sora-mart.com/api/blog/prefecture-lists`, {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.status == 200) {
+                    setPrefectureData(data.data);
+                }
+            })
+            .catch((error) => console.log("" + error));
+    };
+
+    const submitRentForm = async() => {
+
+        const formData = new FormData();
+        formData.append("eng_name", postData["eng_name"])
+        formData.append("jp_name", postData["jp_name"])
+        formData.append("dob", postData["dob"])
+        formData.append("service_id", postData["service_id"])
+       
+  
+        formData.append("NRC1", {
+            uri: postData["NRC1"], // your file path string
+            name: "NRC1.jpg",
+            type: "image/jpg",
+        });
+   
+        formData.append("NRC2", {
+            uri: postData["NRC2"], // your file path string
+            name: "NRC2.jpg",
+            type: "image/jpg",
+        });
+          
+        formData.append("passport", {
+            uri: postData["passport"], // your file path string
+            name: "passport.jpg",
+            type: "image/jpg",
+        });
+       
+        formData.append("bank_book", {
+            uri: postData["bank_book"], // your file path string
+            name: "bank_book.jpg",
+            type: "image/jpg",
+        });
+       
+         
+       
+        formData.append("phone_no", postData["phone"])
+        formData.append("room_no", postData["room_number"])
+        formData.append("visa_id", postData["visa"])
+        formData.append("contact_jp_name", postData["con_jp_name"])
+        formData.append("contact_jp_phone", postData["con_jp_phone"])
+        formData.append("contact_jp_dob", postData["con_jp_dob"])
+        formData.append("contact_jp_address", postData["con_jp_address"])
+        formData.append("contact_mm_name", postData["con_mm_name"])
+        formData.append("contact_mm_phone", postData["con_mm_phone"])
+        formData.append("contact_mm_dob", postData["con_mm_dob"])
+        formData.append("contact_mm_address", postData["con_mm_address"])
+        
+        await fetch("https://sora-mart.com/api/blog/rent-house", {
+            method: "POST", // or 'PUT'
+            headers: {
+                Authorization: global.auth,
+            },
+            body: formData,
+        })
+            .then((response) => response.json())
+            .then((data) => {
+               
+                  navigation.replace('Blog Complete Status');
+                  
+            })
             .catch((error) => {
                 console.log(error);
             });
     }
+
+
 
     useEffect(()=>{
         getTown();
@@ -284,7 +377,7 @@ function RentFormThree({route,navigation}){
                 <MyDatePicker lbl={translate('birthday')} date={conmy_eng_dob} setDate={setConMyEngDob}/>
                 <MyInputItem lbl={translate('address')} value={conmy_eng_address} setValue={setConMyEngAddress}/>
             </VStack>
-            <StepThreeBtn navigation={navigation} postData={postData}/>
+            <StepThreeBtn action={()=> submitRentForm()} />
         </ScrollView>
     )
 }

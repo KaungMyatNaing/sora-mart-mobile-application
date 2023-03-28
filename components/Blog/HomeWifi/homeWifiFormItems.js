@@ -90,22 +90,23 @@ function WifiStepOneBtn({myData,navigation}){
     )
 }
 
-function WifiStepTwoBtn({postData,navigation}){
-    
-    const baseUrl = config.baseUrl+'/api/wifi-request/add';
-
-    const reqNowAction = () => {
-        if(global.auth == ''){
-            global.forceLoginMsg = config.forceLoginMsg
-            navigation.replace('Sign In');
-          }else{ 
-            navigation.replace('Blog Complete Status',{myData:postData,baseUrl:baseUrl});
-        }
-    }
+function WifiStepTwoBtn(props){
+//    
+//    const baseUrl = config.baseUrl+'/api/wifi-request/add';
+//
+//    const reqNowAction = () => {
+//        if(global.auth == ''){
+//            global.forceLoginMsg = config.forceLoginMsg
+//            navigation.replace('Sign In');
+//          }else{ 
+//            //navigation.replace('Blog Complete Status', { myData: postData, baseUrl: baseUrl });
+//            navigation.replace('Blog Complete Status');
+//        }
+//    }
 
     return(
         <VStack pl={5} pr={5} mt='30%'>
-            <TouchableOpacity style={styles.btn} m={5} onPress={()=>reqNowAction()}>
+            <TouchableOpacity style={styles.btn} m={5} onPress={props.action}>
                 <Text style={styles.btnLbl}>{translate('requestNow')}</Text>
             </TouchableOpacity>
         </VStack>

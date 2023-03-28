@@ -44,7 +44,7 @@ function RequestTourForm({navigation,route}){
     const [satday, setSatDay] = useState(false);
     const [sunday, setSunDay] = useState(false);
 
-    const baseUrl = config.baseUrl + '/api/tour-request/add?type=' + type;
+  
 
     let day = [];
 
@@ -53,61 +53,82 @@ function RequestTourForm({navigation,route}){
     };
 
     function submitAction() {
+        const formData = new FormData();
         const postData = {
             "name" : contactName,
             "phone" : mobile,
             "pickup_type" : pickupType,
             "service_id" : tour_data.guid,
-        };       
+        };   
+        
+        formData.append('type', type);
+        formData.append('name', postData["name"]);
+        formData.append('phone', postData["phone"]);
+        formData.append('pickup_type', postData["pickup_type"]);
+        formData.append('service_id', postData["service_id"]);
+
 
         if(pickupType == 'daily'){
-           postData["start"] = formatAMPM(dailyStart);
-           postData["end"] = formatAMPM(dailyEnd);
+            postData["start"] = formatAMPM(dailyStart);
+        formData.append('m_start', postData["start"]);
+            postData["end"] = formatAMPM(dailyEnd);
+            formData.append('m_end', postData["end"]);
         }else{
+           
             if(monday){
-                postData['m_start'] = formatAMPM(monStart);
-                postData['m_end'] = formatAMPM(monEnd);
+                formData.append('m_start', formatAMPM(monStart));
+                formData.append('m_end',formatAMPM(monEnd));
                 day.push("monday");
             }
-            
+    
             if(tuesday){
-                postData['tue_start'] = formatAMPM(tueStart);
-                postData['tue_end'] = formatAMPM(tueEnd);
+                formData.append('tue_start', formatAMPM(tueStart));
+                formData.append('tue_end',formatAMPM(tueEnd));
                 day.push("tuesday");
             }
-            
+    
             if(wedday){
-                postData['wed_tart'] = formatAMPM(wedStart);
-                postData['wed_end'] = formatAMPM(wedEnd);
+                formData.append('wed_start', formatAMPM(wedStart));
+                formData.append('wed_end',formatAMPM(wedEnd));
                 day.push("wedday");
             }
-            
+    
             if(thursday){
-                postData['thur_start'] = formatAMPM(thurStart);
-                postData['thur_end'] = formatAMPM(thurEnd);
+                formData.append('thur_start', formatAMPM(thurStart));
+                formData.append('thur_end',formatAMPM(thurEnd));
                 day.push("thursday");
             }
-            
+    
             if(friday){
-                postData['fri_start'] = formatAMPM(friStart);
-                postData['fri_end'] = formatAMPM(friEnd);
+                formData.append('fri_start', formatAMPM(friStart));
+                formData.append('fri_end',formatAMPM(friEnd));
                 day.push("friday");
             }
-            
+    
             if(satday){
-                postData['sat_start'] = formatAMPM(satStart);
-                postData['sat_end'] = formatAMPM(satEnd);
+                formData.append('sat_start', formatAMPM(satStart));
+                formData.append('sat_end',formatAMPM(satEnd));
                 day.push("satday");
             }
-            
+    
             if(sunday){
-                postData['sun_start'] = formatAMPM(sunStart);
-                postData['sun_end'] = formatAMPM(sunEnd);
+                formData.append('sun_start', formatAMPM(sunStart));
+                formData.append('sun_end',formatAMPM(sunEnd));
                 day.push("sunday");
             }
     
+    
             postData['day'] = day;
         }
+
+        if (day.length > 1) {
+            day.map((b,i) => {
+                formData.append("day[]",day[i])
+            })
+        } else if (day.length == 1) {
+            formData.append("day[]",day[0])
+        }
+        console.log(formData)
 
         if(global.auth == ''){
             global.forceLoginMsg = config.forceLoginMsg
@@ -115,41 +136,21 @@ function RequestTourForm({navigation,route}){
           }else{ 
             if(pickupType == 'daily'){
                 if(contactName != '' && mobile != ''){
-                    const headers = { 
-                        'Accept' : 'application/json',
-                        'Authorization' : 'Bearer '+ global.auth,
-                    }; 
-                    axios.post(baseUrl, postData, { headers })
-                    .then(response => {
-                        if(response.data.status_code == 200){
-                            ToastHelper.toast(response.data.status, null, 'success');
-                            // alert(response.data.status);
-                            navigation.replace('Blog Complete Status');
-                        }    
-                    })    
-                    .catch((error) => {
-                        console.log(error);
-                        ToastHelper.toast(error, null, 'error');
-                        // alert(error);
-                        navigation.replace('Blog Failed Status');
-                    });
-                    // navigation.replace('Blog Complete Status',{baseUrl:baseUrl,myData:postData});
-                    // const headers = { 
-                    //     'Accept' : 'application/json',
-                    //     'Authorization' : 'Bearer '+ global.auth,
-                    // }; 
-                    // axios.post(baseUrl, postData, { headers })
-                    // .then(response => {
-                    //     if(response.data.status_code == 200){
-                    //         alert(response.data.status);
-                    //         navigation.replace('Blog Complete Status');
-                    //     }    
-                    // })    
-                    // .catch((error) => {
-                    //     console.log(error);
-                    //     alert(error);
-                    //     navigation.replace('Blog Failed Status');
-                    // });
+                    fetch("https://sora-mart.com/api/blog/tour-request", {
+      method: "POST", // or 'PUT'
+      headers: {
+        Authorization: global.auth,
+      },
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        navigation.replace('Blog Complete Status');
+      })
+      .catch((error) => {
+        navigation.replace('Blog Failed Status');
+      });
+            
                 }else{
                     ToastHelper.toast('Please fill up all data', null, 'error');
                     // alert('Please fill up all data');
@@ -157,43 +158,23 @@ function RequestTourForm({navigation,route}){
             }else{
                 console.log('request tour data');
                 console.log(postData);
-                console.log(baseUrl);
+             
                 if(day.length > 0 && contactName != '' && mobile != ''){
-                    const headers = { 
-                        'Accept' : 'application/json',
-                        'Authorization' : 'Bearer '+ global.auth,
-                    }; 
-                    axios.post(baseUrl, postData, { headers })
-                    .then(response => {
-                        if(response.data.status_code == 200){
-                            // ToastHelper.toast(response.data.status, null, 'success');
-                            alert(response.data.status);
-                            navigation.replace('Blog Complete Status',{baseUrl:baseUrl,myData:postData});
-                        }    
-                    })    
-                    .catch((error) => {
-                        console.log(error);
-                        ToastHelper.toast(error, null, 'error');
-                        // alert(error);
-                        navigation.navigate('Blog Failed Status');
-                    });
-                    // navigation.replace('Blog Complete Status',{baseUrl:baseUrl,myData:postData})
-                    // const headers = { 
-                    //     'Accept' : 'application/json',
-                    //     'Authorization' : 'Bearer '+ global.auth,
-                    // }; 
-                    // axios.post(baseUrl, postData, { headers })
-                    // .then(response => {
-                    //     if(response.data.status_code == 200){
-                    //         alert(response.data.status);
-                    //         navigation.replace('Blog Complete Status');
-                    //     }    
-                    // })    
-                    // .catch((error) => {
-                    //     console.log(error);
-                    //     alert(error);
-                    //     navigation.replace('Blog Failed Status');
-                    // });
+                    fetch("https://sora-mart.com/api/blog/tour-request", {
+      method: "POST", // or 'PUT'
+      headers: {
+        Authorization: global.auth,
+      },
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        navigation.replace('Blog Complete Status');
+      })
+      .catch((error) => {
+        navigation.replace('Blog Failed Status');
+      });
+            
                 }else{
                     ToastHelper.toast('Please fill up all data and choose day', null, 'error');
                     // alert('Please fill up all data and choose day');

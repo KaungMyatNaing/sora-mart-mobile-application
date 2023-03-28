@@ -58,42 +58,42 @@ function StepTwoBtn({navigation,myData}){
     )
 }
 
-function StepThreeBtn({navigation,postData}){
+function StepThreeBtn(props){
 
-    const baseUrl = config.baseUrl+'/api/rent-house/add'; 
-
-    console.log("==============postData house rent ==================");
-    console.log(postData);
-   
-    const rentNowAction = () => {
-
-        if(global.auth == ''){
-            global.forceLoginMsg = config.forceLoginMsg;
-            navigation.replace('Sign In');            
-        }else{
-            const headers = { 
-                'Accept' : 'application/json',
-                'Authorization' : 'Bearer '+ global.auth,
-            }; 
-            axios.post(baseUrl, postData, { headers })
-            .then(response => {
-            if(response.data.status_code == 200){
-
-                navigation.replace('Blog Complete Status');            
-
-                ToastHelper.toast(response.data.status, null, 'success');
-                // alert(response.data.status);
-                }    
-            })    
-            .catch((error) => {
-                console.log(error);
-                navigation.replace('Blog Failed Status');
-            });
-        }        
-    }
+//    const baseUrl = config.baseUrl+'/api/rent-house/add'; 
+//
+//    console.log("==============postData house rent ==================");
+//    console.log(postData);
+//   
+//    const rentNowAction = () => {
+//
+//        if(global.auth == ''){
+//            global.forceLoginMsg = config.forceLoginMsg;
+//            navigation.replace('Sign In');            
+//        }else{
+//            const headers = { 
+//                'Accept' : 'application/json',
+//                'Authorization' : 'Bearer '+ global.auth,
+//            }; 
+//            axios.post(baseUrl, postData, { headers })
+//            .then(response => {
+//            if(response.data.status_code == 200){
+//
+//                navigation.replace('Blog Complete Status');            
+//
+//                ToastHelper.toast(response.data.status, null, 'success');
+//                // alert(response.data.status);
+//                }    
+//            })    
+//            .catch((error) => {
+//                console.log(error);
+//                navigation.replace('Blog Failed Status');
+//            });
+//        }        
+  
     return(
         <VStack>
-            <TouchableOpacity style={styles.btn} m={5} onPress={()=>{rentNowAction()}}>
+            <TouchableOpacity style={styles.btn} m={5} onPress={props.action}>
                 <Text style={styles.btnLbl}>{translate('rentNow')}</Text>
             </TouchableOpacity>
         </VStack>
