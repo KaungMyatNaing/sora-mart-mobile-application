@@ -103,7 +103,7 @@ function ShoppingCart({navigation}) {
               setItemData(JSON.parse(value)); 
               global.final_cart = JSON.parse(value);
               amount = JSON.parse(value).reduce((total, i) => total + i.quantity * i.price, 0)
-              console.log(amount)
+              console.log('debug 1 ->'+amount)
              
           }
         } catch (error) {
@@ -115,7 +115,7 @@ function ShoppingCart({navigation}) {
             console.log('Cart loaded')
             global.final_cart = cart_product;
              amount = cart_product.reduce((total, i) => total + i.quantity * i.price, 0)
-            console.log(amount);
+            console.log('debug ->'+amount);
             setTotal(amount);
              
             
@@ -207,17 +207,44 @@ function ShoppingCart({navigation}) {
         //calculateTotalAmount(cart_product);
     }, [value])
    
+    //useEffect(async() => {
+    //    const value = await AsyncStorage.getItem('item');
+    //    if (value !== null) { 
+    //        setItemData(JSON.parse(value)); 
+    //        global.final_cart = JSON.parse(value);
+    //        setTotal(JSON.parse(value).reduce((total, i) => total + i.quantity * i.price, 0));
+    //    }
+    //    //retrieveData();
+    //    //calculateTotal(cart_product);
+    //    //getData();
+    //})
+    //
 
     useEffect(async() => {
         const value = await AsyncStorage.getItem('item');
         if (value !== null) { 
+            setItemData(JSON.parse(value)); 
+            global.final_cart = JSON.parse(value);
             setTotal(JSON.parse(value).reduce((total, i) => total + i.quantity * i.price, 0));
         }
-        retrieveData();
+        //retrieveData();
         //calculateTotal(cart_product);
         //getData();
-    }, [remove, plus, minus,cart_product])
-    
+    }, [remove, plus, minus, cart_product])
+    //
+    //useEffect(async() => {
+    //    const value = await AsyncStorage.getItem('item');
+    //    if (value !== null) { 
+    //        setItemData(JSON.parse(value)); 
+    //        global.final_cart = JSON.parse(value);
+    //        setTotal(JSON.parse(value).reduce((total, i) => total + i.quantity * i.price, 0));
+    //    }
+    //    //retrieveData();
+    //    //calculateTotal(cart_product);
+    //    //getData();
+    //}
+    //,[])
+    //
 
     //useEffect(() => {
     //   
@@ -227,41 +254,26 @@ function ShoppingCart({navigation}) {
     //},[])
 
     
-   
-    const minusAction = () => {
-        let qty = quantity - 1;
 
-        if(qty > 0){
-            setQuantit(qty);
-        }else{
-            ToastHelper.toast('at least 1 item need to be choosed', null, 'error');
-            // alert('at least 1 item need to be choosed');
-        }
-    }
 
     const minusMyPoint = () => {
-        if(myPoint > 0 ) {
+        if (total < myPoint * erate) {
+            console.log("Pls dont")
+        }
+        else if(myPoint > 0 ) {
             setMyPoint(myPoint - 1);
         }
     }
 
-    const plusAction = () => {
-        setQuantit(quantity + 1);
-    }
-
     const plusMyPoint = () => {
-        if(myPoint >= 0 && myPoint < maxPoint){
+        if (total < myPoint * erate) {
+            console.log("Pls dont")
+        }
+        else if(myPoint >= 0 && myPoint < maxPoint){
             setMyPoint(myPoint + 1);
         }
     }
-    const calculateTotal = (data) => {
-       
-        let amount = data.reduce((total, i) => total + i.quantity * i.price, 0)
-        setTotal(amount);
-
-
-        };
-
+ 
     const calculateTotalAmount = async (cart_products) => {
         var amount = 0;
         await cart_products.forEach(product => {
@@ -331,7 +343,7 @@ function ShoppingCart({navigation}) {
   
     const removeAction = async (guid) => {
 
-    let items = itemData.filter((dd)=> dd.product_id != guid);
+    let items = itemData.filter((dd)=> dd.p_id != guid);
     try {
         await AsyncStorage.setItem(
           'item',
@@ -372,7 +384,7 @@ function ShoppingCart({navigation}) {
     }
 
     const plusActionQty = async(id) => { 
-        itemData.map(i => i.product_id == id && i.quantity <= i.max - 1 ? i.quantity += 1 : null)
+        itemData.map(i => i.p_id == id && i.quantity <= i.max - 1 ? i.quantity += 1 : null)
         await AsyncStorage.setItem(
             'item',
             JSON.stringify(itemData));
@@ -382,17 +394,19 @@ function ShoppingCart({navigation}) {
     }
 
     const minusActionQty = async(id) => {
-        itemData.map(i => i.product_id == id && i.quantity <= i.max && i.quantity > 1 ? i.quantity -= 1 : null)
+        itemData.map(i => i.p_id == id && i.quantity <= i.max && i.quantity > 1 ? i.quantity -= 1 : null)
         await AsyncStorage.setItem(
             'item',
             JSON.stringify(itemData));
             
         setMinus(!minus);
-      }
+    }
+    
+    
 
-    const renderItem = ({ item }) => (
+    const renderItem = ({ item,index }) => (
         
-        <Box mb="5" justifyContent='center'>
+        <Box mb="5" justifyContent='center' key={index}>
             <VStack>                            
                 <HStack justifyContent="space-between" ml={5} mr={5}>
                     {/*{isLocal? 
@@ -408,8 +422,11 @@ function ShoppingCart({navigation}) {
                             {item.name}
                         </Text>
                         <Text color="coolGray.600" _dark={{color: "warmGray.200"}}>
-                            {item.product_id} {item.p_attribute}
-                        </Text>                                                
+                            {item.p_attr_value_color_id && item.p_attr_value_color_id}  {item.p_attr_value_size_id && item.p_attr_value_size_id}
+                        </Text>  
+                        <Text color="coolGray.600" _dark={{color: "warmGray.200"}}>
+                            {item.p_attr_name && item.p_attr_name}  {item.p_attr_value && item.p_attr_value}
+                        </Text>
                         <HStack style={styles.getPoints} justifyContent='center'>
                             <Text style={[{fontFamily:'Inter_600SemiBold'},styles.getPointText]} px="2"  _dark={{ color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">
                                 {/*{myPoint} Points*/}
@@ -428,16 +445,16 @@ function ShoppingCart({navigation}) {
                     </VStack>
                     <Spacer />
                     <VStack justifyContent='space-between' maxW='20%' alignItems='flex-end'>
-                        <TouchableOpacity style={{padding:10}} onPress={()=>removeAction(item.product_id)}>
+                        <TouchableOpacity style={{padding:10}} onPress={()=>removeAction(item.p_id)}>
                             <CloseIcon size="3" />
                         </TouchableOpacity>
                         <View  style={styles.itemCount}>
                         <HStack justifyContent='space-evenly' alignContent='center'alignItems='center'> 
-                            <TouchableOpacity onPress={() => plusActionQty(item.product_id)} style={{padding:10}}>
+                            <TouchableOpacity onPress={() => plusActionQty(item.p_id)} style={{padding:10}}>
                                 <Image source={require('../../assets/image/png_icons/plus3x.png')}  alt='decrese item' style={{width:10,height:10}} resizeMode='contain'/>
                             </TouchableOpacity>
                             <Text textAlign='center' style={{fontSize:12,fontFamily:'Inter_600SemiBold'}}>{item.quantity}</Text>
-                            <TouchableOpacity onPress={() => minusActionQty(item.product_id)} style={{padding:10}}>
+                            <TouchableOpacity onPress={() => minusActionQty(item.p_id)} style={{padding:10}}>
                                 <Image source={require('../../assets/image/png_icons/minus3x.png')}  alt='decrese item' style={{width:10,height:10}} resizeMode='contain'/>
                             </TouchableOpacity>                                                    
                         </HStack>
@@ -481,7 +498,7 @@ function ShoppingCart({navigation}) {
                                 refeshing={true}
                                 renderItem={renderItem}
                                 ListEmptyComponent={renderListEmptyComponent}
-                                keyExtractor={item => item.product_id}
+                                keyExtractor={(item,index) => index}
                             />
                             {/*{
                                 itemData.map(
@@ -542,7 +559,7 @@ function ShoppingCart({navigation}) {
                             <Text color='#EC1C24' style={{fontFamily: 'Inter_500Medium',marginRight:10}} mr='1' fontSize='14' >{value == 'two'? "MMK" : "JPY"}</Text>
                                         {/*<Text style={{ color: "#EC1C24", fontFamily: 'Inter_700Bold', fontSize: 18, marginRight: 3 }}>{usePointAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>*/}
                                         <Text style={{color:"#EC1C24",fontFamily:'Inter_700Bold',fontSize:18,marginRight:3}}>{total - myPoint * erate}MMK</Text>
-                                                <Text style={[styles.oldPrice, { fontFamily: 'Inter_400Regular' }]}>{total}</Text>
+                                                <Text style={[styles.oldPrice, { fontFamily: 'Inter_400Regular' }]}>{total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
                         </HStack>  
                         : <ActivityIndicator color='red'/>                                            
                     ):(
@@ -576,7 +593,7 @@ function ShoppingCart({navigation}) {
                     
             <View style={styles.tab}>
                         <Center>
-                            {cart_product.length > 0 || itemData.length > 0 ? <TouchableOpacity style={styles.signInBtn} onPress={() => navigation.replace('Shipping and Payments', {point: myPoint, isUsed: checked, total: total,m_discount: erate * myPoint})}>
+                            {itemData.length > 0 ? <TouchableOpacity style={styles.signInBtn} onPress={() => navigation.replace('Shipping and Payments', {point: checked ? myPoint : 0, isUsed: checked, total: total,m_discount: checked ? erate * myPoint : 0})}>
                                 <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 16, fontWeight: '700', color: '#FFF', textAlign: 'center' }}>{translate('checkout')}</Text>
                         </TouchableOpacity> :   <TouchableOpacity disabled  style={styles.signInBtn} onPress={() => navigation.replace('Shipping and Payments',{point:myPoint,isUsed:checked})}>
                                 <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 16, fontWeight: '700', color: '#FFF', textAlign: 'center' }}>{translate('checkout')}</Text>

@@ -134,7 +134,9 @@ function MyOrder({navigation}) {
                 <Spacer size='1'/>
                 <Text alignItems='flex-end' style={[styles.orderViewDetails, {fontFamily: 'Inter_500Medium'}]} onPress={() => navigation.navigate('Order Details',{order_id:item.guid})}>{translate('viewDetail')}</Text>
             </HStack>
-            <Text style={[styles.orderDeliveryMethod, {fontFamily: 'Inter_400Regular',fontSize:12}]}>{item.delivery}</Text>
+                  <Text style={[styles.orderDeliveryMethod, { fontFamily: 'Inter_400Regular', fontSize: 12 }]}>
+                      {item.delivery && item.delivery.name}
+                  </Text>
             <Spacer size='1'/>                        
             <HStack>
                 <Text style={[{fontFamily: 'Inter_400Regular'},styles.myOrderTitle]}>{translate('placeOn')} : </Text>
@@ -199,7 +201,7 @@ function MyOrder({navigation}) {
                     renderItem={statusRenderItem}
                     ListEmptyComponent={renderListEmptyComponent}
                     showsHorizontalScrollIndicator={false}
-                    keyExtractor={item => item.guid}       
+                    keyExtractor={item => item.id}       
                 />
             </View>
             {loading ? <ActivityIndicator color='red' backgroundColor='#fff' height='100%'/> : 

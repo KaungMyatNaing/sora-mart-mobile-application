@@ -61,6 +61,8 @@ import DrawerBackBtn from './components/layouts/drawerBackBtn';
 import ChooseAddress from './components/ecommerce/address/chooseAddress'
 import SimCard from './components/simcard/simcard';
 
+import SimcardManager from './components/simcard/SimcardManager';
+
 const Stack = createNativeStackNavigator();
 
 Notifications.setNotificationHandler({
@@ -198,7 +200,8 @@ export default function App() {
           <Stack.Screen name="Update PaymentInfo" component={UpdatePaymentInfo} options={{title:'Edit Payment Information'}}/>
           <Stack.Screen name="Notification" component={Notification}/>
           <Stack.Screen name="Order Details" component={OrderDetails}/>
-          <Stack.Screen name='Sim Card' component={SimCard}/>
+              <Stack.Screen name='Sim Card Manager' component={SimcardManager} />
+              <Stack.Screen name='Sim Card' component={SimCard}/>
           <Stack.Screen name='Point History' component={PointHistory}/>
           <Stack.Screen name='Travel Details' component={TravelDetails} options={{title:"Travel"}}/>
           <Stack.Screen name='Job Form' component={JobForm}/>

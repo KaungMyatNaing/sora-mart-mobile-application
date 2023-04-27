@@ -12,6 +12,8 @@ import Constants from "expo-constants";
 import { AntDesign } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import { SimpleLineIcons } from "@expo/vector-icons";
+import { MaterialIcons } from '@expo/vector-icons';
+import PlanModal from "./PlanModal"
 
 const dumbdata = [
   {
@@ -33,19 +35,19 @@ const dumbdata = [
     date: "21/3/23 10:30AM",
   },
   {
-    id: 1,
+    id: 4,
     type: "callin",
     ph: "+95786785435",
     date: "21/3/23 10:30AM",
   },
   {
-    id: 2,
+    id: 5,
     type: "callout",
     ph: "+95786785435",
     date: "21/3/23 10:30AM",
   },
   {
-    id: 3,
+    id: 6,
     type: "callin",
     ph: "+95786785435",
     date: "21/3/23 10:30AM",
@@ -77,8 +79,40 @@ const renderItemCall = ({ item }) => {
 
 export default function SimCard() {
   const [tab, setTab] = React.useState(0);
+  const [planshow, setPlanshow] = React.useState(false);
   return (
     <SafeAreaView style={styles.container}>
+
+
+<View
+        style={{
+          backgroundColor: "#F5EEFF",
+          diplay: "flex",
+          width: "95%",
+          justifyContent: "space-between",
+          flexDirection: "row",
+          padding: 5,
+          height: "15%",
+          alignItems: "center",
+          borderWidth: 2,
+          borderColor: "#EEEBEF",
+          marginBottom: 5,
+          borderRadius: 10
+        }}
+      >
+        <Text style={{ fontWeight: "bold" }}>Your Phone Number</Text>
+        <View>
+          <Text style={{ fontWeight: "bold", color: "#1E00AD",fontSize:18 }}>
+            0989898978
+          </Text>
+          {/*<Text style={{fontWeight:'bold',color:'#1E00AD',fontSize:'2rem'}}>1GB</Text>*/}
+        </View>
+      </View>
+
+
+
+
+
       <View
         style={{
           backgroundColor: "#F5EEFF",
@@ -102,6 +136,9 @@ export default function SimCard() {
           </Text>
           {/*<Text style={{fontWeight:'bold',color:'#1E00AD',fontSize:'2rem'}}>1GB</Text>*/}
         </View>
+
+      
+
       </View>
 
       <View
@@ -124,12 +161,22 @@ export default function SimCard() {
         <View>
           <Text style={{fontWeight:'bold',color:'red',fontSize:14}}>500MB/<Text style={{fontWeight:'bold',color:'#1E00AD',fontSize:25}}>1GB</Text></Text>
         </View>
+          <TouchableOpacity onPress={()=> setPlanshow(true)}>
+        <View style={{padding: 10, backgroundColor: '#EC1C24',}}>
+          <Text style={{ fontWeight: "bold", color: "white",fontSize:15 }}>
+            Upgrade Plan
+          </Text>
+          {/*<Text style={{fontWeight:'bold',color:'#1E00AD',fontSize:'2rem'}}>1GB</Text>*/}
+          </View>
+          </TouchableOpacity>
       </View>
 
       <Text>Your Option</Text>
       <View
         style={{ width: "95%", flexDirection: "row", justifyContent: "center" }}
       >
+       
+
         <View
           style={{
             width: "28.55%",
@@ -145,16 +192,19 @@ export default function SimCard() {
           }}
         >
           <TouchableOpacity onPress={() => setTab(1)}>
-            <AntDesign
-              name="pluscircleo"
+            <Feather
+              name="phone-call"
               size={20}
               color={tab == 1 ? "black" : "white"}
             />
             <Text style={{ color: tab == 1 ? "black" : "white" }}>
-              Add Plan
+              Call Logs
             </Text>
           </TouchableOpacity>
         </View>
+
+
+
 
         <View
           style={{
@@ -171,16 +221,14 @@ export default function SimCard() {
           }}
         >
           <TouchableOpacity onPress={() => setTab(2)}>
-            <Feather
-              name="phone-call"
-              size={20}
-              color={tab == 2 ? "black" : "white"}
-            />
+            <MaterialIcons name="sms" size={24} color="white" />
             <Text style={{ color: tab == 2 ? "black" : "white" }}>
-              Call Logs
+              SMS Logs
             </Text>
           </TouchableOpacity>
         </View>
+
+
 
         <View
           style={{
@@ -202,7 +250,7 @@ export default function SimCard() {
               color={tab == 3 ? "black" : "white"}
             />
             <Text style={{ color: tab == 3 ? "black" : "white" }}>
-              Card Info
+              Requested Plans
             </Text>
           </TouchableOpacity>
         </View>
@@ -240,6 +288,9 @@ export default function SimCard() {
           </View>
         ) : null}
       </View>
+      <PlanModal
+        isOpen={planshow}
+        onClose={() => setPlanShow(false)}/>
     </SafeAreaView>
   );
 }

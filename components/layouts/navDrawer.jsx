@@ -44,6 +44,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import ChooseAddress from '../ecommerce/address/chooseAddress'
+import SimcardManager from '../simcard/SimcardManager';
 
 const Drawer = createDrawerNavigator();
 const MyOrderNav = createNativeStackNavigator();
@@ -230,8 +231,8 @@ function MyDrawer({navigation}) {
         />
 
 <Drawer.Screen
-          name="My Sim Card"
-          component={SimCard}
+          name="Sim Card Manager"
+          component={SimcardManager}
           options={{ 
             drawerLabel: ({ focused }) => {
               return (

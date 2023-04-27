@@ -229,7 +229,7 @@ function Signin({ navigation }) {
           console.log("Success:", data);
           if (data.status == 200) {
               global.auth = data.token;
-            navigation.replace('Home');
+            navigation.push('Home');
           }
           if (data.message == "Please verify your account!") {
               
@@ -344,7 +344,7 @@ function Signin({ navigation }) {
           <TouchableOpacity
             onPress={() =>
               Linking.openURL(
-                "http://demo.myanmarwebc6.sg-host.com/password-reset"
+                "https://sora-mart.com/password-reset"
               )
             }
             style={[styles.forgotContainer, { fontFamily: "Inter_400Regular" }]}
