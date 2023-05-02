@@ -34,6 +34,7 @@ import HTMLView from "react-native-htmlview";
 import { AsyncStorage } from "react-native";
 import { translate } from "react-native-translate";
 import { ActivityIndicator } from "react-native-paper";
+import { cartStore } from "../store/cartStore";
 
 function ProductDetail({ route, navigation }) {
   const { item } = route.params;
@@ -56,6 +57,9 @@ function ProductDetail({ route, navigation }) {
   const [atrclick, setAtrClick] = useState();
 
   const [itemData, setItemData] = useState();
+
+  const isAction = cartStore((state) => state.isAction);
+  const changeCart = cartStore((state) => state.changeCart);
   const retrieveData = async () => {
     try {
       const value = await AsyncStorage.getItem("item");
@@ -157,12 +161,14 @@ function ProductDetail({ route, navigation }) {
                 : null
             );
             await AsyncStorage.setItem("item", JSON.stringify(jj));
+            changeCart();
             showAlert();
           }
           if (checkProductVarientExist.length == 0) {
             const buggy = [...jj, myData];
 
             await AsyncStorage.setItem("item", JSON.stringify(buggy));
+            changeCart();
             showAlert();
           }
         }
@@ -181,18 +187,21 @@ function ProductDetail({ route, navigation }) {
                 : null
             );
             await AsyncStorage.setItem("item", JSON.stringify(jj));
+            changeCart();
             showAlert();
           }
           if (checkProductVarientExist.length == 0) {
             const buggy = [...jj, myData];
 
             await AsyncStorage.setItem("item", JSON.stringify(buggy));
+            changeCart();
             showAlert();
           }
         }
       } else {
         const gg = [myData];
         await AsyncStorage.setItem("item", JSON.stringify(gg));
+        changeCart();
 
         showAlert();
       }
@@ -227,17 +236,20 @@ function ProductDetail({ route, navigation }) {
               : null
           );
           await AsyncStorage.setItem("item", JSON.stringify(jj));
+          changeCart();
           showAlert();
         }
         if (checkProductExist.length == 0) {
           const buggy = [...jj, myData];
 
           await AsyncStorage.setItem("item", JSON.stringify(buggy));
+          changeCart();
           showAlert();
         }
       } else {
         const gg = [myData];
         await AsyncStorage.setItem("item", JSON.stringify(gg));
+        changeCart();
 
         showAlert();
       }
@@ -285,8 +297,9 @@ function ProductDetail({ route, navigation }) {
     }
   };
 
-  const plusAction = () => {
+  const plusAction = async () => {
     // setNoOfStock(noOfStock - 1);
+
     setQuantit(quantity + 1);
     if (noOfStock) {
       if (noOfStock - quantity > 0) {
@@ -325,24 +338,13 @@ function ProductDetail({ route, navigation }) {
       <TouchableOpacity onPress={() => setBigImg(item.image_url)}>
         <Image
           alt="product img"
-          source={{ uri: config.imageUrl + "/" + item.image_url }}
+          source={{ uri: 'https://sora-mart.com'+ item.image_url }}
           style={styles.productImg}
           resizeMode="contain"
         />
       </TouchableOpacity>
     );
   };
-
-  //  const whiteButton = ({item}) => {
-  //    const [click, setClick] = useState(false);
-  //    return (
-  //      <TouchableOpacity onPress={()=> setClick(!click)}>
-  //      <View style={{ backgroundColor: item.value, width: 35, height: 35, borderRadius: 35, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-  //        {click ?  <View style={{backgroundColor: 'white',width: 20, height: 20,borderRadius: 20,}}></View>  : null}
-  //  </View>
-  //</TouchableOpacity>
-  //    )
-  //  }
 
   return (
     <Box {...safeAreaProps} style={styles.containerPush}>
@@ -417,7 +419,8 @@ function ProductDetail({ route, navigation }) {
                                 onPress={() => {
                                   setAtrClick(item.value);
                                   setAtr(item.product_attrbute_value_id);
-                                }}
+                              }}
+                              key={index}
                               >
                                 <View
                                   style={{

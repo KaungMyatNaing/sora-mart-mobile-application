@@ -108,7 +108,35 @@ const styles = StyleSheet.create({
         width:2,
         height:2,
         alignSelf:'center',
-    }
+    },
+   Btn:{
+        width:'40%',
+        fontWeight:'bold',
+        fontSize:16,
+        backgroundColor:'#EC1C24',
+        textAlign: 'center',
+        paddingHorizontal: 25,
+        paddingVertical: 15
+    },
+    footer: {
+        padding: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'row',
+      },
+      loadMoreBtn: {
+        padding: 10,
+        backgroundColor: '#EC1C24',
+        borderRadius: 4,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    btnText: {
+        color: 'white',
+        fontSize: 15,
+        textAlign: 'center',
+      },
    
 });
 export { styles }

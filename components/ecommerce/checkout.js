@@ -18,6 +18,7 @@ import { styles } from "../../assets/css/ecommerce/checkoutStyle";
 import { ActivityIndicator, TouchableOpacity, Alert } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import config from "../../config/config";
+
 import {
   apiGetActionCreator,
   apiGetAuthActionCreator,
@@ -26,7 +27,7 @@ import {
 import axios from "axios";
 import { useIsFocused } from "@react-navigation/native"; // for re-render
 import ToastHelper from "../Helper/toast";
-import ToastManager from "toastify-react-native";
+
 import { AsyncStorage } from "react-native";
 import { translate } from "react-native-translate";
 import { SuccessToast } from "react-native-toast-message";
@@ -230,57 +231,63 @@ function ShippingAndPayment({ route, navigation }) {
   };
 
   function checkoutOrder() {
-    const final_payment = global.choosePayment.name;
-    const final_code = global.broker_code ? global.broker_code : null;
+    try{
+      const final_payment = global.choosePayment.name;
+      const final_code = global.broker_code ? global.broker_code : null;
 
-    let final_cart = [];
-    global.final_cart.map((i, index) =>
-      final_cart.push({
-        product_id: global.final_cart[index].product_id,
-        qty: global.final_cart[index].quantity,
-        p_attr_value_color_id: global.final_cart[index].p_attr_value_color_id,
-        p_attr_value_size_id: global.final_cart[index].p_attr_value_size_id,
+      let final_cart = [];
+      global.final_cart.map((i, index) =>
+        final_cart.push({
+          product_id: global.final_cart[index].product_id,
+          qty: global.final_cart[index].quantity,
+          p_attr_value_color_id: global.final_cart[index].p_attr_value_color_id,
+          p_attr_value_size_id: global.final_cart[index].p_attr_value_size_id,
+        })
+      );
+
+      const final_order = {
+        cart_item: final_cart,
+        payment_method: final_payment,
+        used_point: mpoint,
+        broker_code: final_code,
+        address_id: global.chooseAddress.guid,
+        delivery_id: deliMethod,
+      };
+      console.log(final_order);
+
+      fetch("https://sora-mart.com/api/checkout", {
+        method: "POST", // or 'PUT'
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: global.auth,
+        },
+        body: JSON.stringify(final_order),
       })
-    );
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status == 200) {
+            console.log("Order is success");
+            Alert.alert("Success", "Your order has been successfully placed !", [
+              {
+                text: "Return to Home",
+                onPress: async () => {
+                  navigation.navigate("Home");
 
-    const final_order = {
-      cart_item: final_cart,
-      payment_method: final_payment,
-      used_point: mpoint,
-      broker_code: final_code,
-      address_id: global.chooseAddress.guid,
-      delivery_id: deliMethod,
-    };
-    console.log(final_order);
-
-    fetch("https://sora-mart.com/api/checkout", {
-      method: "POST", // or 'PUT'
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: global.auth,
-      },
-      body: JSON.stringify(final_order),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status == 200) {
-          console.log("Order is success");
-          Alert.alert("Success", "Your order has been successfully placed !", [
-            {
-              text: "Return to Home",
-              onPress: async () => {
-                navigation.navigate("Home");
-
-                await AsyncStorage.setItem("item", null);
-                console.log("Cart cleared !");
+                  await AsyncStorage.setItem("item", null);
+                  console.log("Cart cleared !");
+                },
               },
-            },
-          ]);
-        }
-      })
-      .catch((error) => {
-        console.log(" " + error);
-      });
+            ]);
+          }
+        })
+        .catch((error) => {
+          console.log(" " + error);
+        });
+    }catch {
+      //ToastHelper.toast("Please select necssary informations before processing to payment.", null, "Message");
+      // alert(error);
+    
+    }
   }
 
   const renderListEmptyComponent = () => (
@@ -412,7 +419,9 @@ function ShippingAndPayment({ route, navigation }) {
                             </HStack>
                         }*/}
           <Divider my="2" />
-          <TouchableOpacity onPress={() => setAddressShow(true)}>
+          <HStack space={3}>
+            
+            <TouchableOpacity onPress={() => setAddressShow(true)}>
             <Text
               style={{
                 fontFamily: "Inter_700Bold",
@@ -422,24 +431,9 @@ function ShippingAndPayment({ route, navigation }) {
             >
               Choose Address
             </Text>
-          </TouchableOpacity>
-          {global.chooseAddress == null ? (
-            <>
-              <HStack alignItems="center">
-                <Image
-                  width={6}
-                  height={6}
-                  mr={3}
-                  resizeMode="contain"
-                  source={require("../../assets/image/ShippingAndPayment/AddressIcon.png")}
-                  alt="cart"
-                />
-                <TouchableOpacity
-                  onPress={() =>
-                    navigation.replace("Choose Address", {
-                      orderId: cartProduct,
-                    })
-                  }
+              </TouchableOpacity>
+              <TouchableOpacity
+                  onPress={() => {navigation.navigate('Add New Address'); }}
                 >
                   <Text
                     style={{
@@ -448,9 +442,17 @@ function ShippingAndPayment({ route, navigation }) {
                       fontSize: 14,
                     }}
                   >
-                    {translate("choosedAddress")}
+                    {/*{translate('change')}*/}
+                    Create Address
                   </Text>
                 </TouchableOpacity>
+          
+          </HStack>
+          
+          {global.chooseAddress == null ? (
+            <>
+              <HStack alignItems="center">
+               
               </HStack>
             </>
           ) : (
@@ -469,24 +471,7 @@ function ShippingAndPayment({ route, navigation }) {
                     {translate("address")}
                   </Text>
                 </HStack>
-                <TouchableOpacity
-                  onPress={() =>
-                    navigation.replace("Choose Address", {
-                      orderId: cartProduct,
-                    })
-                  }
-                >
-                  <Text
-                    style={{
-                      fontFamily: "Inter_700Bold",
-                      color: "#00A5E2",
-                      fontSize: 14,
-                    }}
-                  >
-                    {/*{translate('change')}*/}
-                    Edit Address
-                  </Text>
-                </TouchableOpacity>
+              
               </HStack>
               {/*<MyListWithoutPadding lbl={chooseAddress.user_id}/>*/}
               <MyListWithoutPadding lbl={chooseAddress.full_name} />
@@ -511,31 +496,8 @@ function ShippingAndPayment({ route, navigation }) {
           </TouchableOpacity>
           {global.choosePayment == null ? (
             <HStack alignItems="center">
-              <Image
-                width={6}
-                height={6}
-                mr={3}
-                resizeMode="contain"
-                source={require("../../assets/image/ShippingAndPayment/PaymentMethodIcon3x.png")}
-                alt="cart"
-              />
-              <TouchableOpacity
-                onPress={() =>
-                  navigation.replace("Choose Payment Method", {
-                    orderId: cartProduct,
-                  })
-                }
-              >
-                <Text
-                  style={{
-                    fontFamily: "Inter_700Bold",
-                    color: "#00A5E2",
-                    fontSize: 14,
-                  }}
-                >
-                  {translate("choosedPaymentMethod")}
-                </Text>
-              </TouchableOpacity>
+             
+             
             </HStack>
           ) : (
             <>
@@ -553,23 +515,7 @@ function ShippingAndPayment({ route, navigation }) {
                     {translate("payment")}
                   </Text>
                 </HStack>
-                <TouchableOpacity
-                  onPress={() =>
-                    navigation.replace("Choose Payment Method", {
-                      orderId: cartProduct,
-                    })
-                  }
-                >
-                  <Text
-                    style={{
-                      fontFamily: "Inter_700Bold",
-                      color: "#00A5E2",
-                      fontSize: 14,
-                    }}
-                  >
-                    {translate("change")}
-                  </Text>
-                </TouchableOpacity>
+              
               </HStack>
               <HStack alignItems="center" p={1}>
                 <Image
@@ -791,7 +737,7 @@ function ShippingAndPayment({ route, navigation }) {
       </ScrollView>
       {/* <Toast />           */}
       <ModalExample
-        isOpen={addressshow}
+        isOpen={addressshow} navigation={navigation}
         onClose={() => setAddressShow(false)}
       />
       <PaymentModal

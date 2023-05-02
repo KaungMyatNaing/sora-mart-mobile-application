@@ -33,6 +33,16 @@ const ToastHelper = {
         
         },
     
-    }
+}
+const ProfileToastSuccess = {
+    toast: (text = 'Your Profile has been successfully updated !', icon = null ,type = 'Success') => {
+            Toast.show({
+                type: type,
+                text1: text
+              });
+    
+    },
 
-export default ToastHelper;
+}
+
+export default { ToastHelper,ProfileToastSuccess };

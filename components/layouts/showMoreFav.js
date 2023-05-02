@@ -1,6 +1,6 @@
 import React,{useEffect, useState} from "react"
 import { Text, TouchableOpacity, ActivityIndicator} from 'react-native';
-import { Box, HStack, ScrollView, FlatList,useSafeArea, VStack, Image, View } from "native-base"
+import { Box, HStack, ScrollView, FlatList,useSafeArea, VStack, Image, View,center, Center } from "native-base"
 import { styles } from '../../assets/css/layouts/homeStyle';
 import config from "../../config/config";
 import {useDispatch, useSelector} from 'react-redux';
@@ -17,7 +17,8 @@ function ShowMoreFav ({route, navigation}) {
   const baseUrl = config.baseUrl;
   const product_baseUrl = config.baseUrl + '/api/products';
   const [product,setProduct] = useState(null);
-  const [loading,setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [tloading,setTLoading] = useState(false);
   const [value, setValue] = useState("one");
   const [currencyName, setCurrencyName] = useState();
   const [currencyValue, setCurrencyValue] = useState(0);
@@ -29,7 +30,7 @@ function ShowMoreFav ({route, navigation}) {
   const wishlist = wishlistStore(state => state.wishlist);
   const replaceWishlist = wishlistStore(state => state.replaceWishlist);
   const updateWishlist = wishlistStore(state => state.updateWishlist);
-
+  const [itemlimit, setItemLimit] = useState(10);
 
   const safeAreaProps = useSafeArea({
     safeAreaTop: true,
@@ -37,12 +38,14 @@ function ShowMoreFav ({route, navigation}) {
   });
 
   const getProducts = () => {
-    fetch('https://sora-mart.com/api/products')
+    //setLoading(true);
+    fetch(`https://sora-mart.com/api/products?limit=${itemlimit}&orderBy=desc`)
     .then((response) => response.json())
       .then((data) => {
-        setLoading(false);
+        setTLoading(false);
 
         setProducts(data.data.products);
+        setItemLimit(itemlimit + 5)
       
       });
 }
@@ -135,8 +138,14 @@ React.useEffect(() => {
 
  
   const productsRenderItems = ({ item }) => {
-    const checkId = wishlist && wishlist.filter((i) => i == item.id);
+    const checkId = wishlist.filter((i) => i == item.id);
+    let imagesrc = '';
+    if (item.product_picture.length > 0) {
+       imagesrc = `https://sora-mart.com/storage/${item.product_picture[0].image}`
+    }
+   
     return (
+      
       <TouchableOpacity onPress={() => { navigation.navigate('Product Details', { item: item.id }); global.product_id = item.id; }}>
         <Box mr={3} my={3}>
           <Box style={styles.ImgContainer} alignItems="center" justifyContent="center">
@@ -148,9 +157,13 @@ React.useEffect(() => {
               </View>
             </TouchableOpacity>
             
-        
-            <Image alt="product img" source={{ uri: 'https://sora-mart.com/storage/product_picture/6374b5719d119_photo.png'}} style={styles.productImg} resizeMode='contain'/> 
-                      
+            {
+              item.product_picture.length > 0 ? <Image alt="product img" source={{ uri: imagesrc ? imagesrc : "https://sora-mart.com/storage/product_picture/624572b54cc90_photo.jpg" }} style={styles.productImg} resizeMode='contain' /> 
+                :
+
+                <Image alt="product img" source={{ uri: "https://sora-mart.com/storage/product_picture/624572b54cc90_photo.jpg"}} style={styles.productImg} resizeMode='contain' /> 
+            }
+                       
             {/*{item.product_pictures == null ? 
               <Image alt="product img" source={{ uri: ''}} style={styles.productImg} resizeMode='contain'/>
               : <Image alt="product img" source={{ uri: 'https://sora-mart.com/storage/product_picture/6374b5719d119_photo.png'}} style={styles.productImg} resizeMode='contain'/>}
@@ -175,12 +188,41 @@ React.useEffect(() => {
             
           </Box>
         </Box>
-      </TouchableOpacity>
+      </TouchableOpacity >
+          
     )
   }
   const renderListEmptyComponent = () => (
     <ActivityIndicator/>
   )
+
+  const renderFooter = () => {
+    return (
+      //Footer View with Load More button
+      <Center>
+      <View style={styles.footer}>
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => {
+            getProducts();
+            
+            
+            }}
+            style={styles.loadMoreBtn}
+          //On Click of button calling getData function to load more data
+        >
+          
+          <Text  style={styles.btnText} >Load More</Text>
+          {tloading ? (
+            <ActivityIndicator size="large" color="black" style={{marginLeft: 8}} />
+          ) : null}
+         
+          </TouchableOpacity>
+          </View>
+      
+        </Center>
+    );
+  };
 
 
   return (
@@ -197,7 +239,8 @@ React.useEffect(() => {
                   horizontal={false}
                   showsHorizontalScrollIndicator={false}
                   keyExtractor={item => item.id}
-                  mb='5%' mt='3%'         
+            mb='5%' mt='3%'      
+            ListFooterComponent={renderFooter}
               />
             </VStack>        
       // </ScrollView>    

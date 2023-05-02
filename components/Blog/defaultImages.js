@@ -15,7 +15,7 @@ const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
+      //allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
@@ -47,7 +47,7 @@ function DefaultBackImgs({image,setImage}){
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.All,
-          allowsEditing: true,
+          //allowsEditing: true,
           aspect: [4, 3],
           quality: 1,
         });
@@ -86,7 +86,7 @@ function DefaultBankImgs({image,setImage}){
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.All,
-          allowsEditing: true,
+          //allowsEditing: true,
           aspect: [100, 40],
           quality: 1,
         });    
@@ -117,7 +117,7 @@ function DefaultPassportImgs({image,setImage}){
         // No permissions request is necessary for launching the image library
         let result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.All,
-          allowsEditing: true,
+          //allowsEditing: true,
           aspect: [100, 40],
           quality: 1,
         });
@@ -218,6 +218,15 @@ function PassportImg({image,setImage}){
     )
 }
 
+function UpdateProfilePicture({image,setImage}){
+  return(
+      <VStack mt={5} ml={0}>
+          <Text style={styles.imgTitle} pb={5}>Profile Picture</Text>
+          <DefaultPassportImgs image={image} setImage={setImage}/>                    
+      </VStack>
+  )
+}
+
 function CertificateImg({image,setImage,imageuri,setImageUri}){
   return(
       <VStack mt={5} ml={0}>
@@ -236,4 +245,4 @@ function BankImage({image,setImage}){
     )
 }
 
-export {DefaultBankImgs,DefaultPassportImgs,DefaultFrontImgs,DefaultBackImgs,ResidenceImg,PassportImg,BankImage,MyDefaultImg,CertificateImg} 
+export {DefaultBankImgs,DefaultPassportImgs,DefaultFrontImgs,DefaultBackImgs,ResidenceImg,PassportImg,BankImage,MyDefaultImg,CertificateImg,UpdateProfilePicture} 

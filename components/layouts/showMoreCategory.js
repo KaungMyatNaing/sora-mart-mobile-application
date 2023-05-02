@@ -177,50 +177,61 @@ React.useEffect(() => {
 }, [wishlist]);
 
  
-  const productsRenderItems = ({ item }) => {
-    const checkId = wishlist && wishlist.filter((i) => i == item.id);
-    return (
-      <TouchableOpacity onPress={() => { navigation.navigate('Product Details', { item: item.id }); global.product_id = item.id; }}>
-        <Box mr={3} my={3}>
-          <Box style={styles.ImgContainer} alignItems="center" justifyContent="center">
-             <TouchableOpacity onPress={() => {
-          checkId.length > 0 ? unlikeAction(item.id) : likeAction(item.id);
-        }} style={styles.whishListWrap}>
-              <View>
-                {checkId.length > 0 ? <AntDesign name="heart" size={24} color="red" /> : <AntDesign name="hearto" size={24} color="black" />}
-              </View>
-            </TouchableOpacity>
-            
-        
-            <Image alt="product img" source={{ uri: 'https://sora-mart.com/storage/product_picture/6374b5719d119_photo.png'}} style={styles.productImg} resizeMode='contain'/> 
-                      
-            {/*{item.product_pictures == null ? 
-              <Image alt="product img" source={{ uri: ''}} style={styles.productImg} resizeMode='contain'/>
-              : <Image alt="product img" source={{ uri: 'https://sora-mart.com/storage/product_picture/6374b5719d119_photo.png'}} style={styles.productImg} resizeMode='contain'/>}
-              
-            {item.product_picture[0] == undefined ? null :
-              <Image alt="product img" source={{ uri: config.imageUrl + '/' + item.product_picture[0].image}} style={styles.productImg} />}*/}
-          </Box>
-          <Box mt="3">
-            <Text style={[{ fontFamily: 'Inter_500Medium' }, styles.label]}>{item.name}</Text>
-            {item.price && 
-              <HStack justifyContent='flex-start' alignItems='center'>
-                <Text style={[{fontFamily:'Inter_600SemiBold'},styles.priceMMK]}>JPY</Text>    
-                <Text style={[{fontFamily:'Inter_600SemiBold'},styles.price]}>{item.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
-              </HStack>
-            }            
-            {item.price_mm && 
-              <HStack justifyContent='flex-start' alignItems='center'>
-                <Text style={[{fontFamily:'Inter_600SemiBold'},styles.priceMMK]}>MMK</Text>    
-                <Text style={[{fontFamily:'Inter_600SemiBold'},styles.price]}>{item.price_mm.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
-              </HStack>
-            }
-            
-          </Box>
-        </Box>
-      </TouchableOpacity>
-    )
+const productsRenderItems = ({ item }) => {
+  const checkId = wishlist.filter((i) => i == item.id);
+  let imagesrc = '';
+  if (item.product_picture.length > 0) {
+     imagesrc = `https://sora-mart.com/storage/${item.product_picture[0].image}`
   }
+ 
+  return (
+    
+    <TouchableOpacity onPress={() => { navigation.navigate('Product Details', { item: item.id }); global.product_id = item.id; }}>
+      <Box mr={3} my={3}>
+        <Box style={styles.ImgContainer} alignItems="center" justifyContent="center">
+           <TouchableOpacity onPress={() => {
+        checkId.length > 0 ? unlikeAction(item.id) : likeAction(item.id);
+      }} style={styles.whishListWrap}>
+            <View>
+              {checkId.length > 0 ? <AntDesign name="heart" size={24} color="red" /> : <AntDesign name="hearto" size={24} color="black" />}
+            </View>
+          </TouchableOpacity>
+          
+          {
+            item.product_picture.length > 0 ? <Image alt="product img" source={{ uri: imagesrc ? imagesrc : "https://sora-mart.com/storage/product_picture/624572b54cc90_photo.jpg" }} style={styles.productImg} resizeMode='contain' /> 
+              :
+
+              <Image alt="product img" source={{ uri: "https://sora-mart.com/storage/product_picture/624572b54cc90_photo.jpg"}} style={styles.productImg} resizeMode='contain' /> 
+          }
+                     
+          {/*{item.product_pictures == null ? 
+            <Image alt="product img" source={{ uri: ''}} style={styles.productImg} resizeMode='contain'/>
+            : <Image alt="product img" source={{ uri: 'https://sora-mart.com/storage/product_picture/6374b5719d119_photo.png'}} style={styles.productImg} resizeMode='contain'/>}
+            
+          {item.product_picture[0] == undefined ? null :
+            <Image alt="product img" source={{ uri: config.imageUrl + '/' + item.product_picture[0].image}} style={styles.productImg} />}*/}
+        </Box>
+        <Box mt="3">
+          <Text style={[{ fontFamily: 'Inter_500Medium' }, styles.label]}>{item.name}</Text>
+          {item.price && 
+            <HStack justifyContent='flex-start' alignItems='center'>
+              <Text style={[{fontFamily:'Inter_600SemiBold'},styles.priceMMK]}>JPY</Text>    
+              <Text style={[{fontFamily:'Inter_600SemiBold'},styles.price]}>{item.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
+            </HStack>
+          }            
+          {item.price_mm && 
+            <HStack justifyContent='flex-start' alignItems='center'>
+              <Text style={[{fontFamily:'Inter_600SemiBold'},styles.priceMMK]}>MMK</Text>    
+              <Text style={[{fontFamily:'Inter_600SemiBold'},styles.price]}>{item.price_mm.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
+            </HStack>
+          }
+          
+        </Box>
+      </Box>
+    </TouchableOpacity >
+        
+  )
+}
 
   const renderListEmptyComponent = () => (
     <Text>{translate('noItem')}</Text>

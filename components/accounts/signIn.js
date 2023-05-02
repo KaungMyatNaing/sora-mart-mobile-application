@@ -13,7 +13,7 @@ import config from "../../config/config";
 import axios from "axios";
 import { AsyncStorage } from "react-native";
 import { useIsFocused } from "@react-navigation/native"; // for re-render
-import ToastHelper from "../Helper/toast";
+//import ToastHelper from "../Helper/toast";
 import Toast from "react-native-toast-message";
 import * as Google from "expo-auth-session/providers/google";
 import * as Facebook from "expo-auth-session/providers/facebook";
@@ -227,7 +227,12 @@ function Signin({ navigation }) {
       .then((response) => response.json())
       .then((data) => {
           console.log("Success:", data);
-          if (data.status == 200) {
+        if (data.status == 200) {
+          Toast.show({
+            position: 'top',
+            type: 'info',
+            text1: "You are now logged in."
+        })
               global.auth = data.token;
             navigation.push('Home');
           }
@@ -235,10 +240,22 @@ function Signin({ navigation }) {
               
               console.log("move to verify screen")
               navigation.replace('Verified Code',{email:email});
-          }
+        }
+        if (data.status == 400) {
+          Toast.show({
+            position: 'top',
+            type: 'error',
+            text1: "Email or password is incorrect."
+        })
+      }
+        
       })
         .catch((error) => {
-        ToastHelper.toast('User name or password is incorrect');
+          Toast.show({
+            position: 'top',
+            type: 'error',
+            text1: "Email or password is incorrect."
+        })
        
       });
   }
@@ -267,7 +284,12 @@ function Signin({ navigation }) {
         }
     })
       .catch((error) => {
-      ToastHelper.toast('User name or password is incorrect');
+     
+        Toast.show({
+          position: 'top',
+          type: 'error',
+          text1: "Email or password is incorrect."
+      })
      
     });
 }
@@ -289,7 +311,7 @@ function Signin({ navigation }) {
       style={{ backgroundColor: "#FFF" }}
       height="100%"
     >
-      <Toast />
+        <Toast ref={(ref) => {Toast.setRef(ref)} } />
       <VStack px="4" pt="4" justifyContent="center" alignItems="center">
         {global.forceLoginMsg != "" && (
           <Text style={styles.forceLoginMsg}>{global.forceLoginMsg}</Text>

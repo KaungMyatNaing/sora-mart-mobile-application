@@ -111,7 +111,7 @@ function MyDrawer({navigation}) {
     AsyncStorage.setItem( "userEmail", '');
     AsyncStorage.setItem( "userPassword", '');
 
-    navigation.replace('Drawer');
+    navigation.replace("Welcome");
   }
 
   // const doTransalate = async () => {
@@ -165,7 +165,24 @@ function MyDrawer({navigation}) {
                   <Text style={{color:'#FFF',alignSelf:'center',fontFamily:'Inter_500Medium',fontSize:14}}>{translate('signIn')}</Text>
                 </TouchableOpacity>
                 :
-                <TouchableOpacity onPress={() => signOutAction()} style={styles.logOutBtn}>
+                <TouchableOpacity onPress={() => {
+                  global.auth = null;
+    global.forceLoginMsg = null;
+    global.fullname = null;
+    global.currency = null;
+    global.languae = null;
+    global.currencyName = null;
+    global.currencyValue = null;
+    global.user = null;
+
+    AsyncStorage.getAllKeys()
+    .then(keys => AsyncStorage.multiRemove(keys));
+
+    AsyncStorage.setItem( "userEmail", '');
+    AsyncStorage.setItem( "userPassword", '');
+
+  
+                }} style={styles.logOutBtn}>
                   <Text style={{color:'#FFF',alignSelf:'center',fontFamily:'Inter_500Medium',fontSize:14}}>{translate('signOut')}</Text>
                 </TouchableOpacity>
               }

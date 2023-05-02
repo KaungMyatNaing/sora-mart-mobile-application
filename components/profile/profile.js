@@ -94,7 +94,7 @@ function Profile({ navigation }) {
                             }
                             <Box m='2'>
                                 <Text style={[{fontFamily:'Inter_700Bold'},styles.bold]}>{profileData && profileData.fullname}</Text>
-                                <Text style={[{fontFamily:'Inter_400Regular'},styles.regular]}>{profileData && profileData.ph_no}</Text>
+                                <Text style={[{fontFamily:'Inter_400Regular'},styles.regular]}>ID Number {profileData && profileData.guid}</Text>
                             </Box>
                         </HStack>
                         <TouchableOpacity onPress={()=>navigation.navigate('Profile Setting',{userData:profileData})}>
@@ -106,7 +106,7 @@ function Profile({ navigation }) {
                             <TouchableOpacity onPress={()=>navigation.navigate('Point History')}>
                                 <Box>
                                     <Text style={styles.text_point_title}>M-Point</Text>
-                                    <Text   style={[{fontFamily:'Inter_500Medium'},styles.text_point]} >{profileData && profileData.total_point}</Text>
+                                    <Text style={[{fontFamily:'Inter_500Medium'},styles.text_point]} >{profileData && profileData.m_point.current_point}</Text>
                                 </Box>
                             </TouchableOpacity>
                             <Image alt="point" m="2" source={require('../../assets/image/profile/logo_poin.png')}   style={styles.logo_point}/>

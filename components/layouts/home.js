@@ -114,11 +114,12 @@ const Home = ({ navigation }) => {
   
 
    
-      fetch('https://sora-mart.com/api/products')
+      fetch('https://sora-mart.com/api/products?limit=5&orderBy=desc')
       .then((response) => response.json())
         .then((data) => {
           setLoading(false);
-          setProducts(data.data.products);
+          setProducts(data.data.products)
+          
           //console.log('Products length is '+products.length)
         });
    
@@ -410,6 +411,11 @@ const Home = ({ navigation }) => {
   const productsRenderItems = ({ item }) => {
    
     const checkId = wishlist.filter((i) => i == item.id);
+    let imagesrc = '';
+    if (item.product_picture.length > 0) {
+       imagesrc = `https://sora-mart.com/storage/${item.product_picture[0].image}`
+    }
+   
     return (
       
       <TouchableOpacity onPress={() => { navigation.navigate('Product Details', { item: item.id }); global.product_id = item.id; }}>
@@ -423,9 +429,13 @@ const Home = ({ navigation }) => {
               </View>
             </TouchableOpacity>
             
-        
-            <Image alt="product img" source={{ uri: 'https://sora-mart.com/storage/product_picture/6374b5719d119_photo.png'}} style={styles.productImg} resizeMode='contain'/> 
-                      
+            {
+              item.product_picture.length > 0 ? <Image alt="product img" source={{ uri: imagesrc ? imagesrc : "https://sora-mart.com/storage/product_picture/624572b54cc90_photo.jpg" }} style={styles.productImg} resizeMode='contain' /> 
+                :
+
+                <Image alt="product img" source={{ uri: "https://sora-mart.com/storage/product_picture/624572b54cc90_photo.jpg"}} style={styles.productImg} resizeMode='contain' /> 
+            }
+                       
             {/*{item.product_pictures == null ? 
               <Image alt="product img" source={{ uri: ''}} style={styles.productImg} resizeMode='contain'/>
               : <Image alt="product img" source={{ uri: 'https://sora-mart.com/storage/product_picture/6374b5719d119_photo.png'}} style={styles.productImg} resizeMode='contain'/>}

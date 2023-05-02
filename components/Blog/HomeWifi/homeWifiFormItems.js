@@ -155,6 +155,65 @@ const renderIcon=()=>{
         <Image source={require('../../../assets/image/Blog/HomeWifi/DropArrow.png')} w={6} h={6} alt='drop arrow'/>
     )
 }
+
+function AddressTypeddl({lbl,town,value,setSelectedValue}){
+    //  const [value, setSelectedValue] = useState('');
+    const [open,setOpen] = useState(false);
+    // const [value,setValue] = useState('');
+    const [item,setItem] = useState('');
+    return(
+        <VStack mb={5} mt={2}>
+            {/* <SelectDropdown
+                data={town.map(town=>(town.name))}
+                defaultButtonText={lbl}
+                dropdownBackgroundColor='#fff'
+                buttonStyle={{backgroundColor:'#fff',borderBottomWidth:1,width:'100%',height:60,borderBottomColor:'#A0A0A0'}}
+                buttonTextStyle={styles.btnTxt}
+                renderDropdownIcon={renderIcon}
+                rowStyle={{backgroundColor:'#fff'}}
+                rowTextStyle={styles.ddlLbl}
+                dropdownIconPosition='right'
+                onSelect={(selectedItem,index) => {
+                    console.log(selectedItem,index)
+                    setSelectedValue(selectedItem);
+                }}
+                buttonTextAfterSelection={(selectedItem, index) => {
+                   return selectedItem
+                }}
+                rowTextForSelection={(item, index) => {
+                    console.log(item);
+                    return item
+                }}
+            /> */}
+            <DropDownPicker
+                open={open}
+                value={value}
+                items={town.map(town=>({"value":town,"label" :town,"key" : town}))}
+                setOpen={(open)=>setOpen(open)}
+                setValue={(value)=>setSelectedValue(value)}
+                setItems={(item) => setItem(item)}
+                placeholder={lbl}
+                placeholderStyle={{
+                    color: "#A0A0A0",
+                    marginRight:0,
+                    paddingRight:0,
+                }}
+                showArrowIcon={true}
+                showTickIcon={false}
+                dropDownContainerStyle={{
+                    borderColor:'#A0A0A0',
+                    borderRadius:0,
+                }}
+                selectedItemContainerStyle={{
+                    backgroundColor: "#fde7e8"
+                }}
+                listMode="SCROLLVIEW" 
+                style={{borderWidth:0,borderBottomWidth:1,borderBottomColor:'#A0A0A0',borderRadius:0,paddingRight:10,paddingLeft:10}}                        
+                />
+        </VStack>
+    );    
+}
+ 
  function Myddl({lbl,town,value,setSelectedValue}){
     //  const [value, setSelectedValue] = useState('');
     const [open,setOpen] = useState(false);
@@ -270,4 +329,4 @@ const renderIcon=()=>{
         </VStack>
     );    
  }
-export {MyWifiType,WifiStepOneBtn,WifiStepTwoBtn,WifiRadioGroup,MyDatePicker,Myddl,renderIcon,Prefectureddl}
+export {MyWifiType,WifiStepOneBtn,WifiStepTwoBtn,WifiRadioGroup,MyDatePicker,Myddl,renderIcon,Prefectureddl,AddressTypeddl}

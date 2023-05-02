@@ -25,6 +25,7 @@ import Toast from 'react-native-toast-message';
 import AwesomeAlert from 'react-native-awesome-alerts'
 import { data } from '../Blog/HomeWifi/homeWifiFormItems';
 import { translate } from 'react-native-translate';
+import { cartStore } from '../store/cartStore';
 
 
 function ShoppingCart({navigation}) {
@@ -51,6 +52,7 @@ function ShoppingCart({navigation}) {
 
     const [total, setTotal] = useState();
     const [erate, setErate] = useState();
+    const isAction = cartStore(state => state.isAction);
 
     const headers = { 
         'Accept': 'application/json', 
@@ -219,7 +221,7 @@ function ShoppingCart({navigation}) {
     //    //getData();
     //})
     //
-
+  
     useEffect(async() => {
         const value = await AsyncStorage.getItem('item');
         if (value !== null) { 
@@ -230,7 +232,7 @@ function ShoppingCart({navigation}) {
         //retrieveData();
         //calculateTotal(cart_product);
         //getData();
-    }, [remove, plus, minus, cart_product])
+    }, [remove, plus, minus, cart_product,isAction])
     //
     //useEffect(async() => {
     //    const value = await AsyncStorage.getItem('item');

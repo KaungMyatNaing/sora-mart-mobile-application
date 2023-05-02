@@ -352,6 +352,15 @@ const styles = StyleSheet.create({
         borderBottomColor:"#D3D3D3",
         fontSize:12,
     }, 
+    signInBtn:{
+        width:'90%',
+        fontWeight:'bold',
+        fontSize:16,
+        backgroundColor:'#EC1C24',
+        textAlign: 'center',
+        paddingHorizontal: 25,
+        paddingVertical: 15
+     },
     
 });
 export { styles }   
