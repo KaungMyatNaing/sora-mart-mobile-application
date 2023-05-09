@@ -26,6 +26,7 @@ import AwesomeAlert from 'react-native-awesome-alerts'
 import { data } from '../Blog/HomeWifi/homeWifiFormItems';
 import { translate } from 'react-native-translate';
 import { cartStore } from '../store/cartStore';
+import { StackActions } from "@react-navigation/native";
 
 
 function ShoppingCart({navigation}) {
@@ -53,6 +54,7 @@ function ShoppingCart({navigation}) {
     const [total, setTotal] = useState();
     const [erate, setErate] = useState();
     const isAction = cartStore(state => state.isAction);
+    const [currencyvalue, setCurrencyValue] = useState('');
 
     const headers = { 
         'Accept': 'application/json', 
@@ -60,8 +62,8 @@ function ShoppingCart({navigation}) {
     }
 
     const [value, setValue] = useState('one');
-    const [currencyValue, setCurrencyValue] = useState(0);   
-    
+    //const [currencyValue, setCurrencyValue] = useState(0);   
+    //
     const getData = async() => {
       try {
         const res = await AsyncStorage.getItem("currency");
@@ -75,27 +77,26 @@ function ShoppingCart({navigation}) {
     };
 
     const [itemData, setItemData] = useState([]);
-    //const retrieveData = async () => {
-    //  try {
-    //    const value = await AsyncStorage.getItem('item');
-    //    if (value !== null) {
-    //        setItemData(JSON.parse(value));  
-    //        
-    //       
-    //    }
-    //  } catch (error) {
-    //    // Error retrieving data
-    //      console.log(error);
-    //    }
-    //    if (itemData) {
-    //        setCartProduct(itemData);
-    //        console.log('Cart loaded')
-    //        let amount = itemData.reduce((total, i) => total + i.quantity * i.price, 0)
-    //    setTotal(amount);
-    //       
-    //      
-    //    }
-    //};
+ 
+    const getCurrency = async () => {
+        console.log("I must be actovated")
+        try {
+          const defaultCurency = await AsyncStorage.getItem("currency");
+        
+          if (defaultCurency !== null) {
+            setCurrencyType(defaultCurency);
+            global.currencyvalue = defaultCurency;
+            console.log("default currency has been set" +currencytype)
+          } else {
+            AsyncStorage.setItem("currency", 'one');
+            global.currencyvalue = "one";
+            console.log("No currecny type is found. JPY is set as default currency.")
+          }
+          
+        } catch (error) {
+          console.log(error);
+        }
+      }; 
 
     const retrieveData = async () => {
         let amount = 0;
@@ -136,22 +137,10 @@ function ShoppingCart({navigation}) {
                 if(returnData) {
                     setLoading(false);
                     navigation.replace('Drawer');
-                    ToastHelper.toast("There is no item", null, 'error');
+                    //ToastHelper.toast("There is no item", null, 'error');
                 }  
             }
-        //}else{
-        //    axios.get(baseUrl, { headers })
-        //    .then(response => { 
-        //        if (componentMounted.current){ // (5) is component still mounted?
-        //            setCartProduct(response.data.data[0].cart_products);
-        //            calculateTotalAmount(response.data.data[0].cart_products);
-        //            setLoading(false);
-        //        }                
-        //    })    
-        //    .catch((error) => {
-        //        console.log(error);
-        //    });
-        //}
+    
     }
 
     function getProfile() {
@@ -175,8 +164,8 @@ function ShoppingCart({navigation}) {
     
                 }).catch((error) => {
                     setLoading(false);
-                    navigation.replace('Drawer');
-                    ToastHelper.toast("There is no item", null, 'error');
+                    //navigation.replace('Drawer');
+                    //ToastHelper.toast("There is no item", null, 'error');
           });
         }
     }
@@ -205,22 +194,10 @@ function ShoppingCart({navigation}) {
         getProfile();  
         getCats();
         getExchange();
-        
-        //calculateTotalAmount(cart_product);
+    
     }, [value])
    
-    //useEffect(async() => {
-    //    const value = await AsyncStorage.getItem('item');
-    //    if (value !== null) { 
-    //        setItemData(JSON.parse(value)); 
-    //        global.final_cart = JSON.parse(value);
-    //        setTotal(JSON.parse(value).reduce((total, i) => total + i.quantity * i.price, 0));
-    //    }
-    //    //retrieveData();
-    //    //calculateTotal(cart_product);
-    //    //getData();
-    //})
-    //
+   
   
     useEffect(async() => {
         const value = await AsyncStorage.getItem('item');
@@ -229,33 +206,8 @@ function ShoppingCart({navigation}) {
             global.final_cart = JSON.parse(value);
             setTotal(JSON.parse(value).reduce((total, i) => total + i.quantity * i.price, 0));
         }
-        //retrieveData();
-        //calculateTotal(cart_product);
-        //getData();
+        
     }, [remove, plus, minus, cart_product,isAction])
-    //
-    //useEffect(async() => {
-    //    const value = await AsyncStorage.getItem('item');
-    //    if (value !== null) { 
-    //        setItemData(JSON.parse(value)); 
-    //        global.final_cart = JSON.parse(value);
-    //        setTotal(JSON.parse(value).reduce((total, i) => total + i.quantity * i.price, 0));
-    //    }
-    //    //retrieveData();
-    //    //calculateTotal(cart_product);
-    //    //getData();
-    //}
-    //,[])
-    //
-
-    //useEffect(() => {
-    //   
-    //    if (cart_product) {
-    //        calculateTotal(cart_product);
-    //    }
-    //},[])
-
-    
 
 
     const minusMyPoint = () => {
@@ -314,7 +266,7 @@ function ShoppingCart({navigation}) {
 
         calculateUsedPointAmount(amount);
 
-        // amount = amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+     
      
         setTotalAmount(parseFloat(amount));
     }
@@ -322,7 +274,7 @@ function ShoppingCart({navigation}) {
     const calculateUsedPointAmount = (amt) => {
         var usedamt = 0;
         usedamt = amt - myPoint;
-        // usedamt = usedamt.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    
         setUsePointAmount(usedamt);
     }
 
@@ -408,7 +360,7 @@ function ShoppingCart({navigation}) {
 
     const renderItem = ({ item,index }) => (
         
-        <Box mb="5" justifyContent='center' key={index}>
+        <Box mb="5" justifyContent='center' key={item.p_id}>
             <VStack>                            
                 <HStack justifyContent="space-between" ml={5} mr={5}>
                     {/*{isLocal? 
@@ -418,7 +370,7 @@ function ShoppingCart({navigation}) {
                         item.cart_product.product_picture.length != 0 &&
                         <Image resizeMode='contain' w={95} h={130} source={{uri:config.imageUrl +'/'+ item.cart_product.product_pictures[0].image_url}} alt='image' pt='5%' pb='5%' maxW='30%' mr={5}/>                                       
                     }*/}
-                     <Image resizeMode='contain' w={95} h={130} source={{ uri: 'https://sora-mart.com/storage/product_picture/6374b5719d119_photo.png'}} alt='image' pt='5%' pb='5%' maxW='30%' mr={5}/> 
+                     <Image resizeMode='contain' w={95} h={130} source={{ uri: `https://sora-mart.com/storage/${item.image}`}} alt='image' pt='5%' pb='5%' maxW='30%' mr={5}/> 
                     <VStack w='40%' justifyContent='space-between' alignItem='flex-start'>
                         <Text _dark={{color: "warmGray.50"}} color="coolGray.800" style={{fontFamily:'Inter_500Medium'}} >
                             {item.name}
@@ -436,10 +388,7 @@ function ShoppingCart({navigation}) {
                             </Text>
                         </HStack>
                         <Spacer size='5'/>
-                        {/* <HStack>
-                        <Text style={[{fontFamily:'Inter_600SemiBold'},styles.priceMMK]}>{value == 'one'? currencyName + ' ' : value == 'two'? 'MMK ' : 'MMK ' }</Text> 
-                        {currencyValue != 0?<Text style={{fontFamily:'Inter_700Bold'}} fontWeight='bold' fontSize="md" _dark={{ color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">{value == 'one'? item.cart_product.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : item.cart_product.price_mm && item.cart_product.price_mm.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text> : <Text></Text>}
-                        </HStack> */}
+                       
                         <HStack justifyContent='flex-start' alignItems='center'>
                         <Text style={[{fontFamily:'Inter_600SemiBold',marginRight:10},styles.priceMMK]}>{value == 'two' ? "MMK" : "JPY" }</Text> 
                         <Text style={{fontFamily:'Inter_700Bold'}} fontWeight='bold' fontSize="md" _dark={{ color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">{value == 'two'? item.price_mm && item.price_mm.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : item.price && item.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text> 
@@ -468,7 +417,7 @@ function ShoppingCart({navigation}) {
         </Box>   
     );
     
-    //if (loading || cart_product) {
+   
         if(loading || cart_product){
         return (  
             loading ?   <ActivityIndicator color='red' justifyContent='center' alignItems='center' backgroundColor='#fff' height='100%'/>  :      
@@ -481,17 +430,7 @@ function ShoppingCart({navigation}) {
                         <Image w='28' h='28' resizeMode="cover" source={require('../../assets/image/ShoppingCart/InActivePayment3x.png')} alt='checkout'/>
                     </HStack> 
                     }                   
-                      
-                            {/*<FlatList
-                                data={cart_product}
-                                extraData={extra}
-                                randomUpdateProp={cart_product}
-                                // onRefresh={true}
-                                refeshing={true}
-                                renderItem={renderItem}
-                                ListEmptyComponent={renderListEmptyComponent}
-                                keyExtractor={item => item.product_id}
-                            />*/}
+                    
                          <FlatList
                                 data={itemData}
                                 extraData={extra}
@@ -502,18 +441,7 @@ function ShoppingCart({navigation}) {
                                 ListEmptyComponent={renderListEmptyComponent}
                                 keyExtractor={(item,index) => index}
                             />
-                            {/*{
-                                itemData.map(
-                                    (c,index) => (
-                                        <Text key={index}>{c.product_id} {c.name} {c.quantity}</Text>
-                                 )
-                                )
-                            }*/}
-                       
-                    
-                    {/* <Divider my={2} /> */}
-                    {/*{ cart_product.length > 0 &&*/}
-                    {/*<ScrollView showsVerticalScrollIndicator={false} backgroundColor='#fff'>*/}
+                        
 
                     <HStack minH='4%' m={5} justifyContent='space-between' alignItems='center'>
                         <HStack justifyContent='flex-start' alignItem='center' alignContent='center'>
@@ -543,8 +471,8 @@ function ShoppingCart({navigation}) {
                     {checked ? (
                         <>
                             <HStack minH='4%' m={5} justifyContent='center' alignItems='center'>
-                                    {/*<Text style={{fontFamily: 'Inter_400Regular'}}>{translate('pointDiscount')}</Text><Spacer/><Text style={{fontFamily: 'Inter_400Regular'}}>{value == 'one'? <Text>JPY - {(Math.round(Number(myPoint) / Number(currencyValue)))}</Text> : <Text>MMK - {myPoint}</Text>}</Text>*/}
-                                    <Text style={{ fontFamily: 'Inter_400Regular' }}>{translate('pointDiscount')}</Text><Spacer /><Text style={{ fontFamily: 'Inter_400Regular' }}>{erate * myPoint} MMK</Text>
+                                  
+                                    <Text style={{ fontFamily: 'Inter_400Regular' }}>{translate('pointDiscount')}</Text><Spacer /><Text style={{ fontFamily: 'Inter_400Regular' }}>{(erate * myPoint).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} JPY</Text>
                                     
                             </HStack>
                                 <Divider my="2" />
@@ -559,9 +487,10 @@ function ShoppingCart({navigation}) {
                             <Text style={{fontFamily: 'Inter_700Bold'}}>{translate('subTotal')}</Text>
                             <Spacer/>
                             <Text color='#EC1C24' style={{fontFamily: 'Inter_500Medium',marginRight:10}} mr='1' fontSize='14' >{value == 'two'? "MMK" : "JPY"}</Text>
-                                        {/*<Text style={{ color: "#EC1C24", fontFamily: 'Inter_700Bold', fontSize: 18, marginRight: 3 }}>{usePointAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>*/}
-                                        <Text style={{color:"#EC1C24",fontFamily:'Inter_700Bold',fontSize:18,marginRight:3}}>{total - myPoint * erate}MMK</Text>
-                                                <Text style={[styles.oldPrice, { fontFamily: 'Inter_400Regular' }]}>{total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
+                                       
+                                        <Text style={{color:"#EC1C24",fontFamily:'Inter_700Bold',fontSize:18,marginRight:3}}>{(total - myPoint * erate).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",").replace(/^0+/, '')}</Text>
+                                        <Text style={[styles.oldPrice, { fontFamily: 'Inter_400Regular' }]}>{total && total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",").replace(/^0+/, '')}</Text>
+                                       
                         </HStack>  
                         : <ActivityIndicator color='red'/>                                            
                     ):(
@@ -570,7 +499,7 @@ function ShoppingCart({navigation}) {
                             <Text style={{fontFamily: 'Inter_400Regular'}}>{translate('subTotal')}</Text>
                             <Spacer/>
                             <Text color='#EC1C24' mr='1' style={{fontFamily: 'Inter_400Regular',marginRight:10}} fontSize='14'>{value == 'two'? "MMK" : "JPY" }</Text>                            
-                                                <Text mr={1} style={{ color: "#EC1C24", fontFamily: 'Inter_700Bold', fontSize: 18 }}>{totalAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}{total}</Text> 
+                                                <Text mr={1} style={{ color: "#EC1C24", fontFamily: 'Inter_700Bold', fontSize: 18 }}>{total && total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",").replace(/^0+/, '')}</Text> 
                         </HStack>
                         : <ActivityIndicator color='red'/>  
                         )                  
@@ -580,24 +509,32 @@ function ShoppingCart({navigation}) {
                             <Spacer/>
                             <Text color='#EC1C24' style={{fontFamily: 'Inter_500Medium',marginRight:10}} mr='1' fontSize='14' >{value == 'two'? "MMK" : "JPY"}</Text>
                                         {/*<Text style={{ color: "#EC1C24", fontFamily: 'Inter_700Bold', fontSize: 18, marginRight: 3 }}>{usePointAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>*/}
-                                        <Text style={{color:"#EC1C24",fontFamily:'Inter_700Bold',fontSize:18,marginRight:3}}>{total - (myPoint * erate)}MMK</Text>
-                                                <Text style={[styles.oldPrice, { fontFamily: 'Inter_400Regular' }]}>{total}</Text>
+                                        <Text style={{color:"#EC1C24",fontFamily:'Inter_700Bold',fontSize:18,marginRight:3}}>{(total - (myPoint * erate)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",").replace(/^0+/, '')}</Text>
+                                                <Text style={[styles.oldPrice, { fontFamily: 'Inter_400Regular' }]}>{total && total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",").replace(/^0+/, '')}</Text>
                         </HStack> 
-                    {/* <Center>
-                        <TouchableOpacity style={styles.signInBtn} onPress={() => navigation.replace('Shipping and Payments',{point:myPoint,isUsed:checked})}>
-                            <Text style={{fontFamily: 'Inter_700Bold',fontSize:16,fontWeight:'700',color:'#FFF',textAlign:'center'}}>{translate('checkout')}</Text>
-                        </TouchableOpacity>
-                    </Center>    */}
-                                
-                {/*</ScrollView>*/}
-                {/*}                                  */}
+               
                     </VStack>  
                     
             <View style={styles.tab}>
                         <Center>
-                            {itemData.length > 0 ? <TouchableOpacity style={styles.signInBtn} onPress={() => navigation.replace('Shipping and Payments', {point: checked ? myPoint : 0, isUsed: checked, total: total,m_discount: checked ? erate * myPoint : 0})}>
+                            {itemData.length > 0 ? <TouchableOpacity style={styles.signInBtn} onPress={() => {
+                                console.log("testing ---"+ typeof global.auth)
+                                if (global.auth == null) {
+                                    console.log("1");
+                                    const popAction = StackActions.pop(1);
+
+                                    navigation.dispatch(popAction);
+                                    navigation.navigate("Sign In");
+                                } else {
+                                    console.log("2")
+                                    navigation.replace('Shipping and Payments', { point: checked ? myPoint : 0, isUsed: checked, total: total, m_discount: checked ? erate * myPoint : 0 })
+                               
+                                }
+                               
+                               
+                            }}>
                                 <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 16, fontWeight: '700', color: '#FFF', textAlign: 'center' }}>{translate('checkout')}</Text>
-                        </TouchableOpacity> :   <TouchableOpacity disabled  style={styles.signInBtn} onPress={() => navigation.replace('Shipping and Payments',{point:myPoint,isUsed:checked})}>
+                            </TouchableOpacity> : <TouchableOpacity disabled style={styles.signInBtn} >
                                 <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 16, fontWeight: '700', color: '#FFF', textAlign: 'center' }}>{translate('checkout')}</Text>
                         </TouchableOpacity>}
                       

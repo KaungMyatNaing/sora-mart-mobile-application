@@ -53,6 +53,8 @@ function Saved({navigation}) {
     
   const getSaved = savedStore(state => state.getSaved);
 
+  
+
     React.useEffect(() => {
         fetch(`https://sora-mart.com/api/blog/save-service-list`, {
         headers: {
@@ -103,12 +105,13 @@ function Saved({navigation}) {
     ); 
 
 
-    const renderItem = ({ item }) => (
+  const renderItem = ({ item }) => (
+      
         <Box px={5}>
             <VStack>
                 <HStack justifyContent='space-between' alignItems="center" mb="2">
                     <Box style={{fontFamily:'Inter_500Medium', width:'60%'}}>
-                        <Text style={{fontFamily:'Inter_700Bold', fontSize:16}}>{item.service.name}{item.service.guid}</Text>
+        <Text style={{fontFamily:'Inter_700Bold', fontSize:16}}>{item.service.name}{item.service.guid}</Text> 
               <Text style={{ fontFamily: 'Inter_500Medium', color: '#a3a3a3' }} mb="2">{item.service.company.name}</Text>
               {
                 item.service.description && item.service.description.length > 50 ? 

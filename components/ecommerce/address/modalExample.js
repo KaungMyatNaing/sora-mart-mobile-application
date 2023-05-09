@@ -53,8 +53,8 @@ const ModalExample = (props) => {
         if (data.status == 200) {
           updateDefaultAddressList(item.guid);
           setDefaultAddress(!defaultaddress)
-            
-          
+          setOpen(false);
+          props.onClose();
         }
       })
       .catch((error) => {

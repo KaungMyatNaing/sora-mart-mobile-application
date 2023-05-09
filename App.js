@@ -60,6 +60,7 @@ import JobForm from './components/Blog/Job/jobForm';
 import DrawerBackBtn from './components/layouts/drawerBackBtn';
 import ChooseAddress from './components/ecommerce/address/chooseAddress'
 import SimCard from './components/simcard/simcard';
+import { AsyncStorage } from 'react-native';
 
 import SimcardManager from './components/simcard/SimcardManager';
 
@@ -79,6 +80,7 @@ export default function App() {
   const [notification, setNotification] = useState(false);
   const notificationListener = useRef();
   const responseListener = useRef();  
+  const [existlogin, setExistLogin] = React.useState();
 
   useEffect(() => {
     
@@ -103,7 +105,23 @@ export default function App() {
         Notifications.removeNotificationSubscription(notificationListener.current);
         Notifications.removeNotificationSubscription(responseListener.current);
       };
-    }, []);
+  }, []);
+  
+  React.useEffect(async () => {
+  
+      const checkLogin = await AsyncStorage.getItem("login");
+    if (checkLogin !== null) {
+      console.log("this is extracted from async storage ->"+checkLogin);
+        global.auth = checkLogin;
+        setExistLogin("Drawer");
+        console.log("existing login")
+      } else {
+        setExistLogin("Welcome");
+        console.log("new one")
+      }
+   
+ 
+  },[])
 
   registerForPushNotificationsAsync = async () => {
     if (Device.isDevice) {
@@ -141,7 +159,7 @@ export default function App() {
        <NativeBaseProvider>
     {/* <ShowMoreFav/> */}
         <NavigationContainer>
-        <Stack.Navigator initialRouteName="Welcome">    
+            <Stack.Navigator initialRouteName={existlogin}>    
           <Stack.Screen name="Welcome" options={{ headerShown: false }} component={Welcome}/>
           <Stack.Screen name="Sign In" options={{ title: ' ' }} component={SignIn} />
           <Stack.Screen name="Sign Up" options={{ title: ' ' }} component={SignUp} />

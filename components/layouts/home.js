@@ -41,6 +41,7 @@ const Home = ({ navigation }) => {
   const replaceWishlist = wishlistStore(state => state.replaceWishlist);
   const updateWishlist = wishlistStore(state => state.updateWishlist);
   const getWishlist = wishlistStore(state => state.getWishlist);
+  const [currencytype, setCurrencyType] = useState('one');
   
   //global.back = 0;
   //const [watchpd,setWatchpd] = useState(global.back)
@@ -196,50 +197,46 @@ const Home = ({ navigation }) => {
       }
   }
 
-  //useEffect(async()=>{
-  //  // await getData();  
-  //  // await getCurrency();
-  //  await getCats();    
-  //},[isFocused]);
-
-  //useEffect(()=>{
-  //  //getDefaultLocalization();
-  //  console.log("Test: ",wishid);
-  //},[]);
   React.useEffect(() => {
+   
+    getCurrency();
+
     getDefaultLocalization();
     getAction();
     getWishlist();
     getCategory();
-    getProducts();}
+    getProducts();
+    
+  }
+  
     , [])
   React.useEffect(() => {
+  
      getAction();
   }, [wishlist]);
 
 
-//   const getCurrency = ( ) => {
-//     const myData = {
-//       // "product_id": item,
-//     }
-//     const headers = { 
-//         'Accept' : 'application/json',
-//         'Authorization' : 'Bearer '+ global.auth,
-//     }; 
-//   axios.get(config.baseUrl+'/api/exchange-rates', myData, { headers })
-//   .then(response => {
-
-//     response.data.data.map((data) =>  
-//     data.currency == 'JPY' ? AsyncStorage.setItem( "currency_name", data.currency) : ''
-//     )
-//     response.data.data.map((data) =>  
-//     data.currency == 'JPY' ? AsyncStorage.setItem( "currency_value", data.rate) : ''
-//     )    
-//   })    
-//   .catch((error) => {
-//     console.log(error);
-//   });
-// } 
+  
+  const getCurrency = async () => {
+  console.log("I must be actovated")
+  try {
+    const defaultCurency = await AsyncStorage.getItem("currency");
+  
+    if (defaultCurency !== null) {
+      setCurrencyType(defaultCurency);
+      global.currencyvalue = defaultCurency;
+      console.log("default currency has been set." +currencytype)
+    } else {
+      AsyncStorage.setItem("currency", 'one');
+      global.currencyvalue = "one";
+      console.log("No currecny type is found. JPY is set as default currency.")
+    }
+    
+  } catch (error) {
+    console.log(error);
+  }
+  }; 
+  
 
   const alert = () => {
 
@@ -311,28 +308,7 @@ const Home = ({ navigation }) => {
     }
   }
 
-  const removeWishList = (remove_id) => {
-   
-    fetch(`https://sora-mart.com/api/remove-wishlist/${remove_id}`, {
-      method: "DELETE", // or 'PUT'
-      headers: {
-        "Content-Type": "application/json",
-        'Authorization':  global.auth,
-      }
-    })
-      .then((response) => response.json())
-      .then((data) => {
-          if (data.status == 200) {
-          setIsWishList(!isWishList);
-           console.log("removed")
-          }
-          
-      }) .catch((error) => {
-        console.log(error);
-      });
-
-
-  }
+ 
 
   const unlikeAction = (id) => {
     fetch(`https://sora-mart.com/api/remove-wishlist/${id}`, {
@@ -436,28 +412,27 @@ const Home = ({ navigation }) => {
                 <Image alt="product img" source={{ uri: "https://sora-mart.com/storage/product_picture/624572b54cc90_photo.jpg"}} style={styles.productImg} resizeMode='contain' /> 
             }
                        
-            {/*{item.product_pictures == null ? 
-              <Image alt="product img" source={{ uri: ''}} style={styles.productImg} resizeMode='contain'/>
-              : <Image alt="product img" source={{ uri: 'https://sora-mart.com/storage/product_picture/6374b5719d119_photo.png'}} style={styles.productImg} resizeMode='contain'/>}
-              
-            {item.product_picture[0] == undefined ? null :
-              <Image alt="product img" source={{ uri: config.imageUrl + '/' + item.product_picture[0].image}} style={styles.productImg} />}*/}
-          </Box>
+                </Box>
           <Box mt="3">
             <Text style={[{ fontFamily: 'Inter_500Medium' }, styles.label]}>{item.name}</Text>
-            {item.price && 
+      
+
+            {
+              item.price && item.mm_price ?
+              
               <HStack justifyContent='flex-start' alignItems='center'>
-                <Text style={[{fontFamily:'Inter_600SemiBold'},styles.priceMMK]}>JPY</Text>    
-                <Text style={[{fontFamily:'Inter_600SemiBold'},styles.price]}>{item.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
-              </HStack>
-            }            
-            {item.price_mm && 
-              <HStack justifyContent='flex-start' alignItems='center'>
-                <Text style={[{fontFamily:'Inter_600SemiBold'},styles.priceMMK]}>MMK</Text>    
-                <Text style={[{fontFamily:'Inter_600SemiBold'},styles.price]}>{item.price_mm.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
-              </HStack>
+                  <Text style={[{ fontFamily: 'Inter_600SemiBold' }, styles.priceMMK]}>{currencytype && currencytype == "one" ? "JPY" : null}</Text>    
+                  <Text style={[{ fontFamily: 'Inter_600SemiBold' }, styles.priceMMK]}>{currencytype && currencytype == "two" ? "MMK" : null}</Text> 
+                  <Text style={[{ fontFamily: 'Inter_600SemiBold' }, styles.price]}>{currencytype && currencytype == "one" ? item.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : null}</Text>
+                  <Text style={[{fontFamily:'Inter_600SemiBold'},styles.price]}>{currencytype && currencytype == "two" ? item.mm_price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : null}</Text>
+              </HStack> : null
+           
             }
-            
+         
+                       
+          
+          
+          
           </Box>
         </Box>
       </TouchableOpacity >

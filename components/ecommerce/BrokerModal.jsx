@@ -39,6 +39,7 @@ function BrokerModal(props) {
         global.broker_code = data.data.broker_code;
         props.setValidBrokerCode(true);
         setIsValidCode(true);
+        props.onClose();
                     
     
       }).catch((error) => {

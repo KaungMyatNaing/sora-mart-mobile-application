@@ -9,6 +9,7 @@ import axios from "axios";
 import { ActivityIndicator } from "react-native-paper";
 import { SwitchOff, SwitchOn } from "../switchComponent";
 import { translate } from "react-native-translate";
+import { StackActions } from '@react-navigation/native';
 import {
   Prefectureddl,
   AddressTypeddl,
@@ -136,7 +137,9 @@ function AddAddress({ navigation }, props) {
           if (data.status == 200) {
             //navigation.replace('Choose Address');
             addAddressList(myData);
-            navigation.replace("Choose Address");
+            const popAction = StackActions.pop(1);
+
+            navigation.dispatch(popAction);
             //refresh state lote ya. state manager htae yan
           }
         })

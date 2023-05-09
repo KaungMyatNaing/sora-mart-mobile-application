@@ -19,6 +19,7 @@ import AppLoading from 'expo-app-loading';
 import config from '../../config/config'; 
 import { useIsFocused} from '@react-navigation/native' // for re-render
 import ToastHelper from '../Helper/toast';
+import { AntDesign } from '@expo/vector-icons';
 import { AsyncStorage } from 'react-native';
 import { 
     useFonts,
@@ -32,11 +33,18 @@ import {
     Inter_800ExtraBold,
     Inter_900Black, } from '@expo-google-fonts/inter';
 import Toast from 'react-native-toast-message';
+import { wishlistStore } from '../store/wishlistStore';
 
 function SearchResult({route, navigation }) {
     const {text} = route.params; 
-    const [product,setProduct] = useState(null);
-    const [loading,setLoading] = useState(false);
+    const [product,setProduct] = useState();
+  const [loading, setLoading] = useState(false);
+  const [isWishList, setIsWishList] = useState(false);
+  const [wishid, setWishid] = useState([]);
+  const wishlist = wishlistStore(state => state.wishlist);
+  const replaceWishlist = wishlistStore(state => state.replaceWishlist);
+  const updateWishlist = wishlistStore(state => state.updateWishlist);
+  const getWishlist = wishlistStore(state => state.getWishlist);
     const baseUrl = config.baseUrl + '/api/products';
     const headers = { 
         'Accept': 'application/json', 
@@ -64,21 +72,83 @@ function SearchResult({route, navigation }) {
       } catch (error) {
         console.log(error);
       }
-    };
+  };
+  
+  const unlikeAction = (id) => {
+    fetch(`https://sora-mart.com/api/remove-wishlist/${id}`, {
+      method: 'DELETE', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: global.auth,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status == 200) {
+          getAction();
+          console.log('removed');
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    const fdata = wishlist.filter(i => i !== id);
+    replaceWishlist(fdata);
+    console.log(wishlist);
+   
+  };
 
-    const getProduct = (search) => {
-        setLoading(true)
-        const product_baseUrl = config.baseUrl + '/api/products?search='+ search;
-          axios.get(product_baseUrl)
-              .then(response => {   
-                setProduct(response.data.data);
-                setLoading(false)
-              })    
-              .catch((error) => {
-                  console.log(error);
-                  setLoading(false)
+  const likeAction = (id) => {
+
+   fetch(`https://sora-mart.com/api/add-wishlist/${id}`, {
+     method: 'POST', // or 'PUT'
+     headers: {
+       'Content-Type': 'application/json',
+       Authorization: global.auth,
+     },
+   })
+     .then((response) => response.json())
+     .then((data) => {
+       if (data.status == 200) {
+         getAction();
+         console.log('added');
+       }
+     })
+     .catch((error) => {
+       console.log(error);
+     });
+    updateWishlist(id);
+    console.log(wishlist);
     
-              });
+    
+ };
+
+  const getProduct = (search) => {
+    console.log("Searched !")
+        setLoading(true)
+      
+      
+      
+              fetch(`https://sora-mart.com/api/products?keyword=${search}`, {
+                method: "GET", // or 'PUT'
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  setProduct(data.data.products);
+                  console.log(data.data.products);
+                  setLoading(false)
+                  console.log("Searched !")
+                   
+                })
+                  .catch((error) => {
+                    console.log(error);
+                    setLoading(false)
+                 
+                });
       }
 
 
@@ -90,28 +160,41 @@ function SearchResult({route, navigation }) {
         }
     }, [isFocused, text]);
     
-    const productsRenderItems=({item})=>{
+  const productsRenderItems = ({ item }) => {
+    const checkId = wishlist.filter((i) => i == item.id);
       return (
-        <TouchableOpacity onPress={() => navigation.navigate('Product Details',{item:item})} >
+        <TouchableOpacity onPress={() => { navigation.navigate('Product Details', { item: item.id }); global.product_id = item.id; }} >
           <Box mr={3} my={3}>            
             <Box style={styles.ImgContainer} alignItems="center" justifyContent="center">
-              <TouchableOpacity onPress={() => setWishList(item.id)} style={styles.whishListWrap}>
-                <View>
-                 <Image alt="wishlist" source={require('../../assets/image/Blog/Favicon.png')} resizeMode='contain'/>
-                </View>
-              </TouchableOpacity>
-                 {item.product_pictures[0] == undefined ? null :
-                <Image alt="product img" source={{ uri: config.baseUrl +'/'+ item.product_pictures[0].image_url }} style={styles.productImg}/>}
+            <TouchableOpacity onPress={() => {
+          checkId.length > 0 ? unlikeAction(item.id) : likeAction(item.id);
+        }} style={styles.whishListWrap}>
+              <View>
+                {checkId.length > 0 ? <AntDesign name="heart" size={24} color="red" /> : <AntDesign name="hearto" size={24} color="black" />}
+              </View>
+            </TouchableOpacity>
+                 {/*{item.product_pictures[0] == undefined ? null :
+                <Image alt="product img" source={{ uri: config.baseUrl +'/'+ item.product_pictures[0].image_url }} style={styles.productImg}/>}*/}
+              
+
+              {
+                item.product_picture.length > 0 ? 
+              <Image alt="product img" source={{ uri: `https://sora-mart.com/storage/${item.product_picture[0].image}` }} style={styles.productImg}/>
+              
+                :
+                <Image alt="product img" source={{ uri: "https://sora-mart.com/storage/product_picture/624572b54cc90_photo.jpg"}} style={styles.productImg}/>
+
+            }
             </Box>
             <Box mt="3">
-            <Text style={[{fontFamily:'Inter_500Medium'},styles.label]}>{item.name}</Text>
+            <Text style={[{fontFamily:'Inter_500Medium',width: 150},styles.label]}>{item.name}</Text>
             <HStack justifyContent='flex-start' alignItems='center'>
                 <Text style={[{fontFamily:'Inter_600SemiBold'},styles.priceMMK]}>JPY</Text>    
                 <Text style={[{fontFamily:'Inter_600SemiBold'},styles.price]}>{item.price}</Text>
             </HStack>
             <HStack justifyContent='flex-start' alignItems='center'>
                 <Text style={[{fontFamily:'Inter_600SemiBold'},styles.priceMMK]}>MMK</Text>    
-                <Text style={[{fontFamily:'Inter_600SemiBold'},styles.price]}>{item.price_mm}</Text>
+                <Text style={[{fontFamily:'Inter_600SemiBold'},styles.price]}>{item.mm_price}</Text>
             </HStack>
             </Box>
           </Box>

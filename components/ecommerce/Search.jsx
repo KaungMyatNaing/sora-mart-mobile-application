@@ -1,5 +1,6 @@
 import React,{useCallback,useState, useEffect} from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { AsyncStorage } from 'react-native';
 import axios from 'axios';
 import {
     Box,
@@ -91,30 +92,39 @@ import {
 function Search({navigation}) {
     // const navigation = useNavigation(); 
     const [data, setData] = React.useState();
-    const [qty,setQty] = React.useState(1);
+    const [qty, setQty] = React.useState(1);
+    const [recentsearch, setRecentSearch] = React.useState([]);
 
-    const baseUrl = config.baseUrl + '/api/recent-searchs?page=1&limit=10&orderBy=desc';
-    const headers = { 
-        'Accept': 'application/json', 
-        'Authorization' : 'Bearer '+ global.auth,        
-    }
 
     const isFocused = useIsFocused() // for re-render
 
-    useEffect(() => {
-      
-        axios.get(baseUrl, { headers })
-        .then(response => {        
-            console.log(response); 
-            setData(response.data.data);
-            // setLoading(false);
-        })    
-        .catch((error) => {
-            console.log(response);
-            ToastHelper.toast(error, null, 'error'); 
-            // alert(error);
-        });
-    }, [isFocused]);
+    const grabRecentSearch = async() => {
+        const recent = await AsyncStorage.getItem("recentsearch");
+        if (recent !== null) {
+            console.log(JSON.parse(recent))
+            setRecentSearch(JSON.parse(recent)); 
+            console.log(recentsearch);
+        } else {
+            await AsyncStorage.setItem("recentsearch", []);
+            setRecentSearch(JSON.parse(recent)); 
+        }
+    }
+    useEffect(() => {  grabRecentSearch(); },[])
+
+    //useEffect(() => {
+    //  
+    //    axios.get(baseUrl, { headers })
+    //    .then(response => {        
+    //        console.log(response); 
+    //        setData(response.data.data);
+    //        // setLoading(false);
+    //    })    
+    //    .catch((error) => {
+    //        console.log(response);
+    //        ToastHelper.toast(error, null, 'error'); 
+    //        // alert(error);
+    //    });
+    //}, [isFocused]);
     
     let [fontsLoaded] = useFonts({
         Inter_100Thin,
@@ -130,19 +140,38 @@ function Search({navigation}) {
     
       if (!fontsLoaded) {
         return <AppLoading />;
-      }
+    }
+    const recentSearchItem = ({item}) => {
+        return (
+            <TouchableOpacity onPress={() => { navigation.navigate('Search Result', { text: item }) }} style={styles.recent}>
+            <Text>{item}</Text>
+       </TouchableOpacity>
+        )
+    }
       
     return (
         <SafeAreaView style={{backgroundColor:'#FFF'}}>
             <Box w={{base: "100%", md: "25%"}}>    
                 <VStack h={{base: "100%"}} px={3}>
                     <Text>Recent Searchs</Text>
-                    <HStack style={{flexWrap:'wrap',  justifyContent: 'space-evenly' }}>
-                        {data && data.map((data) => 
-                            <TouchableOpacity onPress={() =>{navigation.navigate('Search Result', {text:data.keyword})}} key={data.guid} style={styles.recent}>
-                                <Text>{data.keyword}</Text>
-                            </TouchableOpacity>
-                       )}
+                    <HStack style={{ flexWrap: 'wrap', justifyContent: 'space-evenly' }}>
+                    
+                       
+                        {recentsearch && 
+                <FlatList
+                  data={recentsearch}
+                  renderItem={recentSearchItem}
+                  ListEmptyComponent={renderListEmptyComponent}
+                 
+                  
+                  horizontal
+                 
+                 
+                    />      
+             }    
+   
+
+                      
                     </HStack>                                 
                 </VStack>
             </Box>

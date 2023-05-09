@@ -14,11 +14,18 @@ import axios from 'axios';
 import { useIsFocused } from '@react-navigation/native' // for re-render
 import ToastHelper from '../Helper/toast';
 import Toast from 'react-native-toast-message';
+import { DrawerContentScrollView } from '@react-navigation/drawer';
+import { useEffect } from 'react';
 
 function VerificationCode({route,navigation}) {
     const email = route.params.email;
     //const auth = route.params.authentication;
     const CELL_COUNT = 5;
+    const [btnlock, setBtnLock] = useState(false);
+    const [linkbtnlock, setLinkBtnLock] = useState(false);
+    const [locktimer, setLockTimer] = useState(false);
+    const [timer, setTimer] = useState(5);
+
     const [value, setValue] = useState('');
 
     const ref = useBlurOnFulfill({value, cellCount: CELL_COUNT});
@@ -26,50 +33,94 @@ function VerificationCode({route,navigation}) {
         value,
         setValue,
     });
+    
 
     const resendAction = () => {
-        const resendUrl = config.baseUrl + '/api/verification/resend';
-         
-        const headers = { 
-            'Accept' : 'application/json'
-            //'Authorization' : 'Bearer '+ auth,
-        }
-        const myData = {};
-        axios.post(resendUrl, myData, { headers })
-        .then(response => {   
-            if(response.data.status === 200){
-                console.log('resend verification code is success');
-                // navigation.replace('Sign In');
-            }
-        })    
-        .catch((error) => {
-            ToastHelper.toast(error, error, 'error');
-            alert(error);
-        });
-        // alert('resend');
+        setLinkBtnLock(true);
+
+        fetch(`https://sora-mart.com/api/resend-verify-code?email=${email}`, {
+            method: "POST", // or 'PUT'
+            headers: {
+              "Content-Type": "application/json",
+            },
+           
+          })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log("Success:", data);
+              if (data.status == 200) {
+                setLinkBtnLock(true);
+                console.log("OTP Code resend success.")
+                }
+                setLockTimer(true);
+
+                //timerInterval = setInterval(() => {
+                //    setTimer(timer - 1)
+                //    
+                //}, 1000);
+                
+                setTimeout(() => {
+                    setLinkBtnLock(false);
+                    setLockTimer(false);
+                }, 5000);
+                
+            
+              
+            })
+            .catch((error) => {
+              setLinkBtnLock(false);
+                   
+               
+             
+            });
     }    
     const continueAction = () => {
+       
+            setBtnLock(true);
+       
 
-        const baseUrl = config.baseUrl + '/verify-account';
-
-        const myData = {
-            "email" : email,
-            "verification_code": value
-        }
-        const headers = { 
-            'Accept' : 'application/json',
-            //'Authorization' : 'Bearer '+ auth,
-        }
-        axios.post(baseUrl, myData, { headers })
-        .then(response => {   
-            if(response.data.status === 200){
-                navigation.replace('Sign In');
+            const myData = {
+                "email": email,
+                "verification_code": value
             }
-        })    
-        .catch((error) => {
-            ToastHelper.toast(error, error, 'error');
-            alert(error);
-        });
+            const headers = {
+                'Accept': 'application/json',
+                //'Authorization' : 'Bearer '+ auth,
+            }
+
+            fetch(`https://sora-mart.com/api/verify-account?verification_code=${myData.verification_code}&email=${myData.email}`, {
+                method: "POST", // or 'PUT'
+                headers: {
+                    "Content-Type": "application/json",
+                },
+           
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                
+                    if (data.status == 200) {
+                        setBtnLock(false);
+                        global.auth = data.token;
+                        navigation.replace('Drawer');
+                    }
+                    if (data.status == 400) {
+                        setBtnLock(false);
+                    
+                    }
+
+                
+            
+              
+                })
+                .catch((error) => {
+                    setBtnLock(false);
+                   
+               
+             
+                });
+      
+        
+   
     }
 
     return (
@@ -105,13 +156,13 @@ function VerificationCode({route,navigation}) {
                 />
                 </View>
                 <View style={styles.verificationMiddle3}>
-                    <Text>Dont't recieved the PIN?</Text>
-                    <TouchableOpacity onPress={() => resendAction()}>
-                        <Text style={styles.txtResend}>RESEND</Text>
+                    <Text>{locktimer ? null : `Dont't recieved the PIN?`}</Text>
+                    <TouchableOpacity disabled={linkbtnlock} onPress={() => resendAction()}>
+                        <Text style={styles.txtResend} >{locktimer ? `Please wait 5 seconds.` : `Resend`}</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.verificationBottom}>                
-                    <TouchableOpacity p='3' style={styles.signInBtn} onPress={() => continueAction()}>
+                    <TouchableOpacity p='3'style={btnlock ? styles.signInBtnOff : styles.signInBtn} disabled={btnlock} onPress={() => continueAction()}>
                         <Text style={styles.signInBtnlabel}>CONTINUE</Text>
                     </TouchableOpacity>
                 </View>  

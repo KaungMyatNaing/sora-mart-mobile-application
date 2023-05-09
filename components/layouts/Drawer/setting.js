@@ -24,7 +24,8 @@ function SettingComponent () {
           const defaultCurency = await AsyncStorage.getItem("currency");
           const defaultLanguage = await AsyncStorage.getItem("language");
           if (defaultCurency !== null && defaultCurency != '' ) {
-            setValue(defaultCurency);
+              setValue(defaultCurency);
+              global.currencyvalue = defaultCurency;
           }
           if(defaultLanguage != null && defaultLanguage != ''){
             setLanguae(defaultLanguage);
@@ -49,9 +50,11 @@ function SettingComponent () {
     const currencyAction = (chooseValue) => {
         setValue(chooseValue);
         if(chooseValue == 'two'){
-            AsyncStorage.setItem('currency','two');
+            AsyncStorage.setItem('currency', 'two');
+            global.currencyvalue == 'two';
         }else{
-            AsyncStorage.setItem('currency','one');
+            AsyncStorage.setItem('currency', 'one');
+            global.currencyvalue == 'one';
         }
     }
     

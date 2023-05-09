@@ -82,7 +82,16 @@ signInBtn:{
     textAlign:'center',
     padding:10,
     borderRadius:4,
- },
+    },
+    signInBtnOff:{
+        width:'100%',
+        fontWeight:'bold',
+        fontSize:16,
+        backgroundColor: 'gray',
+        textAlign:'center',
+        padding:10,
+        borderRadius:4,
+     },
  signInBtnlabel:{
      color:'#fff',
     padding:10,

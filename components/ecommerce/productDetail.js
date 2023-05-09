@@ -60,6 +60,32 @@ function ProductDetail({ route, navigation }) {
 
   const isAction = cartStore((state) => state.isAction);
   const changeCart = cartStore((state) => state.changeCart);
+  const [currencytype, setCurrencyType] = useState("");
+  const [cartaction, setCartAction] = useState(true);
+  const [seal, setSeal] = useState(false);
+
+  //React.useEffect(async() => {
+  //  const value = await AsyncStorage.getItem('item');
+  //  if (value !== null) {
+  //    const fItem = JSON.parse(value).filter(i => i.product_id == global.product_id);
+  //    if (fItem.length > 0) {
+  //      const cartQty = fItem[0].quantity;
+  //      if (noOfStock) {
+  //       
+  //        if (cartQty == noOfStock) {
+  //          setInStock(false);
+  //        }
+  //        if (cartQty < noOfStock) {
+  //          setInStock(true);
+  //        }
+  //       
+  //      
+  //        
+  //      } 
+  //    
+  //    }
+  //  }
+  //},[cartaction])
   const retrieveData = async () => {
     try {
       const value = await AsyncStorage.getItem("item");
@@ -85,17 +111,69 @@ function ProductDetail({ route, navigation }) {
 
     fetch(`https://sora-mart.com/api/product/${id}`)
       .then((response) => response.json())
-      .then((data) => {
+      .then(async (data) => {
         if (data.status == 200) {
           setLoading(false);
 
           if (data.data !== undefined) {
             if (data.data.stock !== null || undefined) {
               setNoOfStock(data.data.stock);
-              setInStock(true);
-            } else {
-              setInStock(false);
-            }
+      const value =  await AsyncStorage.getItem('item');
+    if (value !== null) {
+      const fItem = JSON.parse(value).filter(i => i.product_id == global.product_id);
+      if (fItem.length > 0) {
+        const cartQty = fItem[0].quantity;
+      
+          if (data.data.stock < 0) {
+            setInStock(false);
+            setSeal(true);
+            console.log('stock is less than zero')
+          }
+          else if (cartQty == data.data.stock) {
+            setInStock(false);
+            setSeal(true);
+            console.log("WE can't let you add more.")
+          }
+          else if (cartQty < data.data.stock) {
+            setInStock(true);
+            setSeal(false);
+            console.log("You can add ")
+          } else {
+            setInStock(true);
+            setSeal(false);
+            console.log("I don't know")
+        }
+        
+         
+        
+          
+      } else {
+        if (data.data.stock < 0) {
+          setInStock(false);
+          setSeal(true);
+          console.log('stock is less than zero')
+        } else {
+          setInStock(true);
+          setSeal(false);
+          console.log("I don't know")
+        }
+        }
+      
+              }
+              else {
+                if (data.data.stock < 0) {
+                  setInStock(false);
+                  setSeal(true);
+                  console.log('stock is less than zero')
+                } else {
+                  setInStock(true);
+                  setSeal(false);
+                  console.log("I don't know")
+                }
+                }
+    }
+             
+            
           }
 
           setPdata(data.data);
@@ -109,14 +187,37 @@ function ProductDetail({ route, navigation }) {
   useEffect(() => {
     //retrieveData();
     getDetail();
-  }, []);
+    getCurrency();
+  }, [cartaction]);
 
   const safeAreaProps = useSafeArea({
     safeAreaTop: true,
     pt: 2,
   });
 
+  const getCurrency = async () => {
+    console.log("I must be actovated");
+    try {
+      const defaultCurency = await AsyncStorage.getItem("currency");
+
+      if (defaultCurency !== null) {
+        setCurrencyType(defaultCurency);
+        global.currencyvalue = defaultCurency;
+        console.log("default currency has been set" + currencytype);
+      } else {
+        AsyncStorage.setItem("currency", "one");
+        global.currencyvalue = "one";
+        console.log(
+          "No currecny type is found. JPY is set as default currency."
+        );
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const AddToCartAction = async () => {
+    setCartAction(!cartaction);
     //if(global.user && global.user !== '' && global.user !== null){
     let myData = {};
     if (pdata.product_attribute.length > 0) {
@@ -129,6 +230,7 @@ function ProductDetail({ route, navigation }) {
         name: pdata.name,
         quantity: quantity,
         price: pdata.price,
+        mm_price: pdata.mm_price,
         max: pdata.stock,
         m_point: pdata.point,
         p_attr_value_color_id:
@@ -139,6 +241,7 @@ function ProductDetail({ route, navigation }) {
         p_attr_value: pName[0].value,
         is_varient: true,
         p_id: atr ? atr : null, //for cart operation only
+        image: pdata.product_picture[0].image,
       };
       console.log(myData);
       const value = await AsyncStorage.getItem("item");
@@ -213,12 +316,14 @@ function ProductDetail({ route, navigation }) {
         name: pdata.name,
         quantity: quantity,
         price: pdata.price,
+        mm_price: pdata.mm_price,
         max: pdata.stock,
         m_point: pdata.point,
         p_attr_value_color_id: null,
         p_attr_value_size_id: null,
         is_varient: false,
         p_id: pdata.id, //for cart operation only
+        image: pdata.product_picture[0].image,
       };
       console.log(myData);
       const value = await AsyncStorage.getItem("item");
@@ -282,37 +387,87 @@ function ProductDetail({ route, navigation }) {
     if (qty > 0) {
       setQuantit(qty);
       if (noOfStock) {
-        if (noOfStock - qty >= 0) {
+        if (noOfStock - qty > 0 && qty <= noOfStock) {
           setInStock(true);
+          console.log("we have stock");
         } else {
           setInStock(false);
-          console.log("instock is false");
         }
+
+        //else {
+        //  setInStock(true);
+        //  console.log("instock is false");
+        //}
       } else {
+        console.log("the fuvk");
         setInStock(false);
       }
-    } else {
-      ToastHelper.toast("at least 1 item need to be choosed", null, "error");
-      // alert('at least 1 item need to be choosed');
     }
   };
 
   const plusAction = async () => {
     // setNoOfStock(noOfStock - 1);
 
-    setQuantit(quantity + 1);
-    if (noOfStock) {
-      if (noOfStock - quantity > 0) {
-        setInStock(true);
-        console.log(quantity);
-        console.log(noOfStock);
+    const value = await AsyncStorage.getItem('item');
+    if (value !== null) {
+      const fItem = JSON.parse(value).filter(i => i.product_id == global.product_id);
+      if (fItem.length > 0) {
+        const cartQty = fItem[0].quantity;
+        if (noOfStock) {
+          if (quantity + cartQty < noOfStock) {
+            setQuantit(quantity + 1);
+            setInStock(true);
+            console.log(quantity);
+            console.log(noOfStock);
+            console.log("me");
+          }
+          if (cartQty == noOfStock) {
+            setInStock(false);
+          }
+          
+        } else {
+          setInStock(false);
+        }
+
+      } else {
+        if (noOfStock) {
+          if (quantity < noOfStock) {
+            setQuantit(quantity + 1);
+            setInStock(true);
+            console.log(quantity);
+            console.log(noOfStock);
+            console.log("me");
+          }
+        } else {
+          setInStock(false);
+        }
+      }
+       
+    } else {
+      if (noOfStock) {
+        if (quantity < noOfStock) {
+          setQuantit(quantity + 1);
+          setInStock(true);
+          console.log(quantity);
+          console.log(noOfStock);
+          console.log("me");
+        }
       } else {
         setInStock(false);
-        console.log("out of stock");
       }
-    } else {
-      setInStock(false);
     }
+
+    //if (noOfStock) {
+    //  if (quantity < noOfStock) {
+    //    setQuantit(quantity + 1);
+    //    setInStock(true);
+    //    console.log(quantity);
+    //    console.log(noOfStock);
+    //    console.log("me");
+    //  }
+    //} else {
+    //  setInStock(false);
+    //}
   };
 
   const showAlert = () => {
@@ -329,18 +484,19 @@ function ProductDetail({ route, navigation }) {
   };
 
   const continueShopping = () => {
+    setCartAction(cartaction);
     hideAlert();
     //navigation.replace('Home');
   };
 
   const renderItem = ({ item }) => {
     return (
-      <TouchableOpacity onPress={() => setBigImg(item.image_url)}>
+      <TouchableOpacity onPress={() => setBigImg(item.image)}>
         <Image
           alt="product img"
-          source={{ uri: 'https://sora-mart.com'+ item.image_url }}
-          style={styles.productImg}
+          source={{ uri: `https://sora-mart.com/storage/${item.image}` }}
           resizeMode="contain"
+          style={{ width: 75, height: 75 }}
         />
       </TouchableOpacity>
     );
@@ -353,7 +509,59 @@ function ProductDetail({ route, navigation }) {
           <VStack mb={5}>
             <HStack space={2} alignItems="center" justifyContent="space-evenly">
               <Box style={styles.productImgBox} w="20%" justifyContent="center">
-                <Text>{pdata && pdata.name}</Text>
+                {/*<Text>{pdata && pdata.name}</Text>*/}
+                {pdata && pdata.product_picture?.length > 0 ? (
+                  <Image
+                    resizeMode="contain"
+                    alt="product img"
+                    source={{
+                      uri: bigImg
+                        ? `https://sora-mart.com/storage/${bigImg}`
+                        : `https://sora-mart.com/storage/${pdata.product_picture[0].image}`,
+                    }}
+                    style={{ width: 175, height: 175 }}
+                  />
+                ) : null}
+
+                <HStack
+                  style={{
+                    justifyContent: "flex-start",
+                    width: 300,
+                    paddingVertical: 10,
+                  }}
+                >
+                  {pdata && pdata.product_picture?.length > 0 ? (
+                    <FlatList
+                      data={pdata.product_picture}
+                      renderItem={renderItem}
+                      horizontal
+                      keyExtractor={(item) => item.image}
+                    />
+                  ) : (
+                    //pdata.product_picture.map((k) => (
+                    //  <TouchableOpacity
+                    //    onPress={() => {
+                    //      console.log("hello");
+                    //
+                    //    }}
+                    //  >
+                    //
+                    //    <Image
+                    //      alt="product img"
+                    //      source={{
+                    //        uri: `https://sora-mart.com/storage/${k.image}`,
+                    //      }}
+                    //      style={{ width: 75, height: 75 }}
+                    //    />
+                    //  </TouchableOpacity>
+                    //))
+                    <Image
+                      alt="product img"
+                      style={{ width: 75, height: 75 }}
+                    />
+                  )}
+                </HStack>
+
                 {/* <FlatList
                           data={item.product_pictures}
                           renderItem={renderItem}
@@ -419,8 +627,8 @@ function ProductDetail({ route, navigation }) {
                                 onPress={() => {
                                   setAtrClick(item.value);
                                   setAtr(item.product_attrbute_value_id);
-                              }}
-                              key={index}
+                                }}
+                                key={index}
                               >
                                 <View
                                   style={{
@@ -485,7 +693,7 @@ function ProductDetail({ route, navigation }) {
                   >
                     <Box style={styles.itemCount}>
                       <HStack justifyContent="space-evenly" alignItems="center">
-                        <TouchableOpacity
+                          <TouchableOpacity disabled={seal}
                           onPress={minusAction}
                           p={10}
                           style={styles.mpButton}
@@ -519,7 +727,7 @@ function ProductDetail({ route, navigation }) {
                       </HStack>
                     </Box>
                     <Box>
-                      {pdata.price && (
+                      {pdata.price && pdata.mm_price ? (
                         <HStack
                           justifyContent="space-evenly"
                           alignItems="center"
@@ -532,7 +740,12 @@ function ProductDetail({ route, navigation }) {
                               { fontFamily: "Inter_500Medium" },
                             ]}
                           >
-                            JPY
+                            {currencytype && currencytype == "one"
+                              ? "JPY"
+                              : null}
+                            {currencytype && currencytype == "two"
+                              ? "MMK"
+                              : null}
                           </Text>
                           <Text
                             style={[
@@ -540,42 +753,20 @@ function ProductDetail({ route, navigation }) {
                               { fontFamily: "Inter_700Bold" },
                             ]}
                           >
-                            {pdata.price
-                              .toString()
-                              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                            {currencytype && currencytype == "one"
+                              ? pdata.price
+                                  .toString()
+                                  .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                              : null}
+                            {currencytype && currencytype == "two"
+                              ? pdata.mm_price
+                                  .toString()
+                                  .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                              : null}
                           </Text>
                           {/* <Text style={[styles.priceDiscount, {fontFamily: 'Inter_500Medium'}]}>{data.product_discounts.amount}</Text>     */}
                         </HStack>
-                      )}
-
-                      {pdata.price_mm && (
-                        <HStack
-                          justifyContent="space-evenly"
-                          alignItems="center"
-                        >
-                          {/* <Text style={[styles.priceMMK, {fontFamily: 'Inter_500Medium'}]}>MMK</Text>    
-                      <Text style={[styles.price, {fontFamily: 'Inter_700Bold'}]}>{data && data.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>     */}
-                          <Text
-                            style={[
-                              styles.priceMMK,
-                              { fontFamily: "Inter_500Medium" },
-                            ]}
-                          >
-                            MMK
-                          </Text>
-                          <Text
-                            style={[
-                              styles.price,
-                              { fontFamily: "Inter_700Bold" },
-                            ]}
-                          >
-                            {pdata.price_mm
-                              .toString()
-                              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                          </Text>
-                          {/* <Text style={[styles.priceDiscount, {fontFamily: 'Inter_500Medium'}]}>{data.product_discounts.amount}</Text>     */}
-                        </HStack>
-                      )}
+                      ) : null}
                     </Box>
                   </HStack>
                 </View>

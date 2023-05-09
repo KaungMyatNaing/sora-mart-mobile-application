@@ -204,6 +204,7 @@ function ShippingAndPayment({ route, navigation }) {
       if (value == "one") {
         if (product.cart_product.price) {
           amount += parseFloat(product.cart_product.price) * product.quantity;
+          //amount += parseInt(product.cart_product.price) * product.quantity;
         } else {
           amount += 0;
         }
@@ -211,6 +212,7 @@ function ShippingAndPayment({ route, navigation }) {
         if (product.cart_product.price_mm) {
           amount +=
             parseFloat(product.cart_product.price_mm) * product.quantity;
+            //parseInt(product.cart_product.price_mm) * product.quantity;
         } else {
           amount += 0;
         }
@@ -271,21 +273,29 @@ function ShippingAndPayment({ route, navigation }) {
               {
                 text: "Return to Home",
                 onPress: async () => {
-                  navigation.navigate("Home");
+                  await AsyncStorage.setItem("item",
+                  JSON.stringify([]));
+                  navigation.navigate("Drawer");
 
-                  await AsyncStorage.setItem("item", null);
+                 
                   console.log("Cart cleared !");
                 },
               },
             ]);
+            global.broker_code = "";
           }
         })
         .catch((error) => {
-          console.log(" " + error);
+          console.log(error);
         });
     }catch {
       //ToastHelper.toast("Please select necssary informations before processing to payment.", null, "Message");
       // alert(error);
+      Toast.show({
+        position: 'top',
+        type: 'error',
+        text1: "Please input every information before payment."
+    })
     
     }
   }
@@ -644,7 +654,7 @@ function ShippingAndPayment({ route, navigation }) {
               <Spacer size="1" />
               {/*<Text style={{fontFamily: 'Inter_400Regular'}}>{subTotal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>*/}
               <Text style={{ fontFamily: "Inter_400Regular" }}>
-                {global.total}
+                {(global.total).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",").replace(/^0+/, '')}
               </Text>
             </HStack>
             {/* <HStack>
@@ -736,6 +746,7 @@ function ShippingAndPayment({ route, navigation }) {
         </VStack>
       </ScrollView>
       {/* <Toast />           */}
+      <Toast ref={(ref) => {Toast.setRef(ref)} } />
       <ModalExample
         isOpen={addressshow} navigation={navigation}
         onClose={() => setAddressShow(false)}

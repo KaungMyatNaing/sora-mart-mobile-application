@@ -55,7 +55,7 @@ function ProfileSetting({ route, navigation }) {
         const [phno, setPhno] = useState(userData.ph_no); //phno
         const [gender, setGender] = useState(userData.gender); //gender
         const [date, setDate] = useState(userData.dob); //dob
-        const [profileimage, setProfileImage] = useState(""); //photo
+        const [profileimage, setProfileImage] = useState(userData.profil_pic); //photo
       
     
 

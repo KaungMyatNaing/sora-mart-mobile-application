@@ -18,6 +18,7 @@ import Toast from "react-native-toast-message";
 import * as Google from "expo-auth-session/providers/google";
 import * as Facebook from "expo-auth-session/providers/facebook";
 
+
 function Signin({ navigation }) {
   const isFocused = useIsFocused(); // for re-render
 
@@ -31,6 +32,7 @@ function Signin({ navigation }) {
   const [passwordVisible, setPasswordVisible] = useState(true);
 
   const baseUrl = config.baseUrl + "/login";
+  const [btnlock, setBtnLock] = useState(false);
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     expoClientId:
@@ -214,7 +216,9 @@ function Signin({ navigation }) {
     }
   }, [isFocused]);
 
-    function loginAction() {
+  function loginAction() {
+    setBtnLock(true);
+             
     const data = { email: email, password: password };
 
     fetch("https://sora-mart.com/api/login", {
@@ -228,20 +232,26 @@ function Signin({ navigation }) {
       .then((data) => {
           console.log("Success:", data);
         if (data.status == 200) {
+          setBtnLock(false);
+             
           Toast.show({
             position: 'top',
             type: 'info',
             text1: "You are now logged in."
         })
               global.auth = data.token;
-            navigation.push('Home');
+          //navigation.push('Home');
+          navigation.push('Drawer');
           }
           if (data.message == "Please verify your account!") {
-              
+            setBtnLock(false);
+             
               console.log("move to verify screen")
               navigation.replace('Verified Code',{email:email});
         }
         if (data.status == 400) {
+          setBtnLock(false);
+             
           Toast.show({
             position: 'top',
             type: 'error',
@@ -250,7 +260,9 @@ function Signin({ navigation }) {
       }
         
       })
-        .catch((error) => {
+      .catch((error) => {
+        setBtnLock(false);
+             
           Toast.show({
             position: 'top',
             type: 'error',
@@ -274,12 +286,20 @@ function Signin({ navigation }) {
     .then((data) => {
         console.log("Success:", data);
         if (data.status == 200) {
-            global.auth = data.token;
-          navigation.replace('Home');
+          global.auth = data.token;
+          AsyncStorage.setItem("login", data.token);
+          console.log("Login has been set to async storage.")
+          //
+          navigation.push('Drawer');
         }
         if (data.message == "Please verify your account!") {
             
-            console.log("move to verify screen")
+          console.log("move to verify screen")
+          Toast.show({
+            position: 'top',
+            type: 'info',
+            text1: "Please verify your account."
+        })
             navigation.replace('Verified Code',{email:email});
         }
     })
@@ -379,7 +399,7 @@ function Signin({ navigation }) {
         </HStack>
         <Box width="100%" mt="16" justifyContent="center" alignItems="center">
           <TouchableOpacity
-            style={styles.signInBtn}
+           style={btnlock ? styles.signInBtnOff : styles.signInBtn} 
             arialLabel="Sign In"
             onPress={loginAction}
           >

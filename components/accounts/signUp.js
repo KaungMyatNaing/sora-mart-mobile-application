@@ -25,7 +25,7 @@ function SignUp({ navigation }) {
     const [userName, setUserName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-
+  const [btnlock, setBtnLock] = useState(false);
     const baseUrl = config.baseUrl + '/register';
 
     let [fontsLoaded] = useFonts({
@@ -43,41 +43,74 @@ function SignUp({ navigation }) {
     if (!fontsLoaded) {
       return <AppLoading />;
     }
-    const CreateAction = () => {
+  const CreateAction = () => {
+    setBtnLock(true);
      if(validator.isEmail(email)){
           const myData = {
             "fullname": userName,
             "email": email,
-            "password": password
+            "password": password,
+            "referral_code" : null
           }
           const headers = { 
               'Accept' : 'application/json',
           };      
+       console.log(myData);
+          fetch(`https://sora-mart.com/api/register?fullname=${myData.fullname}&email=${myData.email}&password=${myData.password}`, {
+            method: "POST", // or 'PUT'
+            headers: {
+              "Content-Type": "application/json",
+            },
+         
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data)
+              if (data.status == 200) {
+                setBtnLock(false);
+                Toast.show({
+                  position: 'top',
+                  type: 'info',
+                  text1: "Your account has been successfully created. We sent an OTP code to your email address to verify your account."
+              })
+                   
+                  //
+                  navigation.push("Verified Code",{email:email});
+              } else {
+                setBtnLock(false);
+                Toast.show({
+                  position: 'top',
+                  type: 'info',
+                  text1: 'Your Email is already taken.'
+              })
+                }
+                
+            })
+            .catch((error) => {
+              setBtnLock(false);
+             
+                Toast.show({
+                  position: 'top',
+                  type: 'error',
+                  text1: "Please check your input."
+              })
+             
+            });
 
-          axios.post(baseUrl, myData, { headers })
-          .then(response => {          
-              console.log(response.data.status);
-              if(response.data.status === 200){
-                //const token = response.data.data.token;
-                //navigation.replace('Verified Code');
-                navigation.replace('Verified Code',{email:email});
-              }
-          })    
-          .catch((error) => {
-            ToastHelper.toast(error, null, 'error');
-              // alert(error);
-              console.log(error);
-          });
-
-      }else{
-        ToastHelper.toast('Please check your email', null, 'error');
-        // alert('Please check your email');
+     } else {
+      setBtnLock(false);
+        Toast.show({
+          position: 'top',
+          type: 'error',
+          text1: "Please check your Email Address."
+      })
       }      
     }
     
     return (
     <ScrollView showsVerticalScrollIndicator={false} style={{backgroundColor:'#FFF'}} height="100%">
-      <Toast/>
+       
+        <Toast ref={(ref) => {Toast.setRef(ref)} } />
       <Box style={styles.container} py="3">
       <View>
         <View style={styles.wrapper}>
@@ -106,7 +139,7 @@ function SignUp({ navigation }) {
       </View>
       <View style={[styles.buttonContainer, { fontFamily: 'Inter_500Medium'}]}>
       <Box width="100%" px="3.5" justifyContent="center" alignItems="center">
-        <TouchableOpacity style={styles.signInBtn} arialLabel="Sign In" onPress={() => CreateAction()}>
+              <TouchableOpacity style={btnlock ? styles.signInBtnOff : styles.signInBtn} arialLabel="Sign In" disabled={btnlock} onPress={() => CreateAction()} disabled={btnlock}>
           <Text style={styles.signInBtnlabel}>CREATE AN ACCOUNT</Text>
         </TouchableOpacity>
       </Box>            

@@ -6,33 +6,36 @@ import config from '../../config/config';
 import { useIsFocused } from '@react-navigation/native' // for re-render
 import ToastHelper from '../Helper/toast';
 import Toast from 'react-native-toast-message';
+import { AsyncStorage } from 'react-native';
 // import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
-function SearchInput ({navigation}){
-    // const navigation = useNavigation(); 
+function SearchInput (){
+     const navigation = useNavigation(); 
     const [search, setSearch] = React.useState();
-    const baseUrl = config.baseUrl + '/api/recent-searchs/store';
-    const headers = { 
-        'Accept': 'application/json', 
-        'Authorization' : 'Bearer '+ global.auth,        
-    }
-  
-    const handle = (text) => {
-        const myData = {keyword : text};  
-        axios.post(baseUrl, myData, { headers })
-        .then(response => {  
-            navigation.navigate('Search Result', {text:text});
+    const [recentsearch, setRecentSearch] = React.useState([]);
 
-        })    
-        .catch((error) => {
-            console.log(response); 
-            ToastHelper.toast(error, null, 'error');
-        });
+   
+  
+    const handle = async(text) => {
+      
+        const recent = await AsyncStorage.getItem("recentsearch");
+        if (recent !== null) {
+            const recentAdd = [...JSON.parse(recent), text]
+            await AsyncStorage.setItem("recentsearch",JSON.stringify(recentAdd));
+            setRecentSearch(recentAdd); 
+            console.log(recentsearch);
+        } else {
+            await AsyncStorage.setItem("recentsearch", JSON.stringify([text]));
+            setRecentSearch(JSON.parse(recent)); 
+        }
+        navigation.navigate('Search Result', { text: text });
+       
     }
 
     return(
         <HStack w="90%" justifyContent='space-between' alignItems="center">
-            <Input variant="unstyled" value={search} onSubmitEditing = {(event) => (handle(event.nativeEvent.text))} placeholder="search" w="80%" onChange={(e) => setSearch(e.target.value)}/>
+            <Input variant="unstyled" value={search} onSubmitEditing = {(event) => (handle(event.nativeEvent.text))} placeholder="Search" w="80%" onChange={(e) => setSearch(e.target.value)}/>
             <TouchableOpacity onPress={() => setSearch('')}>
                 <CloseIcon size="4" w="20%"/>   
             </TouchableOpacity>  
