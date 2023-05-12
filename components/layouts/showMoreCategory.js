@@ -43,13 +43,13 @@ const ShowMoreCategory = ({route, navigation}) => {
   const getProducts = () => {
     let category_name = global.category_name;
     console.log(category_name)
-    fetch('https://sora-mart.com/api/products')
+    fetch('https://sora-mart.com/api/products?limit=100')
     .then((response) => response.json())
       .then((data) => {
         setLoading(false);
 
         setProducts(data.data.products.filter(i => i.category.name == category_name));
-        console.log(products);
+        //console.log(data.data.products.map(i => i.category.name));
       });
 }
 
@@ -84,13 +84,6 @@ const ShowMoreCategory = ({route, navigation}) => {
         });
     }
   }
-  // const isFocused = useIsFocused() // for re-render
-  //useEffect(()=>{
-  //  // getData();
-  //  // getCurrency();
-  //  getProducts();
-  //  //getProductByCategory();
-  //},[isWishList]);
 
  
   

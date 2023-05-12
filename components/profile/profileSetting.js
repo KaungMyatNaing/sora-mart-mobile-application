@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 import {
   Box,
@@ -8,8 +8,8 @@ import {
   Input,
   Radio,
   ScrollView,
-    FormControl,
-  Center
+  FormControl,
+  Center,
 } from "native-base";
 import { Image } from "react-native";
 import { Text, TouchableOpacity } from "react-native";
@@ -26,103 +26,87 @@ import { TextInput } from "react-native-paper";
 import { UpdateProfilePicture } from "../Blog/defaultImages";
 
 function ProfileSetting({ route, navigation }) {
-    const userData = route.params.userData;
-    const [userdata, setUserData] = useState('');
-    const [submitaction, setSubmitAction] = useState(true);
-    useEffect(() => {
-         fetch("https://sora-mart.com/api/me", {
-            headers: {
-                Authorization: global.auth,
-            }
-        })
-            .then((response) => response.json())
-            .then((data) => {
-               
-                setUserData(data.data);
+  const userData = route.params.userData;
+  const [userdata, setUserData] = useState("");
+  const [submitaction, setSubmitAction] = useState(true);
+  const [profileimage, setProfileImage] = useState(); //photo
+  const [bkimage, setBkImage] = useState('');
 
-                console.log(userdata);
-                  
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }
-    ,[submitaction])
-   
-        const [name, setName] = useState(userData.fullname); //fullname
-        const [email, setEmail] = useState(userData.email);
-        const [userId, setUserId] = useState(userData.guid);
-        const [phno, setPhno] = useState(userData.ph_no); //phno
-        const [gender, setGender] = useState(userData.gender); //gender
-        const [date, setDate] = useState(userData.dob); //dob
-        const [profileimage, setProfileImage] = useState(userData.profil_pic); //photo
-      
-    
+  useEffect(() => {
+    fetch("https://sora-mart.com/api/me", {
+      headers: {
+        Authorization: global.auth,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setUserData(data.data);
 
-  const updateProfile = async() => {
+        setBkImage(data.data.profil_pic);
+        console.log(data.data.profil_pic);
+        console.log(userdata);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, [submitaction]);
+
+  const [name, setName] = useState(userData.fullname); //fullname
+  const [email, setEmail] = useState(userData.email);
+  const [userId, setUserId] = useState(userData.guid);
+  const [phno, setPhno] = useState(userData.ph_no); //phno
+  const [gender, setGender] = useState(userData.gender); //gender
+  const [date, setDate] = useState(userData.dob); //dob
+
+  const updateProfile = async () => {
     console.log("I click update btn");
     if (global.auth == "") {
       global.forceLoginMsg = config.forceLoginMsg;
       navigation.navigate("Sign In");
     } else {
       console.log("Am I working?");
-      //const updateUserData = {
-      //    "fullname" : name,
-      //    "dob" : '1/1/1',
-      //    "gender" : gender,
-      //    "ph_no": phno,
-      //    "photo" : 'kjhdkjhakjhd.png'
-      //
-      //}
 
-      //            const updateUserData = {
-      //                "fullname" : 'Prince of Darkness',
-      //                "dob" : '1/1/1',
-      //                "gender" : 'sigma male',
-      //                "ph_no": '12345678',
-      //                "photo" : 'kjhdkjhakjhd.png'
-      //
-      //   }
-      //const myData = {
-      //    "fullname": name,
-      //    "ph_no": phno,
-      //    "dob":date,
-      //    "gender": gender,
-      //
-      //
-      
-      //}
-        
-        const formData = new FormData();
-        
-        if (name && name) {
-            formData.append("fullname", name);
-        }
-        if (date && date) {
-            formData.append("dob", date);
-        }
-        if (gender && gender) {
-            formData.append("gender", gender);
-        }
-        if (phno && phno) {
-            formData.append("ph_no", phno);
-        }
-    //  formData.append("fullname", name);
-    //  formData.append("dob", date);
-    //  formData.append("gender", gender);
-    //  formData.append("ph_no", phno);
-        if (profileimage && profileimage) {
-            formData.append("photo", {
-                uri: profileimage, // your file path string
-                name: "profileimage.jpg",
-                type: "image/jpg",
-              });
-        }
-    //  formData.append("photo", {
-    //    uri: image, // your file path string
-    //    name: "profileimage.jpg",
-    //    type: "image/jpg",
-    //  });
+      const formData = new FormData();
+
+      if (name && name) {
+        formData.append("fullname", name);
+      }
+      if (date && date) {
+        formData.append("dob", date);
+      }
+      if (gender && gender) {
+        formData.append("gender", gender);
+      }
+      if (phno && phno) {
+        formData.append("ph_no", phno);
+      }
+      //  formData.append("fullname", name);
+      //  formData.append("dob", date);
+      //  formData.append("gender", gender);
+      //  formData.append("ph_no", phno);
+
+      if (profileimage) {
+        formData.append("photo", {
+          uri: profileimage ? profileimage : bkimage, // your file path string
+          name: "profileimage.jpg",
+          type: "image/jpg",
+        });
+      } else {
+        formData.append("photo", {
+          uri: bkimage ? `https://sora-mart.com/${bkimage}` : null, // your file path string
+          name: "profileimage.jpg",
+          type: "image/jpg",
+        });
+      }
+      //possible problem -> image might not be optional
+
+      console.log(formData);
+
+      //  formData.append("photo", {
+      //    uri: image, // your file path string
+      //    name: "profileimage.jpg",
+      //    type: "image/jpg",
+      //  });
 
       //if(image != '' && image != null){
       //    myData['profil_pic'] = image;
@@ -145,48 +129,51 @@ function ProfileSetting({ route, navigation }) {
       //            ToastHelper.toast(error.message, null, 'error');
       //            console.log(error);
       //          });
-    //  console.log(updateUserData);
-    //  fetch("https://sora-mart.com/api/edit-profile", {
-    //    method: "POST",
-    //    headers: {
-    //      Accept: "application/json",
-    //      Authorization: global.auth,
-    //    },
-    //    body: JSON.stringify(updateUserData),
-    //  })
-    //    .then((response) => response.json())
-    //    .then((data) => {
-    //      console.log("Profile data is successfully updated !!!", data);
-    //    })
-    //    .catch((error) => console.log(error));
-    //}
-        
-    await fetch("https://sora-mart.com/api/edit-profile", {
+      //  console.log(updateUserData);
+      //  fetch("https://sora-mart.com/api/edit-profile", {
+      //    method: "POST",
+      //    headers: {
+      //      Accept: "application/json",
+      //      Authorization: global.auth,
+      //    },
+      //    body: JSON.stringify(updateUserData),
+      //  })
+      //    .then((response) => response.json())
+      //    .then((data) => {
+      //      console.log("Profile data is successfully updated !!!", data);
+      //    })
+      //    .catch((error) => console.log(error));
+      //}
+
+      await fetch("https://sora-mart.com/api/edit-profile", {
         method: "POST", // or 'PUT'
         headers: {
-            Authorization: global.auth,
+          Authorization: global.auth,
         },
         body: formData,
-    })
+      })
         .then((response) => response.json())
         .then((data) => {
-            Toast.show({
-                position: 'top',
-                type: 'info',
-                text1: "Your Profile has been updated !"
-            })
-            console.log(data);
-            setSubmitAction(!submitaction);
+          Toast.show({
+            position: "top",
+            type: "info",
+            text1: "Your Profile has been updated !",
+          });
+          console.log(data);
+         
+          setBkImage(profileimage);
+          console.log(profileimage);
+       
+          setSubmitAction(!submitaction);
         })
         .catch((error) => {
-            Toast.show({
-                position: 'top',
-                type: 'error',
-                text1: error.message
-            })
-         
+          Toast.show({
+            position: "top",
+            type: "error",
+            text1: error.message,
+          });
         });
-}
+    }
   };
 
   const pickImage = async () => {
@@ -259,7 +246,14 @@ function ProfileSetting({ route, navigation }) {
                             :<MyDefaultImg lbl='Profile'/>
                             }            
                         </TouchableOpacity>*/}
-
+            {bkimage ?
+              <Image
+                resizeMode="contain"
+                source={{ uri:  `https://sora-mart.com/${bkimage}` }}
+                alt="profile img"
+                style={styles.profileImg}
+              /> : null
+            }
             <UpdateProfilePicture
               image={profileimage}
               setImage={setProfileImage}
@@ -374,29 +368,30 @@ function ProfileSetting({ route, navigation }) {
           </Text>
               </TouchableOpacity>
               */}
-              <Center>
-              <TouchableOpacity
-              style={styles.signInBtn}
-              onPress={() => updateProfile()}
+        <Center>
+          <TouchableOpacity
+            style={styles.signInBtn}
+            onPress={() => updateProfile()}
+          >
+            <Text
+              style={{
+                fontFamily: "Inter_700Bold",
+                fontSize: 16,
+                fontWeight: "700",
+                color: "#FFF",
+                textAlign: "center",
+              }}
             >
-              <Text
-                style={{
-                  fontFamily: "Inter_700Bold",
-                  fontSize: 16,
-                  fontWeight: "700",
-                  color: "#FFF",
-                  textAlign: "center",
-                }}
-              >
-                 {translate("save")}
-              </Text>
-              </TouchableOpacity>
-              </Center>
-            
-              
-
+              {translate("save")}
+            </Text>
+          </TouchableOpacity>
+        </Center>
       </VStack>
-          <Toast ref={(ref) => {Toast.setRef(ref)} } />
+      <Toast
+        ref={(ref) => {
+          Toast.setRef(ref);
+        }}
+      />
     </ScrollView>
   );
 }

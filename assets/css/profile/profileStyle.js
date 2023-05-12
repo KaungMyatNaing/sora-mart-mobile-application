@@ -211,9 +211,9 @@ const styles = StyleSheet.create({
         borderRadius: 50/2
     },
     profileImg:{
-        width:100,
-        height:100,
-        borderRadius: 100 / 2,
+        width:113,
+        height:113,
+        borderRadius: 113 / 2,
     },
 
     bold:{

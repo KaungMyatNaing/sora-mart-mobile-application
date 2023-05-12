@@ -95,9 +95,9 @@ function Profile({ navigation }) {
                     space="3"
                     justifyContent="center"
                   >
-                    {/*{ profileData.profil_pic !== null || undefined ? <Image resizeMode='cover' source={{ uri: 'https://sora-mart.com'+profileData?.profil_pic }} alt="profile img" style={styles.logo}/>
+                    { profileData.profil_pic !== null || undefined ? <Image resizeMode='contain' source={{ uri: 'https://sora-mart.com'+profileData?.profil_pic }} alt="profile img" style={styles.logo}/>
                             :<Image alt="profile" source={require('../../assets/image/profile/Profile_imgage.png')}  style={styles.logo}/>
-                            }*/}
+                            }
                     <Box m="2">
                       <Text
                         style={[{ fontFamily: "Inter_700Bold" }, styles.bold]}

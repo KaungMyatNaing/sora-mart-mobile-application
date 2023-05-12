@@ -64,28 +64,6 @@ function ProductDetail({ route, navigation }) {
   const [cartaction, setCartAction] = useState(true);
   const [seal, setSeal] = useState(false);
 
-  //React.useEffect(async() => {
-  //  const value = await AsyncStorage.getItem('item');
-  //  if (value !== null) {
-  //    const fItem = JSON.parse(value).filter(i => i.product_id == global.product_id);
-  //    if (fItem.length > 0) {
-  //      const cartQty = fItem[0].quantity;
-  //      if (noOfStock) {
-  //       
-  //        if (cartQty == noOfStock) {
-  //          setInStock(false);
-  //        }
-  //        if (cartQty < noOfStock) {
-  //          setInStock(true);
-  //        }
-  //       
-  //      
-  //        
-  //      } 
-  //    
-  //    }
-  //  }
-  //},[cartaction])
   const retrieveData = async () => {
     try {
       const value = await AsyncStorage.getItem("item");
@@ -118,62 +96,51 @@ function ProductDetail({ route, navigation }) {
           if (data.data !== undefined) {
             if (data.data.stock !== null || undefined) {
               setNoOfStock(data.data.stock);
-      const value =  await AsyncStorage.getItem('item');
-    if (value !== null) {
-      const fItem = JSON.parse(value).filter(i => i.product_id == global.product_id);
-      if (fItem.length > 0) {
-        const cartQty = fItem[0].quantity;
-      
-          if (data.data.stock < 0) {
-            setInStock(false);
-            setSeal(true);
-            console.log('stock is less than zero')
-          }
-          else if (cartQty == data.data.stock) {
-            setInStock(false);
-            setSeal(true);
-            console.log("WE can't let you add more.")
-          }
-          else if (cartQty < data.data.stock) {
-            setInStock(true);
-            setSeal(false);
-            console.log("You can add ")
-          } else {
-            setInStock(true);
-            setSeal(false);
-            console.log("I don't know")
-        }
-        
-         
-        
-          
-      } else {
-        if (data.data.stock < 0) {
-          setInStock(false);
-          setSeal(true);
-          console.log('stock is less than zero')
-        } else {
-          setInStock(true);
-          setSeal(false);
-          console.log("I don't know")
-        }
-        }
-      
-              }
-              else {
+              const value = await AsyncStorage.getItem("item");
+              if (value !== null) {
+                const fItem = JSON.parse(value).filter(
+                  (i) => i.product_id == global.product_id
+                );
+                if (fItem.length > 0) {
+                  const cartQty = fItem[0].quantity;
+
+                  if (noOfStock) {
+                    if (quantity + cartQty < noOfStock) {
+                      setQuantit(quantity + 1);
+                      setInStock(true);
+                      console.log(quantity);
+                      console.log(noOfStock);
+                      console.log("me");
+                    }
+                    if (cartQty == noOfStock) {
+                      setInStock(false);
+                    }
+                  } else {
+                    setInStock(false);
+                  }
+                } else {
+                  if (data.data.stock < 0) {
+                    setInStock(false);
+                    setSeal(true);
+                    console.log("stock is less than zero");
+                  } else {
+                    setInStock(true);
+                    setSeal(false);
+                    console.log("I don't know");
+                  }
+                }
+              } else {
                 if (data.data.stock < 0) {
                   setInStock(false);
                   setSeal(true);
-                  console.log('stock is less than zero')
+                  console.log("stock is less than zero");
                 } else {
                   setInStock(true);
                   setSeal(false);
-                  console.log("I don't know")
+                  console.log("I don't know");
                 }
-                }
-    }
-             
-            
+              }
+            }
           }
 
           setPdata(data.data);
@@ -265,6 +232,7 @@ function ProductDetail({ route, navigation }) {
             );
             await AsyncStorage.setItem("item", JSON.stringify(jj));
             changeCart();
+            setQuantit(1);
             showAlert();
           }
           if (checkProductVarientExist.length == 0) {
@@ -272,6 +240,7 @@ function ProductDetail({ route, navigation }) {
 
             await AsyncStorage.setItem("item", JSON.stringify(buggy));
             changeCart();
+            setQuantit(1);
             showAlert();
           }
         }
@@ -291,6 +260,7 @@ function ProductDetail({ route, navigation }) {
             );
             await AsyncStorage.setItem("item", JSON.stringify(jj));
             changeCart();
+            setQuantit(1);
             showAlert();
           }
           if (checkProductVarientExist.length == 0) {
@@ -298,6 +268,7 @@ function ProductDetail({ route, navigation }) {
 
             await AsyncStorage.setItem("item", JSON.stringify(buggy));
             changeCart();
+            setQuantit(1);
             showAlert();
           }
         }
@@ -305,7 +276,7 @@ function ProductDetail({ route, navigation }) {
         const gg = [myData];
         await AsyncStorage.setItem("item", JSON.stringify(gg));
         changeCart();
-
+        setQuantit(1);
         showAlert();
       }
     }
@@ -342,6 +313,7 @@ function ProductDetail({ route, navigation }) {
           );
           await AsyncStorage.setItem("item", JSON.stringify(jj));
           changeCart();
+          setQuantit(1);
           showAlert();
         }
         if (checkProductExist.length == 0) {
@@ -349,13 +321,14 @@ function ProductDetail({ route, navigation }) {
 
           await AsyncStorage.setItem("item", JSON.stringify(buggy));
           changeCart();
+          setQuantit(1);
           showAlert();
         }
       } else {
         const gg = [myData];
         await AsyncStorage.setItem("item", JSON.stringify(gg));
         changeCart();
-
+        setQuantit(1);
         showAlert();
       }
     }
@@ -381,94 +354,176 @@ function ProductDetail({ route, navigation }) {
     } catch (error) {}
   };
 
-  const minusAction = () => {
-    let qty = quantity - 1;
+//  const minusAction = () => {
+//    let qty = quantity - 1;
+//
+//    if (qty > 0) {
+//      setQuantit(qty);
+//      if (noOfStock) {
+//        if (noOfStock - qty > 0 && qty <= noOfStock) {
+//          setInStock(true);
+//          console.log("we have stock");
+//        } else {
+//          setInStock(false);
+//        }
+//
+//        //else {
+//        //  setInStock(true);
+//        //  console.log("instock is false");
+//        //}
+//      } else {
+//        console.log("the fuvk");
+//        setInStock(false);
+//      }
+//    }
+//  };
+const minusAction = () => {
+  const qty = quantity - 1;
 
-    if (qty > 0) {
-      setQuantit(qty);
-      if (noOfStock) {
-        if (noOfStock - qty > 0 && qty <= noOfStock) {
-          setInStock(true);
-          console.log("we have stock");
-        } else {
-          setInStock(false);
-        }
+  if (qty > 0) {
+    setQuantit(qty);
 
-        //else {
-        //  setInStock(true);
-        //  console.log("instock is false");
-        //}
+    if (noOfStock) {
+      if (noOfStock - qty > 0) {
+        setInStock(true);
+        console.log("we have stock");
       } else {
-        console.log("the fuvk");
         setInStock(false);
       }
-    }
-  };
-
-  const plusAction = async () => {
-    // setNoOfStock(noOfStock - 1);
-
-    const value = await AsyncStorage.getItem('item');
-    if (value !== null) {
-      const fItem = JSON.parse(value).filter(i => i.product_id == global.product_id);
-      if (fItem.length > 0) {
-        const cartQty = fItem[0].quantity;
-        if (noOfStock) {
-          if (quantity + cartQty < noOfStock) {
-            setQuantit(quantity + 1);
-            setInStock(true);
-            console.log(quantity);
-            console.log(noOfStock);
-            console.log("me");
-          }
-          if (cartQty == noOfStock) {
-            setInStock(false);
-          }
-          
-        } else {
-          setInStock(false);
-        }
-
-      } else {
-        if (noOfStock) {
-          if (quantity < noOfStock) {
-            setQuantit(quantity + 1);
-            setInStock(true);
-            console.log(quantity);
-            console.log(noOfStock);
-            console.log("me");
-          }
-        } else {
-          setInStock(false);
-        }
-      }
-       
     } else {
-      if (noOfStock) {
-        if (quantity < noOfStock) {
+      console.log("the fuvk");
+      setInStock(false);
+    }
+  }
+};
+
+
+//  const plusAction = async () => {
+//    // setNoOfStock(noOfStock - 1);
+//
+//    const value = await AsyncStorage.getItem("item");
+//    if (value !== null) {
+//      const fItem = JSON.parse(value).filter(
+//        (i) => i.product_id == global.product_id
+//      );
+//      if (fItem.length > 0) {
+//        const cartQty = fItem[0].quantity;
+//        if (fItem[0].is_varient && fItem[0].p_id == atr) {
+//          if (noOfStock) {
+//            if (quantity + cartQty < noOfStock) {
+//              setQuantit(quantity + 1);
+//              setInStock(true);
+//              console.log(quantity);
+//              console.log(noOfStock);
+//              console.log("me");
+//            }
+//            if (cartQty == noOfStock) {
+//              setInStock(false);
+//            }
+//          } else {
+//            setInStock(false);
+//          }
+//        }
+//        if (noOfStock) {
+//          if (quantity + cartQty < noOfStock) {
+//            setQuantit(quantity + 1);
+//            setInStock(true);
+//            console.log(quantity);
+//            console.log(noOfStock);
+//            console.log("me");
+//          }
+//          if (cartQty == noOfStock) {
+//            setInStock(false);
+//          }
+//        } else {
+//          setInStock(false);
+//        }
+//      } else {
+//        if (noOfStock) {
+//          if (quantity < noOfStock) {
+//            setQuantit(quantity + 1);
+//            setInStock(true);
+//            console.log(quantity);
+//            console.log(noOfStock);
+//            console.log("me");
+//          }
+//        } else {
+//          setInStock(false);
+//        }
+//      }
+//    } else {
+//      if (noOfStock) {
+//        if (quantity < noOfStock) {
+//          setQuantit(quantity + 1);
+//          setInStock(true);
+//          console.log(quantity);
+//          console.log(noOfStock);
+//          console.log("me");
+//        }
+//      } else {
+//        setInStock(false);
+//      }
+//    }
+//
+//    //if (noOfStock) {
+//    //  if (quantity < noOfStock) {
+//    //    setQuantit(quantity + 1);
+//    //    setInStock(true);
+//    //    console.log(quantity);
+//    //    console.log(noOfStock);
+//    //    console.log("me");
+//    //  }
+//    //} else {
+//    //  setInStock(false);
+//    //}
+//  };
+  
+const plusAction = async () => {
+  const value = await AsyncStorage.getItem("item");
+  
+  if (value !== null) {
+    const items = JSON.parse(value);
+    const matchingItems = items.filter((item) => item.product_id === global.product_id);
+    
+    if (matchingItems.length > 0) {
+      const cartQty = matchingItems[0].quantity;
+      const isVariant = matchingItems[0].is_varient && matchingItems[0].p_id === atr;
+      
+      if (isVariant || !matchingItems[0].is_varient) {
+        if (noOfStock && quantity + cartQty < noOfStock) {
           setQuantit(quantity + 1);
           setInStock(true);
           console.log(quantity);
           console.log(noOfStock);
           console.log("me");
+        } else if (cartQty === noOfStock) {
+          setInStock(false);
         }
+      }
+    } else {
+      if (noOfStock && quantity < noOfStock) {
+        setQuantit(quantity + 1);
+        setInStock(true);
+        console.log(quantity);
+        console.log(noOfStock);
+        console.log("me");
       } else {
         setInStock(false);
       }
     }
+  } else {
+    if (noOfStock && quantity < noOfStock) {
+      setQuantit(quantity + 1);
+      setInStock(true);
+      console.log(quantity);
+      console.log(noOfStock);
+      console.log("me");
+    } else {
+      setInStock(false);
+    }
+  }
+};
 
-    //if (noOfStock) {
-    //  if (quantity < noOfStock) {
-    //    setQuantit(quantity + 1);
-    //    setInStock(true);
-    //    console.log(quantity);
-    //    console.log(noOfStock);
-    //    console.log("me");
-    //  }
-    //} else {
-    //  setInStock(false);
-    //}
-  };
 
   const showAlert = () => {
     setShow(true);
@@ -693,7 +748,8 @@ function ProductDetail({ route, navigation }) {
                   >
                     <Box style={styles.itemCount}>
                       <HStack justifyContent="space-evenly" alignItems="center">
-                          <TouchableOpacity disabled={seal}
+                        <TouchableOpacity
+                          disabled={seal}
                           onPress={minusAction}
                           p={10}
                           style={styles.mpButton}

@@ -51,10 +51,13 @@ function ShoppingCart({navigation}) {
     const [minus, setMinus] = useState(false);
     const [first, setFirst] = useState(true);
 
-    const [total, setTotal] = useState();
+    const [total, setTotal] = useState(0);
     const [erate, setErate] = useState();
     const isAction = cartStore(state => state.isAction);
     const [currencyvalue, setCurrencyValue] = useState('');
+    const [bkmpoint, setBkMpoint] = useState(0);
+    const [bkminpoint, setBkMinPoint] = useState(0);
+    const [controllock, setControlLock] = useState(false);
 
     const headers = { 
         'Accept': 'application/json', 
@@ -156,9 +159,35 @@ function ShoppingCart({navigation}) {
         .then((response) => response.json())
                 .then((data) => {
                     if (componentMounted.current) { 
+                        //if (itemData.length > 0) {
+                        //    if (total < myPoint * erate) {
+                        //        let halfMpoint = 0;
+                        //      for (let i = 1; total > i * erate; i++){
+                        //          halfMpoint += 1;
+                        //        }
+                        //        console.log("it must" + halfMpoint)
+                        //        console.log("total is less than mpoint * erate")
+                        //        setMyPoint(halfMpoint)
+                        //        setBkMpoint(data.data.m_point.current_point);
+                        //    } else {
+                        //        console.log("I will be using default mpoint since total price is greater than mpoint * erate")
+                        //        setBkMpoint(data.data.m_point.current_point);
+                        //        setMyPoint(data.data.m_point.current_point);
+                        //    }
+                        //} else {
+                        //    console.log("since no items has been found on cart, I will be using default m points.")
+                        //    setBkMpoint(data.data.m_point.current_point);
+                        //    setMyPoint(data.data.m_point.current_point);
+                        //}
+                      
                         setMyPoint(data.data.m_point.current_point);
+                        setBkMpoint(data.data.m_point.current_point);
+                        console.log("M Points has been set.")
                         setMaxPoint(data.data.m_point.current_point);
                         console.log(myPoint, maxPoint);
+                        
+     
+                       
                         setLoading(false);
                     }
     
@@ -189,41 +218,90 @@ function ShoppingCart({navigation}) {
           });
     }
    
-
-    useEffect(()=>{  
+   
+    useEffect(() => {  
+        getExchange();
         getProfile();  
         getCats();
-        getExchange();
+        
+        
+
+        
     
     }, [value])
    
    
   
-    useEffect(async() => {
+    useEffect(async () => {
+        
         const value = await AsyncStorage.getItem('item');
-        if (value !== null) { 
-            setItemData(JSON.parse(value)); 
+        if (value !== null) {
+            setItemData(JSON.parse(value));
             global.final_cart = JSON.parse(value);
             setTotal(JSON.parse(value).reduce((total, i) => total + i.quantity * i.price, 0));
+            
+            
+            calculateTotalAmount(total);
+            //if (itemData.length > 0) {
+            //    if (total < 1 * erate) {
+            //        let halfMpoint = 0;
+            //        for (let i = 1; total > i * erate; i++) {
+            //            halfMpoint += 1;
+            //        }
+            //        console.log("it must" + halfMpoint)
+            //        setMyPoint(halfMpoint)
+            //        
+            //    } else {
+            //        setMyPoint(bkmpoint);
+            //    }
+            //} else {
+            //    
+            //    setMyPoint(bkmpoint);
+            //}
         }
+      
         
     }, [remove, plus, minus, cart_product,isAction])
+
+
+//    const minusMyPoint = () => {
+//        if (total < usePointAmount * erate) {
+//            console.log("Pls dont")
+//        }
+//        else if(usePointAmount > 1 ) {
+//            setMyPoint(myPoint - 1);
+//        }
+//    }
+//
+//    const plusMyPoint = () => {
+//        if (total < usePointAmount * erate) {
+//            console.log("Pls dont")
+//        }
+//        else if(usePointAmount >= 0 && usePointAmount < maxPoint){
+//            setMyPoint(myPoint + 1);
+//        }
+//    }
 
 
     const minusMyPoint = () => {
         if (total < myPoint * erate) {
             console.log("Pls dont")
         }
-        else if(myPoint > 0 ) {
+        else if(myPoint > 1 ) {
             setMyPoint(myPoint - 1);
         }
     }
 
     const plusMyPoint = () => {
+       
         if (total < myPoint * erate) {
-            console.log("Pls dont")
+            console.log("Pls dont plus")
+            if (myPoint < bkminpoint) {
+                setMyPoint(myPoint + 1);
+                console.log("I worked")
+            }
         }
-        else if(myPoint >= 0 && myPoint < maxPoint){
+        else if(myPoint >= 1 && myPoint < bkmpoint && myPoint < bkminpoint ) {
             setMyPoint(myPoint + 1);
         }
     }
@@ -272,10 +350,39 @@ function ShoppingCart({navigation}) {
     }
 
     const calculateUsedPointAmount = (amt) => {
-        var usedamt = 0;
-        usedamt = amt - myPoint;
+
+        if (total < myPoint * erate) {
+                    let halfMpoint = 0;
+                  for (let i = 1; total > i * erate; i++){
+                      halfMpoint += 1;
+                    }
+                    console.log("it must" + halfMpoint)
+                    console.log("total is less than mpoint * erate")
+            setMyPoint(halfMpoint);
+            setBkMinPoint(halfMpoint);
+            var usedamt = 0;
+            usedamt = amt - myPoint;
+        
+            setUsePointAmount(usedamt);
+                   
+                } else {
+                    console.log("I will be using default mpoint since total price is greater than mpoint * erate")
+                   
+            setMyPoint(bkmpoint);
+            setBkMinPoint(bkmpoint);
+            var usedamt = 0;
+            usedamt = amt - myPoint;
+        
+            setUsePointAmount(usedamt);
+                }
     
-        setUsePointAmount(usedamt);
+            
+            
+            
+    //    var usedamt = 0;
+    //    usedamt = amt - myPoint;
+    //
+    //    setUsePointAmount(usedamt);
     }
 
     const showAlert = () => {
@@ -304,6 +411,7 @@ function ShoppingCart({navigation}) {
           JSON.stringify(items)
         );
         setRemove(!remove);
+       
         retrieveData();
         //ToastHelper.toast("item successfully removed", null, 'success');
         //showAlert();
@@ -396,17 +504,17 @@ function ShoppingCart({navigation}) {
                     </VStack>
                     <Spacer />
                     <VStack justifyContent='space-between' maxW='20%' alignItems='flex-end'>
-                        <TouchableOpacity style={{padding:10}} onPress={()=>removeAction(item.p_id)}>
+                        <TouchableOpacity disabled={controllock} style={{padding:10,opacity: controllock ? 0.5 : 1}} onPress={()=>removeAction(item.p_id)}>
                             <CloseIcon size="3" />
                         </TouchableOpacity>
                         <View  style={styles.itemCount}>
                         <HStack justifyContent='space-evenly' alignContent='center'alignItems='center'> 
-                            <TouchableOpacity onPress={() => plusActionQty(item.p_id)} style={{padding:10}}>
-                                <Image source={require('../../assets/image/png_icons/plus3x.png')}  alt='decrese item' style={{width:10,height:10}} resizeMode='contain'/>
+                            <TouchableOpacity disabled={controllock} onPress={() => plusActionQty(item.p_id)} style={{padding:10}}>
+                                <Image source={require('../../assets/image/png_icons/plus3x.png')}  alt='decrese item' style={{width:10,height:10,opacity: controllock ? 0.5 : 1}} resizeMode='contain'/>
                             </TouchableOpacity>
-                            <Text textAlign='center' style={{fontSize:12,fontFamily:'Inter_600SemiBold'}}>{item.quantity}</Text>
-                            <TouchableOpacity onPress={() => minusActionQty(item.p_id)} style={{padding:10}}>
-                                <Image source={require('../../assets/image/png_icons/minus3x.png')}  alt='decrese item' style={{width:10,height:10}} resizeMode='contain'/>
+                            <Text textAlign='center' style={{fontSize:12,fontFamily:'Inter_600SemiBold',opacity: controllock ? 0.5 : 1}}>{item.quantity}</Text>
+                            <TouchableOpacity disabled={controllock} onPress={() => minusActionQty(item.p_id)} style={{padding:10}}>
+                                <Image source={require('../../assets/image/png_icons/minus3x.png')}  alt='decrese item' style={{width:10,height:10,opacity: controllock ? 0.5 : 1}} resizeMode='contain'/>
                             </TouchableOpacity>                                                    
                         </HStack>
                         </View>
@@ -447,10 +555,12 @@ function ShoppingCart({navigation}) {
                         <HStack justifyContent='flex-start' alignItem='center' alignContent='center'>
                             <Checkbox colorScheme="red" mr='3'
                                 accessible={true} 
-                                accessibilityLabel="check me!"
+                                    accessibilityLabel="check me!" 
                                 onPress={() => {
                                     calculateTotalAmount(cart_product);
+                                    calculateUsedPointAmount(total);
                                     setChecked(!checked);
+                                    setControlLock(!controllock);
                                 }}/>
                             <Text style={{fontFamily: 'Inter_400Regular'}}>{translate('useMyPoint')}</Text>
                         </HStack>                        
@@ -488,8 +598,8 @@ function ShoppingCart({navigation}) {
                             <Spacer/>
                             <Text color='#EC1C24' style={{fontFamily: 'Inter_500Medium',marginRight:10}} mr='1' fontSize='14' >{value == 'two'? "MMK" : "JPY"}</Text>
                                        
-                                        <Text style={{color:"#EC1C24",fontFamily:'Inter_700Bold',fontSize:18,marginRight:3}}>{(total - myPoint * erate).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",").replace(/^0+/, '')}</Text>
-                                        <Text style={[styles.oldPrice, { fontFamily: 'Inter_400Regular' }]}>{total && total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",").replace(/^0+/, '')}</Text>
+                                        <Text style={{color:"#EC1C24",fontFamily:'Inter_700Bold',fontSize:18,marginRight:3}}>{(total - myPoint * erate).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
+                                        <Text style={[styles.oldPrice, { fontFamily: 'Inter_400Regular' }]}>{total && total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
                                        
                         </HStack>  
                         : <ActivityIndicator color='red'/>                                            
@@ -499,7 +609,7 @@ function ShoppingCart({navigation}) {
                             <Text style={{fontFamily: 'Inter_400Regular'}}>{translate('subTotal')}</Text>
                             <Spacer/>
                             <Text color='#EC1C24' mr='1' style={{fontFamily: 'Inter_400Regular',marginRight:10}} fontSize='14'>{value == 'two'? "MMK" : "JPY" }</Text>                            
-                                                <Text mr={1} style={{ color: "#EC1C24", fontFamily: 'Inter_700Bold', fontSize: 18 }}>{total && total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",").replace(/^0+/, '')}</Text> 
+                                                <Text mr={1} style={{ color: "#EC1C24", fontFamily: 'Inter_700Bold', fontSize: 18 }}>{total && total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text> 
                         </HStack>
                         : <ActivityIndicator color='red'/>  
                         )                  
@@ -510,7 +620,7 @@ function ShoppingCart({navigation}) {
                             <Text color='#EC1C24' style={{fontFamily: 'Inter_500Medium',marginRight:10}} mr='1' fontSize='14' >{value == 'two'? "MMK" : "JPY"}</Text>
                                         {/*<Text style={{ color: "#EC1C24", fontFamily: 'Inter_700Bold', fontSize: 18, marginRight: 3 }}>{usePointAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>*/}
                                         <Text style={{color:"#EC1C24",fontFamily:'Inter_700Bold',fontSize:18,marginRight:3}}>{(total - (myPoint * erate)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",").replace(/^0+/, '')}</Text>
-                                                <Text style={[styles.oldPrice, { fontFamily: 'Inter_400Regular' }]}>{total && total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",").replace(/^0+/, '')}</Text>
+                                                <Text style={[styles.oldPrice, { fontFamily: 'Inter_400Regular' }]}>{total && total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
                         </HStack> 
                
                     </VStack>  

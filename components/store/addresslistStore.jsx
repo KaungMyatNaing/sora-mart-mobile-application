@@ -31,7 +31,7 @@ export const addresslistStore = create((set, get) => ({
   updateDefaultAddressList: (id) => {
     const oldDatas = get().addresslist;
     oldDatas.map((olddata) =>
-      olddata.guid == id ? olddata.is_default == 1 : null
+      olddata.guid == id ? olddata.is_default == 1 : 0
     );
     console.log("Default Address has been set !")
   },
