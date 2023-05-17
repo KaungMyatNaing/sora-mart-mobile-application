@@ -119,10 +119,10 @@ function WifiRadioGroup({setSubscription}){
         <VStack justifyContent='flex-start' mt={10} mb='30%'> 
             <Text style={styles.title} pb={5}>{translate('suscriptionPlan')}</Text>
             <Radio.Group>
-                <Radio colorScheme="red" value='Monthly' mb={2} onPress={()=>setSubscription('Monthly')}>
+                <Radio colorScheme="red" value='Monthly' mb={2} onPress={()=>setSubscription('monthly')}>
                     <Box ml={2}><Text style={styles.radioLbl}>{translate('monthly')}</Text></Box>
                 </Radio>
-                <Radio colorScheme="red" value='Yearly' mb={2} onPress={()=>setSubscription('Yearly')}>
+                <Radio colorScheme="red" value='Yearly' mb={2} onPress={()=>setSubscription('yearly')}>
                     <Box ml={2}><Text style={styles.radioLbl}>{translate('yearly')}</Text></Box>
                 </Radio>
             </Radio.Group>

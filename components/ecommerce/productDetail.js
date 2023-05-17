@@ -397,7 +397,7 @@ const minusAction = () => {
   }
 };
 
-
+//
 //  const plusAction = async () => {
 //    // setNoOfStock(noOfStock - 1);
 //

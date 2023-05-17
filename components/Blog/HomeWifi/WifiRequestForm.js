@@ -199,8 +199,11 @@ function WifiRequestFormTwo({route,navigation}){
                 body: formData,
               })
                .then((response) => response.json() )
-                .then((data) => {
+               .then((data) => {
+                   if (data.status == 200) {
                     navigation.replace('Blog Complete Status');
+                    }
+
                     
                 })
                 .catch((error) => {

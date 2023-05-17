@@ -70,9 +70,13 @@ function RequestTourForm({navigation,route}){
 
         if(pickupType == 'daily'){
             postData["start"] = formatAMPM(dailyStart);
-        formData.append('m_start', postData["start"]);
+            //formData.append('m_start', postData["start"]);
+            formData.append('start_time', postData["start"]);
             postData["end"] = formatAMPM(dailyEnd);
-            formData.append('m_end', postData["end"]);
+            //formData.append('m_end', postData["end"]);
+            formData.append('end_time', postData["end"]);
+            //formData.append("day[]", day[0]);
+            
         }else{
            
             if(monday){
@@ -144,16 +148,19 @@ function RequestTourForm({navigation,route}){
       body: formData,
     })
       .then((response) => response.json())
-      .then((data) => {
-        navigation.replace('Blog Complete Status');
+                        .then((data) => {
+                            if (data.status == 200) {
+                                navigation.replace('Blog Complete Status');
+
+          }
       })
       .catch((error) => {
         navigation.replace('Blog Failed Status');
       });
             
                 }else{
-                    ToastHelper.toast('Please fill up all data', null, 'error');
-                    // alert('Please fill up all data');
+                    //ToastHelper.toast('Please fill up all data', null, 'error');
+                     alert('Please fill up all data');
                 }
             }else{
                 console.log('request tour data');
@@ -176,8 +183,8 @@ function RequestTourForm({navigation,route}){
       });
             
                 }else{
-                    ToastHelper.toast('Please fill up all data and choose day', null, 'error');
-                    // alert('Please fill up all data and choose day');
+                    //ToastHelper.toast('Please fill up all data and choose day', null, 'error');
+                     alert('Please fill up all data and choose day');
                 }
             }
         }

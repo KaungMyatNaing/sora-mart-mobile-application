@@ -455,7 +455,10 @@ function JobForm({ navigation, route }) {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
+        if (data.status == 200) {
+          navigation.replace('Blog Complete Status');
+
+}
       })
       .catch((error) => {
         console.log(" " + error);
