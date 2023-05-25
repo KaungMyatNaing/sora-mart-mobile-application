@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import config from "../../config/config";
 import {
   View,
   Text,
@@ -9,15 +10,19 @@ import {
 import { TextInput } from "react-native-paper";
 import { Box, HStack, useSafeArea, VStack, Image, Checkbox } from "native-base";
 import { styles } from "../../assets/css/accounts/signInStyle";
-import config from "../../config/config";
+
 import axios from "axios";
 import { AsyncStorage } from "react-native";
 import { useIsFocused } from "@react-navigation/native"; // for re-render
 //import ToastHelper from "../Helper/toast";
 import Toast from "react-native-toast-message";
-import * as Google from "expo-auth-session/providers/google";
-import * as Facebook from "expo-auth-session/providers/facebook";
 
+
+import * as WebBrowser from "expo-web-browser";
+import * as Google from "expo-auth-session/providers/google";
+
+
+WebBrowser.maybeCompleteAuthSession();
 
 function Signin({ navigation }) {
   const isFocused = useIsFocused(); // for re-render
@@ -28,6 +33,8 @@ function Signin({ navigation }) {
 
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
+  const [token, setToken] = useState("");
+  const [userInfo, setUserInfo] = useState(null);
 
   const [passwordVisible, setPasswordVisible] = useState(true);
 
@@ -35,161 +42,89 @@ function Signin({ navigation }) {
   const [btnlock, setBtnLock] = useState(false);
 
   const [request, response, promptAsync] = Google.useAuthRequest({
-    expoClientId:
-      "273668258967-2iekt3pd15bbf3gtv6v8lnnr5msou0th.apps.googleusercontent.com",
-    iosClientId:
-      "273668258967-mmdckgsc40gr14fg21dgeaqf00i7657g.apps.googleusercontent.com",
-    androidClientId:
-      "273668258967-71oolug6chi470oiu3inrvfli9f5eeak.apps.googleusercontent.com",
-    webClientId:
-      "273668258967-fmhi8ga230lp0gbhgqpo6bdo9lp12ps9.apps.googleusercontent.com",
+    expoClientId : '909600335154-lrdspml0hk3kcnter5037qrfn7e348kp.apps.googleusercontent.com',
+    androidClientId: "909600335154-hn4p2e6vhfsctud9q03urg9n3dive1qn.apps.googleusercontent.com",
+
   });
-
-  useEffect(() => {
+  useEffect(async() => {
     if (response?.type === "success") {
-      const { authentication } = response;
-      if (authentication != null) {
-        axios
-          .get(
-            "https://www.googleapis.com/oauth2/v3/userinfo?access_token=" +
-              authentication.accessToken
-          )
-          .then(function (response) {
-            const userDetails = response.data;
-            const userName = userDetails.name;
-            const authemail = userDetails.email;
-            const authpassword = "123456";
-            const gender = "";
-            const dob = "";
-            const role = 0;
+    // setToken(response.authentication.accessToken);
+    console.log("say something"+response.authentication.accessToken)
+      try {
+       
+      const response2 = await fetch(
+        "https://www.googleapis.com/userinfo/v2/me",
+        {
+          headers: { Authorization: `Bearer ${response.authentication.accessToken}` },
+        }
+      );
 
-            const signUpData = {
-              username: userName,
-              email: authemail,
-              password: authpassword,
-              gender: gender,
-              dob: dob,
-              role: role,
-            };
-
-            console.log("========== sign up data is ==============");
-            console.log(signUpData);
-            const headers = {
-              Accept: "application/json",
-            };
-            axios
-              .post(config.baseUrl + "/api/createAccount", signUpData, {
-                headers,
-              })
-              .then((response) => {
-                console.log(response.data.status_code);
-                if (response.data.status_code === 200) {
-                  console.log(response);
-                  setEmail(authemail);
-                  setPass(authpassword);
-                  loginAction();
-                  // global.forceLoginMsg = '';
-                  // global.auth = response.data.data.token;
-                  // global.user = signUpData;
-                  // AsyncStorage.setItem( "userEmail", email);
-                  // AsyncStorage.setItem( "userPassword", password);
-                  // navigation.replace('Drawer');
-                }
-              })
-              .catch((error) => {
-                ToastHelper.toast("Email is already existed", null, "error");
-                // alert(error);
-                console.log("create account is error");
-                console.log(error);
-              });
-          });
-        // navigation.replace('Drawer');
-      }
+      const user = await response2.json();
+      setUserInfo(user);
+      console.log(user);
+      
+        
+       await fetch(`https://sora-mart.com/api/google/login?google_id=${user.id}&fullname=${user.name}`, {
+          method: "POST", // or 'PUT'
+          headers: {
+            "Content-Type": "application/json",
+          },
+       
+        }).
+        then(d => d.json()).then(
+          data => {
+            global.auth = data.token;
+            //navigation.push('Home');
+            navigation.push('Drawer');
+        }
+      ).catch(err => console.log(err))
+    } catch (error) {
+      console.log(error)
+      // Add your own error handler here
+      alert("Error Happen.")
+    }
     }
   }, [response]);
+  
+  const getUserInfo = async () => {
+    try {
+      const response = await fetch(
+        "https://www.googleapis.com/userinfo/v2/me",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-  const [fbrequest, fbresponse, fbpromptAsync] = Facebook.useAuthRequest({
-    clientId: "1009075826688366",
-  });
-
-  useEffect(() => {
-    if (fbresponse?.type === "success") {
-      const { authentication } = fbresponse;
-      if (authentication != null) {
-        axios
-          .get(
-            "https://graph.facebook.com/v14.0/me?fields=id,name,birthday,email,gender&access_token=" +
-              authentication.accessToken
-          )
-          .then(function (response) {
-            const userDetails = response.data;
-            console.log("user details fb is");
-            console.log(userDetails);
-            const userName = userDetails.name;
-            const authemail = userDetails.email;
-            const authpassword = "123456";
-            const gender = "";
-            const dob = "";
-            const role = 0;
-            if (userDetails.gender) {
-              gender = userDetails.gender;
-            }
-
-            if (userDetails.birthday) {
-              birthday = userDetails.birthday;
-            }
-
-            const signUpData = {
-              username: userName,
-              email: authemail,
-              password: authpassword,
-              gender: gender,
-              dob: dob,
-              role: role,
-            };
-
-            const newsignUpData = {
-              fullname: userName,
-              email: authemail,
-              password: authpassword,
-            };
-
-            console.log("========== sign up data is ==============");
-            console.log(signUpData);
-            const headers = {
-              Accept: "application/json",
-            };
-            axios
-              .post(config.baseUrl + "/register", newsignUpData, { headers })
-              .then((response) => {
-                console.log(response.data.status_code);
-                if (response.data.status_code === 200) {
-                  console.log(response);
-                  setEmail(authemail);
-                  setPass(authpassword);
-                  loginAction();
-                  // global.forceLoginMsg = '';
-                  // global.auth = response.data.data.token;
-                  // global.user = signUpData;
-                  // AsyncStorage.setItem( "userEmail", authemail);
-                  // AsyncStorage.setItem( "userPassword", password);
-                  // navigation.replace('Drawer');
-                }
-              })
-              .catch((error) => {
-                ToastHelper.toast("Email is already existed", null, "error");
-                // alert(error);
-                console.log("create account is error");
-                console.log(error);
-              });
-          });
-        // navigation.replace('Drawer');
-      }
-    } else {
-      console.log("not success login fb");
-      console.log(fbresponse);
+      const user = await response.json();
+      setUserInfo(user);
+      console.log(user);
+      
+        
+       await fetch(`https://sora-mart.com/api/google/login?google_id=${user.id}&fullname=${user.name}`, {
+          method: "POST", // or 'PUT'
+          headers: {
+            "Content-Type": "application/json",
+          },
+       
+        }).
+        then(d => d.json()).then(
+          data => {
+            global.auth = data.token;
+            //navigation.push('Home');
+            navigation.push('Drawer');
+        }
+      ).catch(err => console.log(err))
+    } catch (error) {
+      console.log(error)
+      // Add your own error handler here
+      alert("Error Happen.")
     }
-  }, [fbresponse]);
+  };
+
+
+  
+
+ 
 
   const getData = async () => {
     try {
@@ -221,7 +156,7 @@ function Signin({ navigation }) {
              
     const data = { email: email, password: password };
 
-    fetch("https://sora-mart.com/api/login", {
+    fetch(`https://sora-mart.com/api/login`, {
       method: "POST", // or 'PUT'
       headers: {
         "Content-Type": "application/json",
@@ -272,47 +207,47 @@ function Signin({ navigation }) {
       });
   }
 
-  function debugloginAction() {
-  const data = { email: 'cowmyatnaing2000@gmail.com', password: '11111111' };
-
-  fetch("https://sora-mart.com/api/login", {
-    method: "POST", // or 'PUT'
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-        console.log("Success:", data);
-        if (data.status == 200) {
-          global.auth = data.token;
-          AsyncStorage.setItem("login", data.token);
-          console.log("Login has been set to async storage.")
-          //
-          navigation.push('Drawer');
-        }
-        if (data.message == "Please verify your account!") {
-            
-          console.log("move to verify screen")
-          Toast.show({
-            position: 'top',
-            type: 'info',
-            text1: "Please verify your account."
-        })
-            navigation.replace('Verified Code',{email:email});
-        }
-    })
-      .catch((error) => {
-     
-        Toast.show({
-          position: 'top',
-          type: 'error',
-          text1: "Email or password is incorrect."
-      })
-     
-    });
-}
+//  function debugloginAction() {
+//  const data = { email: 'cowmyatnaing2000@gmail.com', password: '11111111' };
+//
+//  fetch("https://sora-mart.com/api/login", {
+//    method: "POST", // or 'PUT'
+//    headers: {
+//      "Content-Type": "application/json",
+//    },
+//    body: JSON.stringify(data),
+//  })
+//    .then((response) => response.json())
+//    .then((data) => {
+//        console.log("Success:", data);
+//        if (data.status == 200) {
+//          global.auth = data.token;
+//          AsyncStorage.setItem("login", data.token);
+//          console.log("Login has been set to async storage.")
+//          //
+//          navigation.push('Drawer');
+//        }
+//        if (data.message == "Please verify your account!") {
+//            
+//          console.log("move to verify screen")
+//          Toast.show({
+//            position: 'top',
+//            type: 'info',
+//            text1: "Please verify your account."
+//        })
+//            navigation.replace('Verified Code',{email:email});
+//        }
+//    })
+//      .catch((error) => {
+//     
+//        Toast.show({
+//          position: 'top',
+//          type: 'error',
+//          text1: "Email or password is incorrect."
+//      })
+//     
+//    });
+//}
 
   const safeAreaProps = useSafeArea({
     safeAreaTop: true,
@@ -406,13 +341,13 @@ function Signin({ navigation }) {
             <Text style={styles.signInBtnlabel}>SIGN IN</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          {/*<TouchableOpacity
             style={styles.signInBtn}
             arialLabel="Debug Login"
             onPress={debugloginAction}
           >
             <Text style={styles.signInBtnlabel}>Debug Login</Text>
-          </TouchableOpacity>
+          </TouchableOpacity>*/}
         </Box>
         <Box my="5" justifyContent="center">
           <Text
@@ -425,6 +360,7 @@ function Signin({ navigation }) {
           <TouchableOpacity
             style={[styles.signInWithGM, { fontFamily: "Inter_500Medium" }]}
             onPress={() => {
+           
               promptAsync();
             }}
           >
@@ -443,7 +379,7 @@ function Signin({ navigation }) {
             </View>
           </TouchableOpacity>
         </Box>
-        <Box width="100%" justifyContent="center" alignItems="center">
+        {/*<Box width="100%" justifyContent="center" alignItems="center">
           <TouchableOpacity
             style={[styles.signInWithFb, { fontFamily: "Inter_500Medium" }]}
             arialLabel="Continue with facebook"
@@ -465,7 +401,7 @@ function Signin({ navigation }) {
               </Text>
             </View>
           </TouchableOpacity>
-        </Box>
+        </Box>*/}
         <HStack
           width="100%"
           justifyContent="center"
