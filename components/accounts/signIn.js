@@ -61,8 +61,7 @@ function Signin({ navigation }) {
 
       const user = await response2.json();
       setUserInfo(user);
-      console.log(user);
-      
+    
         
        await fetch(`https://sora-mart.com/api/google/login?google_id=${user.id}&fullname=${user.name}`, {
           method: "POST", // or 'PUT'
